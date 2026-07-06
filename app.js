@@ -489,6 +489,23 @@ function renderCheck(){
   $$('#checkList .ci').forEach(ci=>ci.addEventListener('click',()=>ci.classList.toggle('done')));
 }
 
+/* ---------- 홈 바로가기 카드 ---------- */
+function renderMenu(){
+  const items = [
+    { v:'gear',    ic:'⛺', t:'장비 카탈로그', d:`텐트 ${TENTS.length}종 + 침낭·매트·배낭·스토브·랜턴` },
+    { v:'spots',   ic:'📍', t:'박지 가이드',   d:`전국 백패킹 성지 ${SPOTS.length}곳 · 사진·날씨` },
+    { v:'events',  ic:'🎽', t:'행사',          d:`백패킹·트레일러닝 ${EVENTS.length}개 · 미리 접수` },
+    { v:'deals',   ic:'🔥', t:'할인·블프',     d:`장비 세일·블랙프라이데이 캘린더` },
+    { v:'reviews', ic:'✍️', t:'다녀온 후기',   d:`크루 후기·사진 + 오픈채팅 참여` },
+  ];
+  $('#menuGrid').innerHTML = items.map(m=>`
+    <button class="mcard" onclick="showView('${m.v}')">
+      <div class="mic">${m.ic}</div>
+      <div class="mtxt"><div class="mt">${m.t}</div><div class="md">${esc(m.d)}</div></div>
+      <div class="marrow">→</div>
+    </button>`).join('');
+}
+
 /* ---------- 6. 크루 소개 ---------- */
 function renderCrew(){
   $('#crewGrid').innerHTML = CREW.map(c=>`
@@ -522,6 +539,7 @@ function reviewCard(r, mine){
       <div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
     </div>
     <div class="rtext">"${esc(r.text)}"</div>
+    ${(typeof r.photo==='string' && /^data:image\//.test(r.photo)) ? `<img class="rphoto" src="${r.photo}" loading="lazy" alt="후기 사진">` : ''}
     ${meta?`<div class="rmeta">${meta}</div>`:''}
     ${mine?`<div style="text-align:right;margin-top:6px"><button class="del" onclick="deleteReview(${r.id})">삭제</button></div>`:''}
   </div>`;
@@ -564,6 +582,30 @@ function deleteReview(id){
 /* ---------- 후기 폼 ---------- */
 let fStars = 0;
 const fTags = new Set();
+let fPhoto = null;   // 첨부 사진 (압축된 dataURL)
+// 이미지 압축 → 작은 JPEG dataURL (용량 절약)
+function compressImage(file, maxDim, quality){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const scale = Math.min(1, maxDim/Math.max(w,h));
+      w = Math.round(w*scale); h = Math.round(h*scale);
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      try{ resolve(c.toDataURL('image/jpeg', quality)); }catch(e){ reject(e); }
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('이미지 로드 실패')); };
+    img.src = url;
+  });
+}
+function clearPhoto(){
+  fPhoto = null;
+  const inp=$('#f-photo'); if(inp) inp.value='';
+  const pv=$('#f-photo-preview'); if(pv) pv.style.display='none';
+}
 function setupReviewForm(){
   // 박지 드롭다운
   const sel = $('#f-spot');
@@ -584,6 +626,17 @@ function setupReviewForm(){
   });
   // 글자수
   $('#f-text').addEventListener('input', e=> $('#f-cnt').textContent = e.target.value.length);
+  // 사진 첨부 (압축 후 미리보기)
+  $('#f-photo').addEventListener('change', async e=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    if(!/^image\//.test(file.type)){ toast('이미지 파일만 첨부할 수 있어요'); clearPhoto(); return; }
+    try{
+      fPhoto = await compressImage(file, 900, 0.65);
+      $('#f-photo-img').src = fPhoto;
+      $('#f-photo-preview').style.display = '';
+    }catch(err){ toast('사진 처리에 실패했어요'); clearPhoto(); console.warn(err); }
+  });
   // 백엔드 설정 시 안내문 갱신
   if(supaOn()){ const n=$('.rform .fnote2'); if(n) n.innerHTML='등록하면 <b>크루 전체</b>에게 바로 공유되고 모든 기기에서 보여요.'; }
 }
@@ -593,6 +646,7 @@ function clearForm(){
   ['f-name','f-when','f-gear','f-text'].forEach(id=>$('#'+id).value='');
   $('#f-cnt').textContent='0'; $('#f-spot').value=''; fStars=0; paintStars();
   fTags.clear(); $$('#f-tags .tg').forEach(t=>t.classList.remove('on'));
+  clearPhoto();
 }
 async function submitReview(ev){
   const name = $('#f-name').value.trim();
@@ -612,7 +666,7 @@ async function submitReview(ev){
     try{
       const res = await fetch(`${SUPABASE.url}/rest/v1/reviews`, {
         method:'POST', headers:{ ...supaHeaders(), Prefer:'return=minimal' },
-        body: JSON.stringify({ name, text, spot, visited:when, gear, stars:fStars, tags })
+        body: JSON.stringify({ name, text, spot, visited:when, gear, stars:fStars, tags, photo:fPhoto })
       });
       if(!res.ok) throw new Error('HTTP '+res.status);
       clearForm();
@@ -626,7 +680,7 @@ async function submitReview(ev){
   }
 
   // 미설정 시: 이 기기에 저장 + 카톡 공유
-  const r = { id: Date.now(), name, text, spot, when, gear, stars: fStars, tags };
+  const r = { id: Date.now(), name, text, spot, when, gear, stars: fStars, tags, photo: fPhoto };
   const mine = loadMine(); mine.unshift(r); saveMine(mine);
   renderReviews(); clearForm(); showShare(r);
 }
@@ -681,7 +735,7 @@ function renderStars(){
 }
 
 /* ---------- init ---------- */
-renderCrew(); setupTentControls(); renderTents(); renderDeals(); setupSpots(); renderSpots();
+renderMenu(); renderCrew(); setupTentControls(); renderTents(); renderDeals(); setupSpots(); renderSpots();
 setupEvents(); renderEvents();
 renderReviews(); renderCheck(); renderStars();
 setupReviewForm(); setupContact();

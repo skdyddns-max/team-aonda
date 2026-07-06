@@ -223,6 +223,24 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .evt .edesc{font-size:13.5px;color:#4a463c;margin-top:6px;line-height:1.55}
 .evt .tsearch{display:inline-flex;align-items:center;gap:3px;margin-top:10px;font-size:11.5px;font-weight:800;color:var(--brand-d)}
 .evt:hover .tsearch{text-decoration:underline}
+/* 홈 바로가기 카드 */
+.menu-grid{display:flex;flex-direction:column;gap:10px}
+.mcard{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 16px;box-shadow:var(--shadow);cursor:pointer;font-family:inherit;transition:.14s}
+.mcard:hover{border-color:var(--sage);box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.mcard:active{transform:translateY(0)}
+.mcard .mic{flex:0 0 auto;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:var(--brand-soft)}
+.mcard .mtxt{flex:1;min-width:0}
+.mcard .mt{font-weight:850;font-size:16px;color:var(--ink)}
+.mcard .md{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5}
+.mcard .marrow{flex:0 0 auto;font-size:18px;color:var(--brand-d);font-weight:900}
+@media(min-width:560px){ .menu-grid{display:grid;grid-template-columns:1fr 1fr} }
+/* 후기 사진 첨부 */
+.photo-pick{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:800;color:var(--forest);background:#fff;border:1.5px dashed var(--sage);border-radius:11px;padding:11px 15px;cursor:pointer}
+.photo-pick:active{opacity:.7}
+.photo-preview{margin-top:10px;position:relative}
+.photo-preview img{width:100%;max-height:220px;object-fit:cover;border-radius:12px;border:1px solid var(--line)}
+.photo-del{margin-top:6px;font-size:12px;font-weight:700;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:inherit}
+.review .rphoto{width:100%;max-height:280px;object-fit:cover;border-radius:12px;margin-top:10px;border:1px solid var(--line)}
 .spot .sthumb{height:130px;background-size:cover;background-position:center;position:relative;display:flex}
 .spot .sthumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.22))}
 .spot .sbody{padding:14px 15px}
@@ -386,6 +404,14 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
     <button class="btn btn-ghost" onclick="showView('gear')">텐트 500종 비교</button>
   </div>
 </div></header>
+
+<!-- HOME 바로가기 카드 -->
+<section id="menu" data-view="home"><div class="wrap">
+  <div class="eyebrow">Quick Menu</div>
+  <h2>어디부터 볼까요?</h2>
+  <p class="sub">보고 싶은 걸 누르면 그 화면으로 바로 이동해요.</p>
+  <div class="menu-grid" id="menuGrid"></div>
+</div></section>
 
 <!-- CREW INTRO -->
 <section id="crew" data-view="home"><div class="wrap">
@@ -620,6 +646,16 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
       <label>후기 <span class="opt-tx">(날씨·접근·풍경·꿀팁 등 구체적으로)</span></label>
       <textarea id="f-text" maxlength="300" placeholder="예: 굴업도 개머리언덕. 금요일 막배 타고 들어가 노지에서 1박. 바람 강해 팩다운 단단히! 일몰 최고였고 물은 미리 챙겨가세요."></textarea>
       <div class="cnt"><span id="f-cnt">0</span>/300</div>
+    </div>
+
+    <div class="fld">
+      <label>사진 <span class="opt-tx">(선택 · 1장)</span></label>
+      <label class="photo-pick" for="f-photo">📷 사진 첨부하기</label>
+      <input id="f-photo" type="file" accept="image/*" style="display:none">
+      <div id="f-photo-preview" class="photo-preview" style="display:none">
+        <img id="f-photo-img" alt="첨부 사진 미리보기">
+        <button type="button" class="photo-del" onclick="clearPhoto()">✕ 사진 제거</button>
+      </div>
     </div>
 
     <button class="btn btn-primary" style="width:100%" onclick="submitReview(event)">후기 등록하기</button>
