@@ -142,6 +142,18 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .accuracy{font-size:11.5px;line-height:1.6;color:var(--muted);background:#f6f1e2;border:1px solid var(--line);
   border-radius:12px;padding:12px 14px;margin-top:16px}
 .accuracy .v{color:#2f7d3a}.accuracy .e{color:#9a8a55}
+.diff-legend summary{cursor:pointer;font-weight:800;color:var(--forest);list-style:none}
+.diff-legend summary::-webkit-details-marker{display:none}
+.diff-legend[open] summary{margin-bottom:8px}
+.diff-legend ul{margin:8px 0 8px 2px;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.diff-legend li{padding-left:12px;position:relative}
+.diff-legend li::before{content:"·";position:absolute;left:2px;color:var(--muted)}
+.diff-legend p{margin:6px 0}
+.diff-legend .d1{color:#2f7d3a}.diff-legend .d2{color:#b48a12}.diff-legend .d3{color:#c0542a}
+.spot .pill.diff{font-weight:800}
+.spot .pill.diff.d1{background:#e4f3e5;color:#2f7d3a}
+.spot .pill.diff.d2{background:#f6efd4;color:#96710d}
+.spot .pill.diff.d3{background:#fbe6da;color:#b8481f}
 .rescount{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:12px}
 .rescount b{color:var(--brand-d);font-weight:850}
 .more-btn{width:100%;margin-top:6px;color:var(--forest);border-color:var(--sage);background:#fff}
@@ -410,6 +422,15 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <h2>박지 가이드 · <span id="spotTotal">100</span>곳</h2>
   <p class="sub">국내 백패킹 성지·명소. 검색·필터로 찾아보세요. (입산·야영 통제는 방문 전 꼭 확인!)</p>
   <input id="spotSearch" class="search" type="search" placeholder="🔍 이름·지역·키워드 검색 (예: 통영, 억새, 은하수)" autocomplete="off">
+  <div class="selrow">
+    <select id="fRegion" aria-label="지역"><option value="">전국(전체)</option></select>
+    <select id="fDiff" aria-label="난이도">
+      <option value="">난이도 전체</option>
+      <option value="하">쉬움 (하)</option>
+      <option value="중">보통 (중)</option>
+      <option value="상">어려움 (상)</option>
+    </select>
+  </div>
   <div class="filter-bar" id="spotFilter">
     <div class="fchip on" data-f="all">전체</div>
     <div class="fchip" data-f="섬">🏝 섬</div>
@@ -420,6 +441,16 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <div class="rescount"><b id="spotCount">0</b>곳</div>
   <div id="spotList"></div>
   <button id="spotMore" class="btn btn-ghost more-btn" onclick="moreSpots()" style="display:none">더 보기 ▾</button>
+  <details class="accuracy diff-legend">
+    <summary>ⓘ 난이도(<b class="d1">쉬움</b>·<b class="d2">보통</b>·<b class="d3">어려움</b>)는 어떻게 정했나요?</summary>
+    <p><b>접근성</b>(차·배·도보 시간) · <b>산행 거리와 경사</b> · <b>식수 보급</b> · <b>탈출 용이성</b>을 종합해 매겼어요.</p>
+    <ul>
+      <li><b class="d1">쉬움(하)</b> — 차·배로 야영지 근처까지 접근, 짧고 완만한 도보. 시설 있는 곳도 많음. <b>입문 OK</b></li>
+      <li><b class="d2">보통(중)</b> — 1~3시간 산행이나 배 갈아타기, 식수 미비 가능. 어느 정도 <b>체력·경험</b> 필요</li>
+      <li><b class="d3">어려움(상)</b> — 긴 산행·급경사·릿지, 또는 접근 오래 걸리는 오지 섬. <b>경험자 권장</b></li>
+    </ul>
+    <p style="opacity:.85">※ 개인 체력·날씨·짐 무게에 따라 체감은 달라져요. 참고용으로 봐주세요.</p>
+  </details>
 </div></section>
 
 <!-- CHECKLIST -->

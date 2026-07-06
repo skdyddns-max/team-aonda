@@ -243,12 +243,25 @@ function renderDeals(){
 
 /* ---------- 4. 박지 + 필터 ---------- */
 const SPOT_PAGE = 12;
-let spotFilter = 'all', spotQuery = '', spotLimit = SPOT_PAGE;
+const REGION_ORDER = ['수도권','강원','충청','경상','전라','제주'];
+function regionGroup(region){
+  if(/서울|인천|경기/.test(region)) return '수도권';
+  if(/강원/.test(region)) return '강원';
+  if(/충남|충북|대전|세종|충청/.test(region)) return '충청';
+  if(/경남|경북|대구|울산|부산|경상/.test(region)) return '경상';
+  if(/전남|전북|광주|전라/.test(region)) return '전라';
+  if(/제주/.test(region)) return '제주';
+  return '기타';
+}
+const DIFF_LV = { '하':1, '중':2, '상':3 };
+let spotFilter='all', spotQuery='', spotRegion='', spotDiff='', spotLimit=SPOT_PAGE;
 function filteredSpots(){
   const q = spotQuery.trim().toLowerCase();
   return SPOTS.filter(sp=>{
     if(spotFilter==='nocar'){ if(sp.car) return false; }
     else if(spotFilter!=='all'){ if(sp.type!==spotFilter) return false; }
+    if(spotRegion && regionGroup(sp.region)!==spotRegion) return false;
+    if(spotDiff && sp.difficulty!==spotDiff) return false;
     if(q){
       const hay = (sp.name+' '+sp.region+' '+sp.season+' '+sp.keyword.join(' ')+' '+sp.vibe.join(' ')).toLowerCase();
       if(!hay.includes(q)) return false;
@@ -264,7 +277,7 @@ function spotCardHTML(sp){
     </div>
     <div class="sdesc">${esc(sp.desc)}</div>
     <div class="sinfo">
-      <span class="pill">난이도 ${esc(sp.difficulty)}</span>
+      <span class="pill diff d${DIFF_LV[sp.difficulty]||2}">난이도 ${esc(sp.difficulty)}</span>
       <span class="pill">${esc(sp.season)}</span>
       <span class="pill ${sp.car?'car':''}">${sp.car?'🚗 자차권장':'🚌 자차없이 OK'}</span>
       ${sp.keyword.map(k=>`<span class="pill">#${esc(k)}</span>`).join('')}
@@ -285,6 +298,15 @@ function renderSpots(){
 function moreSpots(){ spotLimit += SPOT_PAGE; renderSpots(); }
 function setupSpots(){
   $('#spotTotal').textContent = SPOTS.length;
+  // 지역 드롭다운 (권역별 개수)
+  const gc = {};
+  SPOTS.forEach(sp=>{ const g=regionGroup(sp.region); gc[g]=(gc[g]||0)+1; });
+  const regs = REGION_ORDER.filter(g=>gc[g]);
+  if(gc['기타']) regs.push('기타');
+  $('#fRegion').insertAdjacentHTML('beforeend',
+    regs.map(g=>`<option value="${g}">${g} (${gc[g]})</option>`).join(''));
+  $('#fRegion').addEventListener('change', e=>{ spotRegion=e.target.value; spotLimit=SPOT_PAGE; renderSpots(); });
+  $('#fDiff').addEventListener('change',  e=>{ spotDiff=e.target.value;  spotLimit=SPOT_PAGE; renderSpots(); });
   let deb;
   $('#spotSearch').addEventListener('input', e=>{
     clearTimeout(deb);

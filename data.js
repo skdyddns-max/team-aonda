@@ -373,7 +373,7 @@ const SPOTS = [
     desc: "억새 능선 백패킹의 명소. 가을 억새철 인기 폭발.", vibe:["친목"], keyword:["억새","능선","일출"] },
   { name: "두타산 무릉계곡", type: "오지", region: "강원 동해", car: true, difficulty: "상", season: "봄·가을",
     desc: "체력 요구되는 오지 산행형 박지. 자연 그대로의 뷰.", vibe:["솔캠"], keyword:["산행","계곡","도전"] },
-  { name: "국립 자연휴양림(대야산 등)", type: "캠핑장", region: "전국", car: true, difficulty: "하", season: "사계절",
+  { name: "국립 자연휴양림(대야산 등)", type: "캠핑장", region: "충북 괴산", car: true, difficulty: "하", season: "사계절",
     desc: "데크·화장실·전기 완비. 편하게 백패킹 감성만 즐기기 좋음.", vibe:["친목"], keyword:["편의","입문","가족"] },
   { name: "가리왕산 자연휴양림", type: "캠핑장", region: "강원 정선", car: true, difficulty: "하", season: "사계절",
     desc: "고지대 데크 사이트. 여름 시원, 시설 좋아 친목캠에 최적.", vibe:["친목"], keyword:["데크","여름","시설"] },
