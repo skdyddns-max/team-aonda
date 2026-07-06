@@ -118,53 +118,107 @@ function renderResult(tents, spots, a){
   setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
 }
 
-/* ---------- 2. 텐트 리스트 + 키워드 필터 ---------- */
-let activeKw = null;
-function tentMatches(t,kw){
-  if(!kw) return true;
+/* ---------- 2. 텐트 데이터베이스 (검색·필터·정렬·페이지네이션) ---------- */
+const PAGE = 24;
+const tState = { q:'', kw:null, brand:'', cap:'', sort:'weight', limit:PAGE };
+
+function kwPass(t,kw){
   switch(kw){
     case 'value': return t.value;
     case 's3':    return t.season===3;
     case 's4':    return t.season===4;
     case 'light': return t.weight>=1 && t.weight<2;
     case 'ul':    return t.wclass==='UL';
+    default:      return true;
   }
+}
+function filteredTents(){
+  const q = tState.q.trim().toLowerCase();
+  let items = TENTS.filter(t=>{
+    if(tState.kw && !kwPass(t,tState.kw)) return false;
+    if(tState.brand && t.brand!==tState.brand) return false;
+    if(tState.cap){
+      if(tState.cap==='4인'){ if(!/[4-9]인/.test(t.cap)) return false; }
+      else if(t.cap!==tState.cap) return false;
+    }
+    if(q){
+      const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[t.brand]) || '';
+      const hay = (t.name+' '+t.brand+' '+kr+' '+t.tags.join(' ')).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  const s = tState.sort;
+  items.sort((a,b)=>
+    s==='price'  ? a.price-b.price :
+    s==='priceD' ? b.price-a.price :
+    s==='brand'  ? a.brand.localeCompare(b.brand) || a.weight-b.weight :
+                   a.weight-b.weight);
+  return items;
+}
+function tentCardHTML(t){
+  return `<div class="tcard">
+    <div class="row1">
+      <div><div class="brand">${esc(t.brand)}</div><div class="tname">${esc(t.name)}</div></div>
+      <span class="season ${t.season===4?'s4':'s3'}">${t.season===4?'사계절':'삼계절'}</span>
+    </div>
+    <div class="stats">
+      <div class="stat">무게<b class="w">${t.weight}kg</b></div>
+      <div class="stat">가격<b>${won(t.price)}</b></div>
+      <div class="stat">인원<b>${t.cap}</b></div>
+      <div class="stat">등급<b>${t.wclass}</b></div>
+    </div>
+    <div class="tags">
+      ${t.value?'<span class="tag value">가성비</span>':''}
+      ${t.tags.map(tag=>`<span class="tag">${esc(tag)}</span>`).join('')}
+    </div>
+  </div>`;
 }
 function renderTents(){
   const list = $('#tentList');
-  const items = TENTS.filter(t=>tentMatches(t,activeKw))
-                     .sort((a,b)=>a.weight-b.weight);
-  if(!items.length){ list.innerHTML=`<div class="empty">해당 조건의 텐트가 없어요.</div>`; return; }
-  list.innerHTML = items.map(t=>`
-    <div class="tcard">
-      <div class="row1">
-        <div><div class="brand">${t.brand}</div><div class="tname">${t.name}</div></div>
-        <span class="season ${t.season===4?'s4':'s3'}">${t.season===4?'사계절':'삼계절'}</span>
-      </div>
-      <div class="stats">
-        <div class="stat">무게<b class="w">${t.weight}kg</b></div>
-        <div class="stat">가격<b>${won(t.price)}</b></div>
-        <div class="stat">인원<b>${t.cap}</b></div>
-        <div class="stat">등급<b>${t.wclass}</b></div>
-      </div>
-      <div class="tags">
-        ${t.value?'<span class="tag value">가성비</span>':''}
-        ${t.tags.map(tag=>`<span class="tag">${tag}</span>`).join('')}
-      </div>
-    </div>`).join('');
+  const items = filteredTents();
+  const shown = items.slice(0, tState.limit);
+  list.innerHTML = shown.length
+    ? shown.map(tentCardHTML).join('')
+    : `<div class="empty">조건에 맞는 텐트가 없어요. 검색어나 필터를 바꿔보세요 🙂</div>`;
+  $('#tentCount').textContent = items.length;
+  const more = $('#tentMore');
+  if(items.length > tState.limit){
+    more.style.display=''; more.textContent = `더 보기 ▾ (남은 ${items.length - tState.limit}종)`;
+  } else more.style.display='none';
 }
-$$('#kwRow .kw').forEach(kw=>{
-  kw.addEventListener('click',()=>{
-    const v=kw.dataset.kw;
-    if(activeKw===v){ activeKw=null; kw.classList.remove('on'); }
-    else{
-      activeKw=v;
-      $$('#kwRow .kw').forEach(k=>k.classList.remove('on'));
-      kw.classList.add('on');
-    }
-    renderTents();
+function moreTents(){ tState.limit += PAGE; renderTents(); }
+function resetLimit(){ tState.limit = PAGE; }
+
+function setupTentControls(){
+  // 총계 표시
+  $('#tentTotal').textContent = TENTS.length;
+  $('#brandTotal').textContent = new Set(TENTS.map(t=>t.brand)).size;
+  // 브랜드 드롭다운 (텐트 많은 순)
+  const cnt = {};
+  TENTS.forEach(t=>cnt[t.brand]=(cnt[t.brand]||0)+1);
+  const brands = Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a] || a.localeCompare(b));
+  $('#fBrand').insertAdjacentHTML('beforeend',
+    brands.map(b=>`<option value="${esc(b)}">${esc(b)} (${cnt[b]})</option>`).join(''));
+  // 검색 (디바운스)
+  let deb;
+  $('#tentSearch').addEventListener('input', e=>{
+    clearTimeout(deb);
+    deb = setTimeout(()=>{ tState.q=e.target.value; resetLimit(); renderTents(); }, 160);
   });
-});
+  $('#fBrand').addEventListener('change', e=>{ tState.brand=e.target.value; resetLimit(); renderTents(); });
+  $('#fCap').addEventListener('change',   e=>{ tState.cap=e.target.value;   resetLimit(); renderTents(); });
+  $('#fSort').addEventListener('change',  e=>{ tState.sort=e.target.value;  resetLimit(); renderTents(); });
+  // 키워드 칩
+  $$('#kwRow .kw').forEach(kw=>{
+    kw.addEventListener('click',()=>{
+      const v=kw.dataset.kw;
+      if(tState.kw===v){ tState.kw=null; kw.classList.remove('on'); }
+      else{ tState.kw=v; $$('#kwRow .kw').forEach(k=>k.classList.remove('on')); kw.classList.add('on'); }
+      resetLimit(); renderTents();
+    });
+  });
+}
 
 /* ---------- 3. 할인 정보 ---------- */
 function renderDeals(){
@@ -361,5 +415,6 @@ function renderStars(){
 }
 
 /* ---------- init ---------- */
-renderCrew(); renderTents(); renderDeals(); renderSpots(); renderReviews(); renderCheck(); renderStars();
+renderCrew(); setupTentControls(); renderTents(); renderDeals(); renderSpots();
+renderReviews(); renderCheck(); renderStars();
 setupReviewForm(); setupContact();
