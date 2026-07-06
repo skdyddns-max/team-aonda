@@ -379,6 +379,35 @@ const SPOTS = [
     desc: "고지대 데크 사이트. 여름 시원, 시설 좋아 친목캠에 최적.", vibe:["친목"], keyword:["데크","여름","시설"] },
   { name: "소무의도", type: "섬", region: "인천 중구", car: false, difficulty: "하", season: "봄·여름·가을",
     desc: "무의도 연결. 둘레길+한적한 노지. 당일~1박 가볍게.", vibe:["솔캠","친목"], keyword:["둘레길","한적","입문"] },
+  // ── 섬 추가 ──
+  { name: "우이도", type: "섬", region: "전남 신안", car: false, difficulty: "상", season: "봄·가을",
+    desc: "풍성사구(모래언덕) 성지. 배를 여러 번 갈아타는 오지 섬이라 여유 일정 필수.", vibe:["솔캠"], keyword:["사구","오지섬","도전"] },
+  { name: "소매물도", type: "섬", region: "경남 통영", car: false, difficulty: "중", season: "봄·가을",
+    desc: "등대섬(초원+등대) 절경. 배로 접근하는 남해 인생샷 명소.", vibe:["친목"], keyword:["등대섬","절경","인생샷"] },
+  { name: "관매도", type: "섬", region: "전남 진도", car: false, difficulty: "하", season: "봄·여름·가을",
+    desc: "관매8경·해송숲. 물 맑고 조용한 남도 섬백패킹.", vibe:["솔캠","친목"], keyword:["해송","해변","한적"] },
+  { name: "덕적도", type: "섬", region: "인천 옹진", car: false, difficulty: "하", season: "봄·여름·가을",
+    desc: "서포리 해변 솔밭 야영. 인천서 배로 쉽게 가는 섬 입문지.", vibe:["친목"], keyword:["해변","솔밭","입문"] },
+  { name: "국화도", type: "섬", region: "경기 화성", car: false, difficulty: "하", season: "봄·여름·가을",
+    desc: "당일치기도 되는 미니 섬. 썰물 때 바닷길 열림. 가족·입문에 딱.", vibe:["친목"], keyword:["미니섬","입문","가족"] },
+  // ── 오지·능선 추가 ──
+  { name: "안반데기", type: "오지", region: "강원 강릉", car: true, difficulty: "하", season: "여름·가을·겨울",
+    desc: "해발 1100m 고랭지 배추밭. 은하수·일출 성지. 차로 정상 근처까지 접근.", vibe:["솔캠","친목"], keyword:["은하수","일출","성지"] },
+  { name: "청옥산 육백마지기", type: "오지", region: "강원 평창", car: true, difficulty: "중", season: "봄·여름·가을",
+    desc: "드넓은 초원+샤스타데이지 꽃밭. 백패커들의 성지 중 성지.", vibe:["친목"], keyword:["초원","야생화","성지"] },
+  { name: "매봉산 바람의언덕", type: "오지", region: "강원 태백", car: true, difficulty: "중", season: "여름·가을",
+    desc: "고랭지 배추밭+풍력발전기. 시원한 능선 뷰가 일품.", vibe:["솔캠","친목"], keyword:["풍력","고랭지","능선"] },
+  { name: "함백산 만항재", type: "오지", region: "강원 정선·태백", car: true, difficulty: "중", season: "여름·가을·겨울",
+    desc: "국내 최고도 포장도로. 야생화 천국·설경. 정상 가까이 차로 접근.", vibe:["솔캠"], keyword:["야생화","설경","고지대"] },
+  { name: "명성산", type: "오지", region: "경기 포천", car: true, difficulty: "중", season: "가을(억새)",
+    desc: "산정호수 위 억새평원. 수도권 대표 억새 백패킹 명소.", vibe:["친목"], keyword:["억새","호수","수도권"] },
+  { name: "오서산", type: "오지", region: "충남 보령", car: true, difficulty: "중", season: "가을",
+    desc: "서해 조망+억새 능선. 일몰·운해가 아름다운 충남 명산.", vibe:["솔캠","친목"], keyword:["억새","일몰","서해"] },
+  // ── 캠핑장·휴양림 추가 ──
+  { name: "유명산 자연휴양림", type: "캠핑장", region: "경기 가평", car: true, difficulty: "하", season: "사계절",
+    desc: "수도권 근교 데크 사이트. 계곡·숲, 접근성 좋아 입문·가족에 좋음.", vibe:["친목"], keyword:["데크","근교","가족"] },
+  { name: "방태산 자연휴양림", type: "캠핑장", region: "강원 인제", car: true, difficulty: "하", season: "봄·여름·가을",
+    desc: "이단폭포·원시림. 여름 시원하고 단풍 절경인 데크 야영지.", vibe:["친목"], keyword:["계곡","단풍","시설"] },
 ];
 
 // 할인 / 블랙프라이데이 정보 (예시 캘린더 — 매년 유사 패턴)
