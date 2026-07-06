@@ -188,8 +188,13 @@ function tentMatch(t, opt){
   }
   return true;
 }
+// 네이버 검색 URL (한글 브랜드명 우선 → 사진·가격·후기 바로 확인)
+function naverSearch(t){
+  const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[t.brand]) ? BRAND_KR[t.brand].split(' ')[0] : t.brand;
+  return 'https://search.naver.com/search.naver?query=' + encodeURIComponent(kr + ' ' + t.name);
+}
 function tentCardHTML(t){
-  return `<div class="tcard">
+  return `<a class="tcard" href="${naverSearch(t)}" target="_blank" rel="noopener">
     <div class="row1">
       <div><div class="brand">${esc(t.brand)}
         ${t.verified?'<span class="vbadge" title="웹 조사로 확인된 실측 스펙">✓ 실측</span>'
@@ -207,7 +212,8 @@ function tentCardHTML(t){
       ${t.value?'<span class="tag value">가성비</span>':''}
       ${t.tags.map(tag=>`<span class="tag">${esc(tag)}</span>`).join('')}
     </div>
-  </div>`;
+    <span class="tsearch">🔍 네이버에서 사진·가격 보기 →</span>
+  </a>`;
 }
 function renderTents(){
   const list = $('#tentList');
