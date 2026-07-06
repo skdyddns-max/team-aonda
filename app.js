@@ -242,36 +242,62 @@ function renderDeals(){
 }
 
 /* ---------- 4. 박지 + 필터 ---------- */
-let spotFilter='all';
-function renderSpots(){
-  const items = SPOTS.filter(sp=>{
-    if(spotFilter==='all') return true;
-    if(spotFilter==='nocar') return !sp.car;
-    return sp.type===spotFilter;
+const SPOT_PAGE = 12;
+let spotFilter = 'all', spotQuery = '', spotLimit = SPOT_PAGE;
+function filteredSpots(){
+  const q = spotQuery.trim().toLowerCase();
+  return SPOTS.filter(sp=>{
+    if(spotFilter==='nocar'){ if(sp.car) return false; }
+    else if(spotFilter!=='all'){ if(sp.type!==spotFilter) return false; }
+    if(q){
+      const hay = (sp.name+' '+sp.region+' '+sp.season+' '+sp.keyword.join(' ')+' '+sp.vibe.join(' ')).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
   });
-  $('#spotList').innerHTML = items.length ? items.map(sp=>`
-    <div class="spot">
-      <div class="sh">
-        <div><span class="snm">${sp.name}</span> <span class="sregion">${sp.region}</span></div>
-        <span class="stype">${sp.type}</span>
-      </div>
-      <div class="sdesc">${sp.desc}</div>
-      <div class="sinfo">
-        <span class="pill">난이도 ${sp.difficulty}</span>
-        <span class="pill">${sp.season}</span>
-        <span class="pill ${sp.car?'car':''}">${sp.car?'🚗 자차권장':'🚌 자차없이 OK'}</span>
-        ${sp.keyword.map(k=>`<span class="pill">#${k}</span>`).join('')}
-      </div>
-    </div>`).join('') : `<div class="empty">해당 조건의 박지가 없어요.</div>`;
 }
-$$('#spotFilter .fchip').forEach(f=>{
-  f.addEventListener('click',()=>{
-    $$('#spotFilter .fchip').forEach(x=>x.classList.remove('on'));
-    f.classList.add('on');
-    spotFilter=f.dataset.f;
-    renderSpots();
+function spotCardHTML(sp){
+  return `<div class="spot">
+    <div class="sh">
+      <div><span class="snm">${esc(sp.name)}</span> <span class="sregion">${esc(sp.region)}</span></div>
+      <span class="stype">${esc(sp.type)}</span>
+    </div>
+    <div class="sdesc">${esc(sp.desc)}</div>
+    <div class="sinfo">
+      <span class="pill">난이도 ${esc(sp.difficulty)}</span>
+      <span class="pill">${esc(sp.season)}</span>
+      <span class="pill ${sp.car?'car':''}">${sp.car?'🚗 자차권장':'🚌 자차없이 OK'}</span>
+      ${sp.keyword.map(k=>`<span class="pill">#${esc(k)}</span>`).join('')}
+    </div>
+  </div>`;
+}
+function renderSpots(){
+  const items = filteredSpots();
+  const shown = items.slice(0, spotLimit);
+  $('#spotList').innerHTML = shown.length
+    ? shown.map(spotCardHTML).join('')
+    : `<div class="empty">조건에 맞는 박지가 없어요. 검색어나 필터를 바꿔보세요 🙂</div>`;
+  $('#spotCount').textContent = items.length;
+  const more = $('#spotMore');
+  if(items.length > spotLimit){ more.style.display=''; more.textContent = `더 보기 ▾ (남은 ${items.length - spotLimit}곳)`; }
+  else more.style.display='none';
+}
+function moreSpots(){ spotLimit += SPOT_PAGE; renderSpots(); }
+function setupSpots(){
+  $('#spotTotal').textContent = SPOTS.length;
+  let deb;
+  $('#spotSearch').addEventListener('input', e=>{
+    clearTimeout(deb);
+    deb = setTimeout(()=>{ spotQuery=e.target.value; spotLimit=SPOT_PAGE; renderSpots(); }, 160);
   });
-});
+  $$('#spotFilter .fchip').forEach(f=>{
+    f.addEventListener('click',()=>{
+      $$('#spotFilter .fchip').forEach(x=>x.classList.remove('on'));
+      f.classList.add('on');
+      spotFilter=f.dataset.f; spotLimit=SPOT_PAGE; renderSpots();
+    });
+  });
+}
 
 /* ---------- 5. 체크리스트 ---------- */
 function renderCheck(){
@@ -471,7 +497,7 @@ function renderStars(){
 }
 
 /* ---------- init ---------- */
-renderCrew(); setupTentControls(); renderTents(); renderDeals(); renderSpots();
+renderCrew(); setupTentControls(); renderTents(); renderDeals(); setupSpots(); renderSpots();
 renderReviews(); renderCheck(); renderStars();
 setupReviewForm(); setupContact();
 if(supaOn()) fetchRemoteReviews();   // 백엔드 설정 시 전체 후기 로드

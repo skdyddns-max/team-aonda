@@ -407,8 +407,9 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 <!-- SPOTS -->
 <section id="spots"><div class="wrap">
   <div class="eyebrow">Backpacking Spots</div>
-  <h2>박지 가이드</h2>
-  <p class="sub">섬 · 오지 · 캠핑장. 자차 없이 갈 수 있는 곳도 표시했어요.</p>
+  <h2>박지 가이드 · <span id="spotTotal">100</span>곳</h2>
+  <p class="sub">국내 백패킹 성지·명소. 검색·필터로 찾아보세요. (입산·야영 통제는 방문 전 꼭 확인!)</p>
+  <input id="spotSearch" class="search" type="search" placeholder="🔍 이름·지역·키워드 검색 (예: 통영, 억새, 은하수)" autocomplete="off">
   <div class="filter-bar" id="spotFilter">
     <div class="fchip on" data-f="all">전체</div>
     <div class="fchip" data-f="섬">🏝 섬</div>
@@ -416,7 +417,9 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
     <div class="fchip" data-f="캠핑장">⛺ 캠핑장</div>
     <div class="fchip" data-f="nocar">🚌 자차없이</div>
   </div>
+  <div class="rescount"><b id="spotCount">0</b>곳</div>
   <div id="spotList"></div>
+  <button id="spotMore" class="btn btn-ghost more-btn" onclick="moreSpots()" style="display:none">더 보기 ▾</button>
 </div></section>
 
 <!-- CHECKLIST -->
