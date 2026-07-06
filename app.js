@@ -8,7 +8,17 @@ const won = n => n.toLocaleString('ko-KR')+"원";
 function scrollTo2(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
 function openKakao(){
   const url = (typeof CONTACT!=='undefined' && CONTACT.kakao) ? CONTACT.kakao : '';
-  if(url) window.open(url,'_blank','noopener'); else scrollTo2('join');
+  if(url) window.open(url,'_blank','noopener'); else showView('reviews');
+}
+// 앱형 탭 뷰 전환 (한 번에 한 섹션만)
+function showView(v){
+  document.querySelectorAll('[data-view]').forEach(el=>{ el.style.display = (el.dataset.view===v) ? '' : 'none'; });
+  $$('#navTabs a').forEach(a=>a.classList.toggle('active', a.dataset.tab===v));
+  window.scrollTo(0,0);
+}
+function setupViews(){
+  $$('#navTabs a').forEach(a=> a.addEventListener('click', ()=>showView(a.dataset.tab)) );
+  showView('home');
 }
 
 /* ---------- 1. 매칭 도구: 옵션 선택 ---------- */
@@ -133,9 +143,9 @@ function renderResult(tents, spots, a){
 
   html += `<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
     <button class="btn btn-ghost" style="flex:1;min-width:130px;color:var(--forest);border-color:var(--sage)"
-      onclick="scrollTo2('tents')">⛺ 전체 텐트 보기</button>
+      onclick="showView('gear')">⛺ 전체 텐트 보기</button>
     <button class="btn btn-ghost" style="flex:1;min-width:130px;color:var(--forest);border-color:var(--sage)"
-      onclick="scrollTo2('spots')">📍 전체 박지 보기</button>
+      onclick="showView('spots')">📍 전체 박지 보기</button>
   </div>`;
 
   res.innerHTML = html;
@@ -675,4 +685,5 @@ renderCrew(); setupTentControls(); renderTents(); renderDeals(); setupSpots(); r
 setupEvents(); renderEvents();
 renderReviews(); renderCheck(); renderStars();
 setupReviewForm(); setupContact();
+setupViews();                        // 앱형 탭 뷰 전환 (홈 뷰로 시작)
 if(supaOn()) fetchRemoteReviews();   // 백엔드 설정 시 전체 후기 로드

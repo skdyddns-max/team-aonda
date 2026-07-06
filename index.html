@@ -37,8 +37,9 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .navlinks{border-top:1px solid var(--line)}
 .navlinks .wrap{display:flex;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px;scrollbar-width:none}
 .navlinks .wrap::-webkit-scrollbar{display:none}
-.navlinks a{flex:0 0 auto;font-size:13px;font-weight:800;color:var(--forest);padding:9px 12px;white-space:nowrap;border-bottom:2px solid transparent}
-.navlinks a:active{color:var(--brand-d)}
+.navlinks a{flex:0 0 auto;font-size:13.5px;font-weight:800;color:var(--muted);padding:10px 13px;white-space:nowrap;border-bottom:2.5px solid transparent;cursor:pointer}
+.navlinks a.active{color:var(--forest);border-bottom-color:var(--brand)}
+.navlinks a:active{opacity:.7}
 .logo{font-weight:900;font-size:16px;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;color:var(--forest)}
 .logo .emblem{height:30px;flex:0 0 auto}
 .logo .lt span{color:var(--brand-d)}
@@ -329,7 +330,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 <!-- NAV -->
 <div class="nav">
   <div class="wrap navtop">
-    <div class="logo">
+    <div class="logo" onclick="showView('home')" style="cursor:pointer">
       <svg class="emblem" viewBox="0 0 340 200" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M22 104 H92"/><path d="M22 130 H76"/><path d="M250 104 H318"/><path d="M264 130 H318"/>
         <circle cx="104" cy="72" r="30"/>
@@ -340,20 +341,20 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
       </svg>
       <span class="lt">Team <span>A.O.D</span></span>
     </div>
-    <a href="#tool" class="mini">🎯 매칭</a>
+    <a class="mini" href="#" onclick="showView('reviews');return false">💬 참여</a>
   </div>
-  <nav class="navlinks"><div class="wrap">
-    <a href="#tents">⛺ 장비</a>
-    <a href="#spots">📍 박지</a>
-    <a href="#events">🎽 행사</a>
-    <a href="#deals">🔥 할인</a>
-    <a href="#reviews">✍️ 후기</a>
-    <a href="#join">💬 참여</a>
+  <nav class="navlinks"><div class="wrap" id="navTabs">
+    <a data-tab="home">🏠 홈</a>
+    <a data-tab="gear">⛺ 장비</a>
+    <a data-tab="spots">📍 박지</a>
+    <a data-tab="events">🎽 행사</a>
+    <a data-tab="deals">🔥 할인</a>
+    <a data-tab="reviews">✍️ 후기</a>
   </div></nav>
 </div>
 
 <!-- HERO -->
-<header class="hero">
+<header class="hero" data-view="home">
   <div class="stars" id="stars"></div>
   <svg class="mtns" viewBox="0 0 640 140" preserveAspectRatio="none" aria-hidden="true">
     <path d="M0,126 L120,104 L230,124 L350,102 L470,126 L580,108 L640,122 L640,140 L0,140 Z" fill="#FBF8EE"/>
@@ -382,12 +383,12 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   </div>
   <div class="hero-cta">
     <button class="btn btn-primary" onclick="scrollTo2('tool')">🎒 나에게 맞는 장비 찾기</button>
-    <button class="btn btn-ghost" onclick="scrollTo2('tents')">텐트 500종 비교</button>
+    <button class="btn btn-ghost" onclick="showView('gear')">텐트 500종 비교</button>
   </div>
 </div></header>
 
 <!-- CREW INTRO -->
-<section id="crew"><div class="wrap">
+<section id="crew" data-view="home"><div class="wrap">
   <div class="eyebrow">Who We Are</div>
   <h2>팀아온다는요</h2>
   <p class="sub">이름 그대로 <b>Team + 아니온듯 다녀갑니다</b>. 흔적 없이 자연을 즐기는 백패킹 크루예요.</p>
@@ -395,7 +396,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- MATCHING TOOL -->
-<section id="tool" class="section-alt"><div class="wrap">
+<section id="tool" class="section-alt" data-view="home"><div class="wrap">
   <div class="eyebrow">Gear Finder</div>
   <h2>나에게 맞는 장비 · 박지 찾기</h2>
   <p class="sub">아래 항목을 선택하면 <b>텐트 + 예산별 장비(침낭·매트·배낭 등) + 박지</b>를 한 번에 추천해 드려요.</p>
@@ -445,7 +446,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- GEAR CATALOG -->
-<section id="tents"><div class="wrap">
+<section id="tents" data-view="gear"><div class="wrap">
   <div class="eyebrow">Gear Catalog</div>
   <h2>장비 카탈로그</h2>
   <p class="sub">종류별로 골라보세요. 카드를 누르면 네이버로 사진·가격을 바로 확인해요.</p>
@@ -504,7 +505,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- DEALS -->
-<section id="deals" class="section-alt"><div class="wrap">
+<section id="deals" class="section-alt" data-view="deals"><div class="wrap">
   <div class="eyebrow">Sale Calendar</div>
   <h2>장비 할인 · 블랙프라이데이</h2>
   <p class="sub">연중 세일 흐름. 큰 장비는 🔥 시즌을 노리세요.</p>
@@ -512,7 +513,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- SPOTS -->
-<section id="spots"><div class="wrap">
+<section id="spots" data-view="spots"><div class="wrap">
   <div class="eyebrow">Backpacking Spots</div>
   <h2>박지 가이드 · <span id="spotTotal">100</span>곳</h2>
   <p class="sub">국내 백패킹 성지·명소. 검색·필터로 찾아보세요. (입산·야영 통제는 방문 전 꼭 확인!)</p>
@@ -552,7 +553,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- EVENTS -->
-<section id="events"><div class="wrap">
+<section id="events" data-view="events"><div class="wrap">
   <div class="eyebrow">Events</div>
   <h2>백패킹 · 트레일러닝 행사</h2>
   <p class="sub">미리 알고 준비하세요. 카드를 누르면 <b>접수·공식 정보</b>로 연결돼요. (일정·접수는 매년 바뀌니 링크에서 최신 확인!)</p>
@@ -565,7 +566,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- REVIEWS (박지 바로 아래) -->
-<section id="reviews" class="section-alt"><div class="wrap">
+<section id="reviews" class="section-alt" data-view="reviews"><div class="wrap">
   <div class="eyebrow">Crew Voices</div>
   <h2>다녀온 후기</h2>
   <p class="sub">직접 다녀온 분들의 기록. 다녀온 박지·장비까지 함께 남겨주세요.</p>
@@ -630,7 +631,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- CHECKLIST -->
-<section id="check"><div class="wrap">
+<section id="check" data-view="home"><div class="wrap">
   <div class="eyebrow">Packing List</div>
   <h2>백패킹 기본 체크리스트</h2>
   <p class="sub">떠나기 전 탭해서 하나씩 확인. 쓰레기는 반드시 되가져오기!</p>
@@ -638,7 +639,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- JOIN / CONTACT -->
-<section id="join"><div class="wrap">
+<section id="join" data-view="reviews"><div class="wrap">
   <div class="join">
     <h3>🥾 함께 걸어요</h3>
     <p>팀아온다와 다음 박지를 함께할 크루를 기다려요.<br>궁금한 건 오픈채팅으로 편하게!</p>
