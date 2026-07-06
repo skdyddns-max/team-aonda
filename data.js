@@ -519,6 +519,31 @@ const SUPABASE = {
   key: "sb_publishable_I7P96pUCMlS9eGv_uGdRfg_Etx_0ooc",   // publishable key — 공개돼도 안전한 키
 };
 
+// 예산별 장비 추천 (텐트 외) — low(~30만)/mid(30~70만)/high(70만+) 예산 티어별 · 여러 브랜드
+// 가격은 해당 품목 1개 기준 대략치입니다.
+const GEAR = [
+  { cat:"🛏 침낭",
+    low:{ name:"네이처하이크 CW280 다운", price:"8~13만", note:"3계절 가성비 다운" },
+    mid:{ name:"씨투써밋 스파크 / 이스케이프", price:"25~42만", note:"경량 다운·압축성 우수" },
+    high:{ name:"컴포트라이트 / 웨스턴마운티니어링", price:"55만+", note:"초경량 고급 구스다운" } },
+  { cat:"🟦 매트",
+    low:{ name:"네이처하이크 에어매트 / 폼매트", price:"3~6만", note:"입문용, 여름 위주" },
+    mid:{ name:"써머레스트 Z라이트 / 넴 프로라이트", price:"12~20만", note:"R값·내구성 밸런스" },
+    high:{ name:"써머레스트 넴프로 / 엑스페드 UL", price:"25만+", note:"고R값 초경량, 동계까지" } },
+  { cat:"🎒 배낭",
+    low:{ name:"네이처하이크 55L / 트레커리", price:"6~12만", note:"가성비 55L 백패킹팩" },
+    mid:{ name:"오스프리 / 그레고리 60L급", price:"22~38만", note:"背面 편한 종주용" },
+    high:{ name:"하이퍼라이트 / 그래닛기어", price:"45만+", note:"초경량 UL 배낭" } },
+  { cat:"🔥 스토브",
+    low:{ name:"BRS-3000T / 파이어메이플", price:"1~4만", note:"초경량 가스 스토브" },
+    mid:{ name:"MSR 포켓로켓 / 소토 아미카스", price:"6~13만", note:"화력·안정성 좋음" },
+    high:{ name:"MSR 윈드버너 / 소토 윈드마스터", price:"14만+", note:"내풍·정밀 화력" } },
+  { cat:"💡 헤드랜턴",
+    low:{ name:"페츨 티키나 / 가성비 충전식", price:"2~4만", note:"입문 헤드랜턴" },
+    mid:{ name:"페츨 액틱 / 블랙다이아몬드 스팟", price:"5~9만", note:"충전·밝기 균형" },
+    high:{ name:"페츨 스위프트 RL", price:"12만+", note:"고광량·리액티브 조명" } },
+];
+
 // 크루 활동 방식 / 가치
 const CREW = [
   { icon:"🌿", title:"Leave No Trace", desc:"왔던 자리는 왔던 그대로. 흔적 없이 자연을 지키는 게 1원칙." },

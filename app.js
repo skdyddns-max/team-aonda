@@ -6,6 +6,10 @@ const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
 const won = n => n.toLocaleString('ko-KR')+"원";
 
 function scrollTo2(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+function openKakao(){
+  const url = (typeof CONTACT!=='undefined' && CONTACT.kakao) ? CONTACT.kakao : '';
+  if(url) window.open(url,'_blank','noopener'); else scrollTo2('join');
+}
 
 /* ---------- 1. 매칭 도구: 옵션 선택 ---------- */
 const answers = {};
@@ -95,7 +99,24 @@ function renderResult(tents, spots, a){
     </div>`;
   });
 
-  html += `<div style="font-size:13px;font-weight:800;color:var(--forest);margin:14px 0 8px">추천 박지</div>`;
+  // ── 예산별 함께 챙길 장비 (텐트 외) ──
+  if(typeof GEAR!=='undefined' && a.budget){
+    const tier = a.budget;   // low / mid / high
+    const tierLabel = ({low:'가성비',mid:'중급',high:'프리미엄'})[tier];
+    html += `<div style="font-size:13px;font-weight:800;color:var(--forest);margin:16px 0 8px">함께 챙기면 좋은 장비 <span style="color:var(--muted);font-weight:600">· ${tierLabel} 예산 기준</span></div>`;
+    GEAR.forEach(g=>{
+      const it = g[tier];
+      html += `<div class="pick">
+        <div class="top"><span class="nm">${esc(g.cat)}</span>
+          <span class="badge" style="background:var(--brand);color:#2c2408">${esc(it.price)}</span></div>
+        <div class="meta">${esc(it.name)}</div>
+        <div class="why">👉 ${esc(it.note)}</div>
+      </div>`;
+    });
+    html += `<p style="font-size:11px;color:var(--muted);margin:2px 2px 4px">※ 예산은 텐트 예산과 같은 기준으로 맞췄어요. 품목별 대략가이며 브랜드는 예시입니다.</p>`;
+  }
+
+  html += `<div style="font-size:13px;font-weight:800;color:var(--forest);margin:16px 0 8px">추천 박지</div>`;
   if(spots[0] && spots[0].s>0){
     spots.forEach((x,i)=>{
       const sp=x.sp;
@@ -110,8 +131,12 @@ function renderResult(tents, spots, a){
     html += `<div class="empty">조건에 딱 맞는 박지가 없어요. 자차 여부나 박지 종류를 바꿔보세요 🙂</div>`;
   }
 
-  html += `<button class="btn btn-ghost" style="width:100%;margin-top:12px;color:var(--forest);border-color:var(--sage)"
-            onclick="scrollTo2('tents')">전체 텐트 비교 보기 →</button>`;
+  html += `<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+    <button class="btn btn-ghost" style="flex:1;min-width:130px;color:var(--forest);border-color:var(--sage)"
+      onclick="scrollTo2('tents')">⛺ 전체 텐트 보기</button>
+    <button class="btn btn-ghost" style="flex:1;min-width:130px;color:var(--forest);border-color:var(--sage)"
+      onclick="scrollTo2('spots')">📍 전체 박지 보기</button>
+  </div>`;
 
   res.innerHTML = html;
   res.classList.add('show');
@@ -120,7 +145,7 @@ function renderResult(tents, spots, a){
 
 /* ---------- 2. 텐트 데이터베이스 (검색·필터·정렬·페이지네이션) ---------- */
 const PAGE = 24;
-const tState = { q:'', kw:null, brand:'', cap:'', sort:'weight', limit:PAGE };
+const tState = { q:'', kws:new Set(), brand:'', cap:'', sort:'weight', limit:PAGE };
 
 function kwPass(t,kw){
   switch(kw){
@@ -134,21 +159,7 @@ function kwPass(t,kw){
 }
 function filteredTents(){
   const q = tState.q.trim().toLowerCase();
-  let items = TENTS.filter(t=>{
-    if(tState.kw && !kwPass(t,tState.kw)) return false;
-    if(tState.brand && t.brand!==tState.brand) return false;
-    if(tState.cap){
-      const tn = parseInt(t.cap);
-      if(tState.cap==='3인'){ if(tn<3) return false; }        // 3인+
-      else if(tn !== parseInt(tState.cap)) return false;      // 1인·2인 정확히
-    }
-    if(q){
-      const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[t.brand]) || '';
-      const hay = (t.name+' '+t.brand+' '+kr+' '+t.tags.join(' ')).toLowerCase();
-      if(!hay.includes(q)) return false;
-    }
-    return true;
-  });
+  let items = TENTS.filter(t=>tentMatch(t, {skip:null}));
   const s = tState.sort;
   items.sort((a,b)=>
     s==='price'  ? a.price-b.price :
@@ -156,6 +167,26 @@ function filteredTents(){
     s==='brand'  ? a.brand.localeCompare(b.brand) || a.weight-b.weight :
                    a.weight-b.weight);
   return items;
+}
+// 텐트가 현재 필터에 맞는지 (skip: 제외할 필터 축 — 패싯 카운트용)
+function tentMatch(t, opt){
+  const skip = opt && opt.skip;
+  if(skip!=='kw' && tState.kws.size){ for(const kw of tState.kws){ if(!kwPass(t,kw)) return false; } }
+  if(skip!=='brand' && tState.brand && t.brand!==tState.brand) return false;
+  if(skip!=='cap' && tState.cap){
+    const tn = parseInt(t.cap);
+    if(tState.cap==='3인'){ if(tn<3) return false; }        // 3인+
+    else if(tn !== parseInt(tState.cap)) return false;      // 1인·2인 정확히
+  }
+  if(skip!=='q'){
+    const q = tState.q.trim().toLowerCase();
+    if(q){
+      const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[t.brand]) || '';
+      const hay = (t.name+' '+t.brand+' '+kr+' '+t.tags.join(' ')).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+  }
+  return true;
 }
 function tentCardHTML(t){
   return `<div class="tcard">
@@ -194,21 +225,28 @@ function renderTents(){
 function moreTents(){ tState.limit += PAGE; renderTents(); }
 function resetLimit(){ tState.limit = PAGE; }
 
+// 브랜드 드롭다운을 현재 필터(브랜드 제외) 기준 개수로 다시 채움 → "있는데 0개" 방지
+function updateBrandOptions(){
+  const sel = $('#fBrand'), prev = sel.value;
+  const cnt = {};
+  TENTS.forEach(t=>{ if(tentMatch(t,{skip:'brand'})) cnt[t.brand]=(cnt[t.brand]||0)+1; });
+  const brands = Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a] || a.localeCompare(b));
+  sel.innerHTML = `<option value="">전체 브랜드</option>`
+    + brands.map(b=>`<option value="${esc(b)}">${esc(b)} (${cnt[b]})</option>`).join('');
+  if(prev && cnt[prev]) sel.value = prev;          // 선택 유지
+  else if(prev){ sel.value=''; tState.brand=''; }  // 현재 필터서 사라졌으면 해제
+}
+function refreshTents(){ resetLimit(); updateBrandOptions(); renderTents(); }
+
 function setupTentControls(){
-  // 총계 표시
   $('#tentTotal').textContent = TENTS.length;
   $('#brandTotal').textContent = new Set(TENTS.map(t=>t.brand)).size;
-  // 브랜드 드롭다운 (텐트 많은 순)
-  const cnt = {};
-  TENTS.forEach(t=>cnt[t.brand]=(cnt[t.brand]||0)+1);
-  const brands = Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a] || a.localeCompare(b));
-  $('#fBrand').insertAdjacentHTML('beforeend',
-    brands.map(b=>`<option value="${esc(b)}">${esc(b)} (${cnt[b]})</option>`).join(''));
+  updateBrandOptions();
   // 검색 (디바운스)
   let deb;
   $('#tentSearch').addEventListener('input', e=>{
     clearTimeout(deb);
-    deb = setTimeout(()=>{ tState.q=e.target.value; resetLimit(); renderTents(); }, 160);
+    deb = setTimeout(()=>{ tState.q=e.target.value; refreshTents(); }, 160);
   });
   $('#fBrand').addEventListener('change', e=>{ tState.brand=e.target.value; resetLimit(); renderTents(); });
   $('#fSort').addEventListener('change',  e=>{ tState.sort=e.target.value;  resetLimit(); renderTents(); });
@@ -218,16 +256,16 @@ function setupTentControls(){
       $$('#capSeg button').forEach(x=>x.classList.remove('on'));
       b.classList.add('on');
       tState.cap = b.dataset.cap;
-      resetLimit(); renderTents();
+      refreshTents();
     });
   });
-  // 키워드 칩
+  // 키워드 칩 (다중 선택 가능 — AND)
   $$('#kwRow .kw').forEach(kw=>{
     kw.addEventListener('click',()=>{
       const v=kw.dataset.kw;
-      if(tState.kw===v){ tState.kw=null; kw.classList.remove('on'); }
-      else{ tState.kw=v; $$('#kwRow .kw').forEach(k=>k.classList.remove('on')); kw.classList.add('on'); }
-      resetLimit(); renderTents();
+      if(tState.kws.has(v)){ tState.kws.delete(v); kw.classList.remove('on'); }
+      else{ tState.kws.add(v); kw.classList.add('on'); }
+      refreshTents();
     });
   });
 }
