@@ -32,8 +32,13 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .sub{color:var(--muted);font-size:14px;margin-bottom:22px}
 
 /* ---------- Header ---------- */
-.nav{position:sticky;top:0;z-index:50;background:rgba(251,248,238,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav{position:sticky;top:0;z-index:50;background:rgba(251,248,238,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav .navtop{display:flex;align-items:center;justify-content:space-between;height:52px}
+.navlinks{border-top:1px solid var(--line)}
+.navlinks .wrap{display:flex;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px;scrollbar-width:none}
+.navlinks .wrap::-webkit-scrollbar{display:none}
+.navlinks a{flex:0 0 auto;font-size:13px;font-weight:800;color:var(--forest);padding:9px 12px;white-space:nowrap;border-bottom:2px solid transparent}
+.navlinks a:active{color:var(--brand-d)}
 .logo{font-weight:900;font-size:16px;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;color:var(--forest)}
 .logo .emblem{height:30px;flex:0 0 auto}
 .logo .lt span{color:var(--brand-d)}
@@ -181,6 +186,29 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .spot:active{transform:translateY(0)}
 .spot .tsearch{display:inline-flex;align-items:center;gap:3px;margin-top:10px;font-size:11px;font-weight:800;color:var(--brand-d)}
 .spot:hover .tsearch{text-decoration:underline}
+
+/* ---------- 개선: 섹션앵커·카테고리탭·접기·접이식폼·박지액션 ---------- */
+[id]{scroll-margin-top:104px}
+.cat-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;margin-bottom:14px;scrollbar-width:none}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tabs button{flex:0 0 auto;font-size:13.5px;font-weight:800;font-family:inherit;padding:9px 15px;border-radius:20px;border:1.5px solid var(--line);background:#fff;color:var(--forest);cursor:pointer;white-space:nowrap;transition:.12s}
+.cat-tabs button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+.catnote{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+.catnote b{color:var(--brand-d)}
+.more-row{display:flex;gap:8px}
+.more-row .more-btn{flex:1}
+.rform-wrap{margin-bottom:18px;border:1.5px solid var(--sage);border-radius:16px;overflow:hidden;background:#fff;box-shadow:var(--shadow)}
+.rform-wrap>summary{list-style:none;cursor:pointer;padding:15px 18px;font-weight:850;font-size:15px;color:var(--forest);background:var(--brand-soft)}
+.rform-wrap>summary::-webkit-details-marker{display:none}
+.rform-wrap>summary span{font-weight:600;font-size:12px;color:var(--muted)}
+.rform-wrap[open]>summary{border-bottom:1px solid var(--line)}
+.rform-wrap .rform{border:none;box-shadow:none;border-radius:0;margin:0;background:transparent}
+.spot .sacts{display:flex;gap:8px;margin-top:11px}
+.spot .sact{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:800;padding:9px 6px;border-radius:10px;border:1.5px solid var(--line);background:#fff;color:var(--forest);text-decoration:none;transition:.12s;white-space:nowrap}
+.spot .sact:active{transform:translateY(1px)}
+.spot .sact.wx{color:var(--brand-d);border-color:#e8daa9;background:#fdf8e8}
+.spot.card-static{cursor:default}
+.spot.card-static:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow)}
 .spot .sthumb{height:130px;background-size:cover;background-position:center;position:relative;display:flex}
 .spot .sthumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.22))}
 .spot .sbody{padding:14px 15px}
@@ -233,6 +261,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   color:#fff;display:grid;place-items:center;font-weight:900;font-size:15px;flex:0 0 auto}
 .review .rn{font-weight:850;font-size:14.5px}
 .review .rt{font-size:11.5px;color:var(--muted);font-weight:600}
+.review .rt.rt-spot{color:var(--brand-d);font-weight:800;font-size:12.5px}
 .review .stars{color:#e0a52e;font-size:13px;letter-spacing:1px;margin-left:auto}
 .review .rtext{font-size:13.5px;color:#4a463c;line-height:1.6}
 .review .rmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
@@ -285,20 +314,29 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 <body>
 
 <!-- NAV -->
-<div class="nav"><div class="wrap">
-  <div class="logo">
-    <svg class="emblem" viewBox="0 0 340 200" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M22 104 H92"/><path d="M22 130 H76"/><path d="M250 104 H318"/><path d="M264 130 H318"/>
-      <circle cx="104" cy="72" r="30"/>
-      <path d="M28 152 C34 124 62 120 78 138 C86 149 78 160 66 153"/>
-      <path d="M192 156 L256 44 L320 156"/><path d="M238 82 L256 44 L274 82" opacity=".6"/>
-      <path d="M118 156 L156 96 L194 156"/><path d="M156 96 V156"/><path d="M148 156 L156 128 L164 156"/>
-      <path d="M40 174 H300"/>
-    </svg>
-    <span class="lt">Team <span>A.O.D</span></span>
+<div class="nav">
+  <div class="wrap navtop">
+    <div class="logo">
+      <svg class="emblem" viewBox="0 0 340 200" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M22 104 H92"/><path d="M22 130 H76"/><path d="M250 104 H318"/><path d="M264 130 H318"/>
+        <circle cx="104" cy="72" r="30"/>
+        <path d="M28 152 C34 124 62 120 78 138 C86 149 78 160 66 153"/>
+        <path d="M192 156 L256 44 L320 156"/><path d="M238 82 L256 44 L274 82" opacity=".6"/>
+        <path d="M118 156 L156 96 L194 156"/><path d="M156 96 V156"/><path d="M148 156 L156 128 L164 156"/>
+        <path d="M40 174 H300"/>
+      </svg>
+      <span class="lt">Team <span>A.O.D</span></span>
+    </div>
+    <a href="#tool" class="mini">🎯 매칭</a>
   </div>
-  <a href="#tool" class="mini">장비 매칭 →</a>
-</div></div>
+  <nav class="navlinks"><div class="wrap">
+    <a href="#tents">⛺ 장비</a>
+    <a href="#spots">📍 박지</a>
+    <a href="#deals">🔥 할인</a>
+    <a href="#reviews">✍️ 후기</a>
+    <a href="#join">💬 참여</a>
+  </div></nav>
+</div>
 
 <!-- HERO -->
 <header class="hero">
@@ -392,41 +430,63 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   </div>
 </div></section>
 
-<!-- TENT COMPARE -->
+<!-- GEAR CATALOG -->
 <section id="tents"><div class="wrap">
-  <div class="eyebrow">Tent Database</div>
-  <h2>백패킹 텐트 비교 · <span id="tentTotal">500</span>종+</h2>
-  <p class="sub">국내·해외 <b id="brandTotal">60</b>개 브랜드. 검색·필터로 나에게 맞는 텐트를 찾아보세요.</p>
-  <input id="tentSearch" class="search" type="search" placeholder="🔍 브랜드·모델·태그 검색 (예: 힐레베르그, UL, 동계, 트레킹폴)" autocomplete="off">
-  <div class="basis-row">
-    <span class="basis-lbl">무게·가격 기준</span>
-    <div class="seg" id="capSeg">
-      <button class="on" data-cap="">전체</button>
-      <button data-cap="1인">1인 기준</button>
-      <button data-cap="2인">2인 기준</button>
-      <button data-cap="3인">3인+</button>
+  <div class="eyebrow">Gear Catalog</div>
+  <h2>장비 카탈로그</h2>
+  <p class="sub">종류별로 골라보세요. 카드를 누르면 네이버로 사진·가격을 바로 확인해요.</p>
+  <div class="cat-tabs" id="catTabs">
+    <button class="on" data-cat="텐트">⛺ 텐트</button>
+    <button data-cat="침낭">🛏 침낭</button>
+    <button data-cat="매트">🟦 매트</button>
+    <button data-cat="배낭">🎒 배낭</button>
+    <button data-cat="스토브">🔥 스토브</button>
+    <button data-cat="랜턴">💡 랜턴</button>
+  </div>
+
+  <!-- 텐트 전용 컨트롤 -->
+  <div id="tentControls">
+    <p class="catnote">국내·해외 <b id="brandTotal">60</b>개 브랜드 · <b id="tentTotal">500</b>종+</p>
+    <input id="tentSearch" class="search" type="search" placeholder="🔍 브랜드·모델·태그 검색 (예: 힐레베르그, UL, 동계)" autocomplete="off">
+    <div class="basis-row">
+      <span class="basis-lbl">무게·가격 기준</span>
+      <div class="seg" id="capSeg">
+        <button class="on" data-cap="">전체</button>
+        <button data-cap="1인">1인 기준</button>
+        <button data-cap="2인">2인 기준</button>
+        <button data-cap="3인">3인+</button>
+      </div>
+    </div>
+    <div class="selrow">
+      <select id="fBrand" aria-label="브랜드"><option value="">전체 브랜드</option></select>
+      <select id="fSort" aria-label="정렬">
+        <option value="weight">가벼운순</option>
+        <option value="price">저가순</option>
+        <option value="priceD">고가순</option>
+        <option value="brand">브랜드순</option>
+      </select>
+    </div>
+    <div class="kw-row" id="kwRow">
+      <div class="kw" data-kw="value">💵 가성비</div>
+      <div class="kw" data-kw="s3">🍃 삼계절</div>
+      <div class="kw" data-kw="s4">❄️ 사계절</div>
+      <div class="kw" data-kw="light">🪶 1~2kg대</div>
+      <div class="kw" data-kw="ul">✨ 초경량 UL</div>
     </div>
   </div>
-  <div class="selrow">
-    <select id="fBrand" aria-label="브랜드"><option value="">전체 브랜드</option></select>
-    <select id="fSort" aria-label="정렬">
-      <option value="weight">가벼운순</option>
-      <option value="price">저가순</option>
-      <option value="priceD">고가순</option>
-      <option value="brand">브랜드순</option>
-    </select>
+
+  <!-- 기타 장비 검색 -->
+  <div id="gearControls" style="display:none">
+    <input id="gearSearch" class="search" type="search" placeholder="🔍 브랜드·모델·태그 검색" autocomplete="off">
   </div>
-  <div class="kw-row" id="kwRow">
-    <div class="kw" data-kw="value">💵 가성비</div>
-    <div class="kw" data-kw="s3">🍃 삼계절</div>
-    <div class="kw" data-kw="s4">❄️ 사계절</div>
-    <div class="kw" data-kw="light">🪶 1~2kg대</div>
-    <div class="kw" data-kw="ul">✨ 초경량 UL</div>
-  </div>
+
   <div class="rescount"><b id="tentCount">0</b>종 표시 중</div>
   <div id="tentList"></div>
-  <button id="tentMore" class="btn btn-ghost more-btn" onclick="moreTents()" style="display:none">더 보기 ▾</button>
-  <p class="accuracy">ⓘ <b class="v">✓ 실측</b> = 2026년 웹 조사로 확인한 스펙(17개 대표 모델). <b class="e">≈ 추정</b> = 대표값에서 인원별로 계산한 값으로 <b>무게 ±10~15%·가격 ±20%</b> 오차가 있을 수 있어요. 실제 구매 전 판매처 스펙을 꼭 확인하세요.</p>
+  <div class="more-row">
+    <button id="tentMore" class="btn btn-ghost more-btn" onclick="moreTents()" style="display:none">더 보기 ▾</button>
+    <button id="tentCollapse" class="btn btn-ghost more-btn" onclick="collapseTents()" style="display:none">접기 ▲</button>
+  </div>
+  <p class="accuracy" id="tentAccuracy">ⓘ <b class="v">✓ 실측</b> = 2026년 웹 조사로 확인한 스펙(17개 대표 모델). <b class="e">≈ 추정</b> = 대표값에서 인원별로 계산한 값으로 <b>무게 ±10~15%·가격 ±20%</b> 오차가 있을 수 있어요. 실제 구매 전 판매처 스펙을 꼭 확인하세요.</p>
 </div></section>
 
 <!-- DEALS -->
@@ -461,7 +521,10 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   </div>
   <div class="rescount"><b id="spotCount">0</b>곳</div>
   <div id="spotList"></div>
-  <button id="spotMore" class="btn btn-ghost more-btn" onclick="moreSpots()" style="display:none">더 보기 ▾</button>
+  <div class="more-row">
+    <button id="spotMore" class="btn btn-ghost more-btn" onclick="moreSpots()" style="display:none">더 보기 ▾</button>
+    <button id="spotCollapse" class="btn btn-ghost more-btn" onclick="collapseSpots()" style="display:none">접기 ▲</button>
+  </div>
   <details class="accuracy diff-legend">
     <summary>ⓘ 난이도(<b class="d1">쉬움</b>·<b class="d2">보통</b>·<b class="d3">어려움</b>)는 어떻게 정했나요?</summary>
     <p><b>접근성</b>(차·배·도보 시간) · <b>산행 거리와 경사</b> · <b>식수 보급</b> · <b>탈출 용이성</b>을 종합해 매겼어요.</p>
@@ -474,23 +537,16 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   </details>
 </div></section>
 
-<!-- CHECKLIST -->
-<section id="check" class="section-alt"><div class="wrap">
-  <div class="eyebrow">Packing List</div>
-  <h2>백패킹 기본 체크리스트</h2>
-  <p class="sub">떠나기 전 탭해서 하나씩 확인. 쓰레기는 반드시 되가져오기!</p>
-  <div class="check-grid" id="checkList"></div>
-</div></section>
-
-<!-- REVIEWS -->
+<!-- REVIEWS (박지 바로 아래) -->
 <section id="reviews" class="section-alt"><div class="wrap">
   <div class="eyebrow">Crew Voices</div>
   <h2>다녀온 후기</h2>
-  <p class="sub">직접 다녀오신 분들의 생생한 기록. 아래에서 나도 후기를 남겨보세요.</p>
+  <p class="sub">직접 다녀온 분들의 기록. 다녀온 박지·장비까지 함께 남겨주세요.</p>
 
-  <!-- 후기 작성 폼 -->
-  <div class="rform">
-    <h3>✍️ 후기 남기기</h3>
+  <!-- 후기 작성 폼 (접이식) -->
+  <details class="rform-wrap">
+    <summary class="rform-summary">✍️ 후기 남기기 <span>· 눌러서 펼치기</span></summary>
+    <div class="rform">
     <p class="fdesc">다녀온 박지·시기·장비를 구체적으로 남길수록 다음 사람에게 큰 도움이 돼요.</p>
 
     <div class="fld">
@@ -540,9 +596,18 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 
     <button class="btn btn-primary" style="width:100%" onclick="submitReview(event)">후기 등록하기</button>
     <p class="fnote2">등록하면 이 페이지에 바로 보여요. 크루 전체와 공유하려면 등록 후 뜨는 <b>카톡 공유</b> 버튼을 눌러주세요.</p>
-  </div>
+    </div>
+  </details>
 
   <div id="reviewList"></div>
+</div></section>
+
+<!-- CHECKLIST -->
+<section id="check"><div class="wrap">
+  <div class="eyebrow">Packing List</div>
+  <h2>백패킹 기본 체크리스트</h2>
+  <p class="sub">떠나기 전 탭해서 하나씩 확인. 쓰레기는 반드시 되가져오기!</p>
+  <div class="check-grid" id="checkList"></div>
 </div></section>
 
 <!-- JOIN / CONTACT -->
@@ -560,9 +625,6 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 <footer>
   <div class="fl">🌿 Team A.O.D · 팀아온다</div>
   <div class="fq">"아니온듯 다녀갑니다"</div>
-  <div class="hero-cta" style="justify-content:center">
-    <button class="btn btn-primary" onclick="openKakao()">💬 크루 참여하기</button>
-  </div>
   <div class="fnote">
     가격·무게·박지 정보는 참고용 대략치입니다. 실제 구매·산행 전 최신 정보와 기상·입산 통제를 꼭 확인하세요.<br>
     Leave No Trace · 흔적 없이 자연을 지키는 백패킹

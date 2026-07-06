@@ -189,10 +189,9 @@ function tentMatch(t, opt){
   return true;
 }
 // 네이버 검색 URL (한글 브랜드명 우선 → 사진·가격·후기 바로 확인)
-function naverSearch(t){
-  const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[t.brand]) ? BRAND_KR[t.brand].split(' ')[0] : t.brand;
-  return 'https://search.naver.com/search.naver?query=' + encodeURIComponent(kr + ' ' + t.name);
-}
+function naverURL(q){ return 'https://search.naver.com/search.naver?query=' + encodeURIComponent(q); }
+function krBrand(brand){ return (typeof BRAND_KR!=='undefined' && BRAND_KR[brand]) ? BRAND_KR[brand].split(' ')[0] : brand; }
+function naverSearch(t){ return naverURL(krBrand(t.brand) + ' ' + t.name); }
 function tentCardHTML(t){
   return `<a class="tcard" href="${naverSearch(t)}" target="_blank" rel="noopener">
     <div class="row1">
@@ -223,13 +222,62 @@ function renderTents(){
     ? shown.map(tentCardHTML).join('')
     : `<div class="empty">조건에 맞는 텐트가 없어요. 검색어나 필터를 바꿔보세요 🙂</div>`;
   $('#tentCount').textContent = items.length;
-  const more = $('#tentMore');
-  if(items.length > tState.limit){
-    more.style.display=''; more.textContent = `더 보기 ▾ (남은 ${items.length - tState.limit}종)`;
-  } else more.style.display='none';
+  listMoreButtons(items.length, tState.limit, '종');
 }
-function moreTents(){ tState.limit += PAGE; renderTents(); }
+// 더보기/접기 버튼 공통 토글
+function listMoreButtons(total, limit, unit){
+  const more=$('#tentMore'), coll=$('#tentCollapse');
+  if(total>limit){ more.style.display=''; more.textContent=`더 보기 ▾ (남은 ${total-limit}${unit})`; } else more.style.display='none';
+  coll.style.display = limit>PAGE ? '' : 'none';
+}
 function resetLimit(){ tState.limit = PAGE; }
+
+/* ── 장비 카테고리 (텐트 / 침낭 / 매트 / 배낭 / 스토브 / 랜턴) ── */
+let curCat = '텐트', gearQuery = '', gearLimit = PAGE;
+function gearCardHTML(g){
+  return `<a class="tcard" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">
+    <div class="row1">
+      <div><div class="brand">${esc(g.brand)}</div><div class="tname">${esc(g.name)}</div></div>
+      ${g.value?'<span class="season s3">가성비</span>':''}
+    </div>
+    <div class="stats">
+      <div class="stat">가격<b>~${g.price}만</b></div>
+    </div>
+    <div class="tags">${g.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+    <span class="tsearch">🔍 네이버에서 사진·가격 보기 →</span>
+  </a>`;
+}
+function renderGear(cat){
+  const q = gearQuery.trim().toLowerCase();
+  const items = (GEAR_ITEMS[cat]||[]).filter(g=>{
+    if(!q) return true;
+    const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[g.brand]) || '';
+    return (g.brand+' '+g.name+' '+kr+' '+g.tags.join(' ')).toLowerCase().includes(q);
+  });
+  const shown = items.slice(0, gearLimit);
+  $('#tentList').innerHTML = shown.length ? shown.map(gearCardHTML).join('') : `<div class="empty">검색 결과가 없어요.</div>`;
+  $('#tentCount').textContent = items.length;
+  listMoreButtons(items.length, gearLimit, '개');
+}
+function selectCat(cat){
+  curCat = cat;
+  $$('#catTabs button').forEach(b=>b.classList.toggle('on', b.dataset.cat===cat));
+  const isTent = cat==='텐트';
+  $('#tentControls').style.display = isTent ? '' : 'none';
+  $('#gearControls').style.display = isTent ? 'none' : '';
+  $('#tentAccuracy').style.display = isTent ? '' : 'none';
+  if(isTent){ resetLimit(); renderTents(); }
+  else { gearQuery=''; $('#gearSearch').value=''; gearLimit=PAGE; renderGear(cat); }
+}
+function moreTents(){
+  if(curCat==='텐트'){ tState.limit += PAGE; renderTents(); }
+  else { gearLimit += PAGE; renderGear(curCat); }
+}
+function collapseTents(){
+  if(curCat==='텐트'){ tState.limit = PAGE; renderTents(); }
+  else { gearLimit = PAGE; renderGear(curCat); }
+  scrollTo2('tents');
+}
 
 // 브랜드 드롭다운을 현재 필터(브랜드 제외) 기준 개수로 다시 채움 → "있는데 0개" 방지
 function updateBrandOptions(){
@@ -273,6 +321,14 @@ function setupTentControls(){
       else{ tState.kws.add(v); kw.classList.add('on'); }
       refreshTents();
     });
+  });
+  // 카테고리 탭 (텐트 / 침낭 / 매트 / 배낭 / 스토브 / 랜턴)
+  $$('#catTabs button').forEach(b=> b.addEventListener('click', ()=>selectCat(b.dataset.cat)) );
+  // 기타 장비 검색
+  let gdeb;
+  $('#gearSearch').addEventListener('input', e=>{
+    clearTimeout(gdeb);
+    gdeb = setTimeout(()=>{ gearQuery=e.target.value; gearLimit=PAGE; renderGear(curCat); }, 160);
   });
 }
 
@@ -325,14 +381,13 @@ function spotTheme(sp){
   if(sp.type==='캠핑장') return 'deck';
   return 'ridge';
 }
-// 박지 네이버 검색 URL (실제 장소 사진·후기 바로 보기)
-function spotSearch(sp){
-  const name = sp.name.replace(/[()·]/g,' ').replace(/\s+/g,' ').trim();
-  return 'https://search.naver.com/search.naver?query=' + encodeURIComponent(name + ' 백패킹');
-}
+// 박지 네이버 검색/날씨 URL
+function spotCleanName(sp){ return sp.name.replace(/[()·]/g,' ').replace(/\s+/g,' ').trim(); }
+function spotSearch(sp){ return naverURL(spotCleanName(sp) + ' 백패킹'); }
+function spotWeather(sp){ return naverURL(spotCleanName(sp) + ' 날씨'); }
 function spotCardHTML(sp){
   const th = spotTheme(sp);
-  return `<a class="spot" href="${spotSearch(sp)}" target="_blank" rel="noopener">
+  return `<div class="spot card-static">
     <div class="sthumb theme-${th}" style="background-image:url('assets/spots/${th}.jpg')">
       <span class="stype">${esc(sp.type)}</span>
     </div>
@@ -345,9 +400,12 @@ function spotCardHTML(sp){
         <span class="pill ${sp.car?'car':''}">${sp.car?'🚗 자차권장':'🚌 자차없이 OK'}</span>
         ${sp.keyword.map(k=>`<span class="pill">#${esc(k)}</span>`).join('')}
       </div>
-      <span class="tsearch">🔍 네이버에서 사진·후기 보기 →</span>
+      <div class="sacts">
+        <a class="sact" href="${spotSearch(sp)}" target="_blank" rel="noopener">🔍 사진·후기</a>
+        <a class="sact wx" href="${spotWeather(sp)}" target="_blank" rel="noopener">🌤 날씨</a>
+      </div>
     </div>
-  </a>`;
+  </div>`;
 }
 function renderSpots(){
   const items = filteredSpots();
@@ -356,11 +414,13 @@ function renderSpots(){
     ? shown.map(spotCardHTML).join('')
     : `<div class="empty">조건에 맞는 박지가 없어요. 검색어나 필터를 바꿔보세요 🙂</div>`;
   $('#spotCount').textContent = items.length;
-  const more = $('#spotMore');
+  const more = $('#spotMore'), coll = $('#spotCollapse');
   if(items.length > spotLimit){ more.style.display=''; more.textContent = `더 보기 ▾ (남은 ${items.length - spotLimit}곳)`; }
   else more.style.display='none';
+  coll.style.display = spotLimit>SPOT_PAGE ? '' : 'none';
 }
 function moreSpots(){ spotLimit += SPOT_PAGE; renderSpots(); }
+function collapseSpots(){ spotLimit = SPOT_PAGE; renderSpots(); scrollTo2('spots'); }
 function setupSpots(){
   $('#spotTotal').textContent = SPOTS.length;
   // 지역 드롭다운 (권역별 개수)
@@ -412,16 +472,17 @@ const saveMine = arr => localStorage.setItem(LS_KEY, JSON.stringify(arr));
 function reviewCard(r, mine){
   const tags = (r.tags && r.tags.length) ? r.tags : (r.tag ? [r.tag] : []);
   const meta = [
-    r.spot ? `<span class="p spot">📍 ${esc(r.spot)}</span>` : '',
-    r.when ? `<span class="p">🗓 ${esc(r.when)}</span>` : '',
     r.gear ? `<span class="p gear">⛺ ${esc(r.gear)}</span>` : '',
     ...tags.map(t=>`<span class="p">#${esc(t)}</span>`)
   ].filter(Boolean).join('');
+  // 다녀온 박지를 헤더에 눈에 띄게 노출 (#4)
+  const sub = r.spot ? `📍 ${esc(r.spot)}${r.when?` · ${esc(r.when)}`:''}`
+            : (r.when ? `🗓 ${esc(r.when)}` : (tags.slice(0,2).map(esc).join(' · ') || '팀아온다'));
   return `<div class="review${mine?' mine':''}">
     <div class="rh">
       <div class="av">${esc(r.name.slice(0,1))}</div>
       <div><div class="rn">${esc(r.name)}${mine?' <span style="font-size:10px;color:var(--sage)">· 내 후기</span>':''}</div>
-        <div class="rt">${tags.slice(0,2).map(esc).join(' · ') || '팀아온다'}</div></div>
+        <div class="rt${r.spot?' rt-spot':''}">${sub}</div></div>
       <div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
     </div>
     <div class="rtext">"${esc(r.text)}"</div>

@@ -321,7 +321,13 @@ const BRAND_KR = {
   "Onewind":"원윈드","DD Hammocks":"디디해먹","Trekology":"트레콜로지","Night Cat":"나이트캣",
   "Sportneer":"스포트니어","Camel Crown":"카멜크라운","Mier":"미어","Hillman":"힐만","Geertop":"기어탑",
   "Azarxis":"아자시스","Weanas":"위나스","Bessport":"베스포트","Clostnature":"클로스트네이처",
-  "Forceatt":"포스캣","Featherstone":"페더스톤","Paria":"파리아","Durango":"듀랑고"
+  "Forceatt":"포스캣","Featherstone":"페더스톤","Paria":"파리아","Durango":"듀랑고",
+  // 장비(텐트 외) 브랜드
+  "Osprey":"오스프리","Gregory":"그레고리","Deuter":"도이터","Rab":"랩","Petzl":"페츨",
+  "Jetboil":"제트보일","Soto":"소토","Therm-a-Rest":"써머레스트","Black Diamond":"블랙다이아몬드",
+  "Millet":"밀레","Kovea":"코베아","Primus":"프리머스","Trangia":"트랑기아","Fire Maple":"파이어메이플",
+  "Klymit":"클라이밋","Ledlenser":"레드렌서","Goal Zero":"고제로","Fenix":"페닉스",
+  "Granite Gear":"그래닛기어","Western Mountaineering":"웨스턴마운티니어링","Marmot":"마모트"
 };
 
 /* ── 웹 조사(2026.07)로 확인한 실측 스펙 — [대표인원 min/trail 무게(kg), KR 대략가(만원)] ──
@@ -543,6 +549,73 @@ const GEAR = [
     mid:{ name:"페츨 액틱 / 블랙다이아몬드 스팟", price:"5~9만", note:"충전·밝기 균형" },
     high:{ name:"페츨 스위프트 RL", price:"12만+", note:"고광량·리액티브 조명" } },
 ];
+
+// 장비 카탈로그 (텐트 외) — 카테고리별. 가격은 만원 단위 대략치.
+const GEAR_CATS = ["침낭","매트","배낭","스토브","랜턴"];
+const _GEAR_RAW = {
+  "침낭":[
+    ["Naturehike","CW280 다운 침낭",12,1,"가성비","다운","3계절"],
+    ["Naturehike","U350 다운 침낭",20,1,"가성비","동계","다운"],
+    ["Sea to Summit","스파크 Sp3",38,0,"경량","다운","3계절"],
+    ["Sea to Summit","이스케이프 Ebx",30,0,"합성","결로강함"],
+    ["Marmot","트레스레스 30",20,1,"합성","3계절","가성비"],
+    ["Mont-bell","다운헐거 800 #3",35,0,"경량","다운"],
+    ["Zerogram","미니멀 다운",28,0,"국산","경량"],
+    ["Rab","뉴트리노 400",45,0,"동계","고급다운"],
+    ["Western Mountaineering","울트라라이트",60,0,"프리미엄","초경량"],
+    ["Sea to Summit","베이스캠프 Bt2",25,1,"입문","합성"],
+  ],
+  "매트":[
+    ["Naturehike","에어매트",4,1,"가성비","에어"],
+    ["Naturehike","폼 매트",2,1,"초저가","폼"],
+    ["Therm-a-Rest","Z라이트 쏠",13,0,"폼","내구성"],
+    ["Therm-a-Rest","넴프로라이트",18,0,"경량","3계절"],
+    ["Therm-a-Rest","넴프로",28,0,"고R값","동계"],
+    ["Exped","울트라 3R",22,0,"경량","에어"],
+    ["Sea to Summit","이써 라이트",20,0,"경량","에어"],
+    ["NEMO","텐서",24,0,"경량","정숙"],
+    ["Klymit","스태틱 V",8,1,"가성비","에어"],
+    ["Big Agnes","래틀스네이크 SL",16,0,"에어","3계절"],
+  ],
+  "배낭":[
+    ["Naturehike","로버 55L",9,1,"가성비","55L"],
+    ["Osprey","이더 65",32,0,"종주","등판편함"],
+    ["Osprey","엑소스 58",28,0,"경량","통기"],
+    ["Gregory","바탄 65",33,0,"거주성","종주"],
+    ["Deuter","에어컨택트 65+10",25,0,"내구성","등판"],
+    ["Hyperlite","2400 사우스웨스트",55,0,"UL","DCF"],
+    ["Granite Gear","크라운3 60",32,0,"UL","경량"],
+    ["Zerogram","백팩 50L",22,0,"국산","경량"],
+    ["Millet","쿨라 60",20,1,"입문","종주"],
+    ["Naturehike","65L 대용량",11,1,"가성비","대용량"],
+  ],
+  "스토브":[
+    ["BRS","3000T",2,1,"초경량","가스"],
+    ["Fire Maple","FMS-300T",3,1,"가성비","가스"],
+    ["MSR","포켓로켓2",7,0,"화력","안정"],
+    ["Soto","아미카스",8,0,"내풍","가성비"],
+    ["Soto","윈드마스터",12,0,"내풍","정밀"],
+    ["MSR","윈드버너",18,0,"일체형","내풍"],
+    ["Jetboil","플래시",17,0,"일체형","빠른가열"],
+    ["Kovea","알파인마스터",9,1,"국산","동계"],
+    ["Trangia","알콜 스토브",4,0,"알콜","정숙"],
+    ["Primus","라이트",10,0,"경량","안정"],
+  ],
+  "랜턴":[
+    ["Petzl","티키나",3,1,"입문","경량"],
+    ["Petzl","액틱",6,0,"충전","밝기"],
+    ["Petzl","스위프트 RL",14,0,"고광량","리액티브"],
+    ["Petzl","e+LITE",4,0,"초경량","비상"],
+    ["Black Diamond","스팟 400",6,0,"밝기","방수"],
+    ["Black Diamond","스톰 400",9,0,"고방수","밝기"],
+    ["Ledlenser","MH5",7,0,"충전","컴팩트"],
+    ["Naturehike","캠핑 랜턴",3,1,"가성비","캠핑"],
+    ["Goal Zero","라이트하우스 미니",8,0,"캠핑","충전"],
+    ["Fenix","HM65R",13,0,"고광량","충전"],
+  ],
+};
+const GEAR_ITEMS = {};
+GEAR_CATS.forEach(c=>{ GEAR_ITEMS[c] = _GEAR_RAW[c].map(m=>{ const[brand,name,price,value,...tags]=m; return {brand,name,price,value:!!value,tags}; }); });
 
 // 크루 활동 방식 / 가치
 const CREW = [
