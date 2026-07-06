@@ -552,7 +552,13 @@ const GEAR = [
 
 // 백패킹·트레일러닝 행사 — 일정·접수는 매년 변동. 카드 클릭 시 접수·공식정보 검색으로 연결.
 const EVENTS = [
-  // 트레일러닝
+  // ── 2026 확정 행사 (웹 조사로 확인) ──
+  { name:"KOLON TRAIL CAMP · 동서트레일", type:"백패킹", when:"2026.10.10~11", region:"경북 봉화 일대", desc:"코오롱스포츠 주최. 국내 최초 동서트레일(849km) 장거리 백패킹. 25/60/120km 코스.", url:"https://www.kolonsport.com/KolonTrailCamp/Detail" },
+  { name:"2026 MoonwaRk ORIGIN (문워크)", type:"백패킹", when:"2026.10.10~11", region:"산악 노지", desc:"밤을 걷는 감성 나이트 백패킹 시리즈. 문워크 오리진.", url:"https://www.instagram.com/moonwark_/" },
+  { name:"B.T.C 베어트레일캠프 · 안동 (Second Forest)", type:"백패킹", when:"2026.10.17~18", region:"경북 안동", desc:"에코라인 주최 소셜 하이킹 캠프. 'Leave No Trace, Create New Trace'.", q:"BTC 베어트레일캠프 안동 신청" },
+  { name:"BASED IN NATURE · 강진", type:"백패킹", when:"2026.10.17~18", region:"전남 강진", desc:"아웃도어 컬처 페스티벌. Spread the outdoor culture.", q:"강진 Based in Nature 아웃도어 2026" },
+  { name:"off_index · Carry the Trail (53K)", type:"트레일러닝", when:"2026.10.24~25", region:"트레일 53km·4000m+", desc:"53km·누적고도 4000m+ 하드코어 트레일 챌린지.", url:"https://www.instagram.com/ott_onthetrail/" },
+  // 트레일러닝 (정기·시즌)
   { name:"코리아 50K", type:"트레일러닝", when:"매년 4~5월", region:"경기 가평·강원", desc:"국내 대표 트레일러닝 대회. 50K/25K 등 코스.", q:"코리아50K 트레일러닝 대회 접수" },
   { name:"트랜스제주 (Trans Jeju)", type:"트레일러닝", when:"매년 10월", region:"제주", desc:"UTMB 월드시리즈. 제주 오름·곶자왈 종주.", q:"트랜스제주 트레일러닝 접수" },
   { name:"서울 100K", type:"트레일러닝", when:"매년 가을", region:"서울 근교 산군", desc:"수도권 산줄기를 잇는 장거리 트레일.", q:"서울100K 트레일러닝 접수" },

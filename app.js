@@ -355,7 +355,8 @@ function renderDeals(){
 let evtFilter = 'all';
 function eventCardHTML(ev){
   const tr = ev.type==='트레일러닝';
-  return `<a class="evt" href="${naverURL(ev.q)}" target="_blank" rel="noopener">
+  const href = ev.url || naverURL(ev.q);
+  return `<a class="evt" href="${href}" target="_blank" rel="noopener">
     <div class="eh"><span class="enm">${esc(ev.name)}</span>
       <span class="etype ${tr?'tr':'bp'}">${tr?'🏃':'🎒'} ${esc(ev.type)}</span></div>
     <div class="emeta">🗓 ${esc(ev.when)} · 📍 ${esc(ev.region)}</div>
