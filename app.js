@@ -224,17 +224,128 @@ function renderCrew(){
     </div>`).join('');
 }
 
-/* ---------- 7. 후기 ---------- */
+/* ---------- 7. 후기 (시드 + 내 기기 저장분) ---------- */
+const LS_KEY = 'ta_reviews_v1';
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const loadMine = () => { try{ return JSON.parse(localStorage.getItem(LS_KEY)) || []; }catch{ return []; } };
+const saveMine = arr => localStorage.setItem(LS_KEY, JSON.stringify(arr));
+
+function reviewCard(r, mine){
+  const tags = (r.tags && r.tags.length) ? r.tags : (r.tag ? [r.tag] : []);
+  const meta = [
+    r.spot ? `<span class="p spot">📍 ${esc(r.spot)}</span>` : '',
+    r.when ? `<span class="p">🗓 ${esc(r.when)}</span>` : '',
+    r.gear ? `<span class="p gear">⛺ ${esc(r.gear)}</span>` : '',
+    ...tags.map(t=>`<span class="p">#${esc(t)}</span>`)
+  ].filter(Boolean).join('');
+  return `<div class="review${mine?' mine':''}">
+    <div class="rh">
+      <div class="av">${esc(r.name.slice(0,1))}</div>
+      <div><div class="rn">${esc(r.name)}${mine?' <span style="font-size:10px;color:var(--sage)">· 내 후기</span>':''}</div>
+        <div class="rt">${tags.slice(0,2).map(esc).join(' · ') || '팀아온다'}</div></div>
+      <div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+    </div>
+    <div class="rtext">"${esc(r.text)}"</div>
+    ${meta?`<div class="rmeta">${meta}</div>`:''}
+    ${mine?`<div style="text-align:right;margin-top:6px"><button class="del" onclick="deleteReview(${r.id})">삭제</button></div>`:''}
+  </div>`;
+}
 function renderReviews(){
-  $('#reviewList').innerHTML = REVIEWS.map(r=>`
-    <div class="review">
-      <div class="rh">
-        <div class="av">${r.name.slice(0,1)}</div>
-        <div><div class="rn">${r.name}</div><div class="rt">${r.tag}</div></div>
-        <div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
-      </div>
-      <div class="rtext">"${r.text}"</div>
-    </div>`).join('');
+  const mine = loadMine();
+  const html = mine.map(r=>reviewCard(r,true)).join('')
+             + REVIEWS.map(r=>reviewCard(r,false)).join('');
+  $('#reviewList').innerHTML = html;
+}
+function deleteReview(id){
+  if(!confirm('이 후기를 삭제할까요?')) return;
+  saveMine(loadMine().filter(r=>r.id!==id));
+  renderReviews();
+  toast('후기를 삭제했어요');
+}
+
+/* ---------- 후기 폼 ---------- */
+let fStars = 0;
+const fTags = new Set();
+function setupReviewForm(){
+  // 박지 드롭다운
+  const sel = $('#f-spot');
+  sel.innerHTML = `<option value="">— 박지 선택 —</option>`
+    + SPOTS.map(s=>`<option value="${s.name}">${s.name} (${s.type})</option>`).join('')
+    + `<option value="기타">기타 / 직접 입력</option>`;
+  // 별점
+  $$('#f-stars span').forEach(st=>{
+    st.addEventListener('click',()=>{ fStars = +st.dataset.s; paintStars(); });
+  });
+  // 태그
+  $$('#f-tags .tg').forEach(tg=>{
+    tg.addEventListener('click',()=>{
+      const t=tg.dataset.t;
+      if(fTags.has(t)){ fTags.delete(t); tg.classList.remove('on'); }
+      else{ fTags.add(t); tg.classList.add('on'); }
+    });
+  });
+  // 글자수
+  $('#f-text').addEventListener('input', e=> $('#f-cnt').textContent = e.target.value.length);
+}
+function paintStars(){ $$('#f-stars span').forEach(s=> s.classList.toggle('on', +s.dataset.s <= fStars)); }
+
+function submitReview(){
+  const name = $('#f-name').value.trim();
+  const text = $('#f-text').value.trim();
+  const spot = $('#f-spot').value;
+  const when = $('#f-when').value.trim();
+  const gear = $('#f-gear').value.trim();
+  if(!name){ toast('닉네임을 입력해 주세요 🙏'); $('#f-name').focus(); return; }
+  if(!fStars){ toast('만족도(별점)를 선택해 주세요 ⭐'); return; }
+  if(text.length < 10){ toast('후기를 조금만 더 구체적으로 적어주세요 (10자 이상)'); $('#f-text').focus(); return; }
+
+  const r = { id: Date.now(), name, text, spot, when, gear, stars: fStars, tags:[...fTags] };
+  const mine = loadMine(); mine.unshift(r); saveMine(mine);
+  renderReviews();
+
+  // 폼 초기화
+  ['f-name','f-when','f-gear','f-text'].forEach(id=>$('#'+id).value='');
+  $('#f-cnt').textContent='0'; $('#f-spot').value=''; fStars=0; paintStars();
+  fTags.clear(); $$('#f-tags .tg').forEach(t=>t.classList.remove('on'));
+
+  showShare(r);
+}
+
+// 등록 후 카톡 공유 안내
+function showShare(r){
+  const spot = r.spot && r.spot!=='기타' ? r.spot : '';
+  const share = `[팀아온다 후기] ${r.name} ${'★'.repeat(r.stars)}\n`
+    + (spot?`📍 ${spot}${r.when?' · '+r.when:''}\n`:'')
+    + (r.gear?`⛺ ${r.gear}\n`:'')
+    + `\n${r.text}`;
+  const kakao = (typeof CONTACT!=='undefined' && CONTACT.kakao) ? CONTACT.kakao : '';
+  const doShare = async ()=>{
+    try{
+      if(navigator.share){ await navigator.share({text:share}); }
+      else{ await navigator.clipboard.writeText(share); toast('후기가 복사됐어요! 오픈채팅에 붙여넣기 하세요'); if(kakao) window.open(kakao,'_blank'); }
+    }catch{ if(kakao) window.open(kakao,'_blank'); }
+  };
+  toast('✅ 후기가 등록됐어요! 크루와 공유하려면 탭하세요', 4200, doShare);
+}
+
+/* ---------- 연락처 채널 ---------- */
+function setupContact(){
+  if(typeof CONTACT==='undefined') return;
+  const k=$('#join-kakao'); if(k && CONTACT.kakao) k.href=CONTACT.kakao;
+  const ig=$('#join-insta');
+  if(ig){
+    if(CONTACT.instagram){ ig.href=CONTACT.instagram; }
+    else{ ig.style.display='none'; }   // 인스타 핸들 미입력 시 버튼 숨김
+  }
+}
+
+/* ---------- 토스트 ---------- */
+let toastTimer;
+function toast(msg, ms=2400, onTap){
+  const t=$('#toast'); t.textContent=msg; t.classList.add('show');
+  t.onclick = onTap ? (()=>{ onTap(); t.classList.remove('show'); }) : null;
+  t.style.cursor = onTap ? 'pointer' : 'default';
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), ms);
 }
 
 /* ---------- 히어로 별 ---------- */
@@ -251,3 +362,4 @@ function renderStars(){
 
 /* ---------- init ---------- */
 renderCrew(); renderTents(); renderDeals(); renderSpots(); renderReviews(); renderCheck(); renderStars();
+setupReviewForm(); setupContact();

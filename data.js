@@ -53,6 +53,12 @@ const DEALS = [
   { period: "12월", title: "연말 결산세일", desc: "블프 놓친 재고 추가 인하. 침낭·매트 등 소품 보충 적기.", hot:false },
 ];
 
+// 연락처 / 채널  (인스타 핸들 알려주시면 instagram 값만 바꾸면 됩니다)
+const CONTACT = {
+  kakao: "https://open.kakao.com/o/g9pC3BIh",
+  instagram: "",            // 예: "https://instagram.com/team_aonda"
+};
+
 // 크루 활동 방식 / 가치
 const CREW = [
   { icon:"🌿", title:"Leave No Trace", desc:"왔던 자리는 왔던 그대로. 흔적 없이 자연을 지키는 게 1원칙." },

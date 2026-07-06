@@ -168,6 +168,45 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 .review .rt{font-size:11.5px;color:var(--muted);font-weight:600}
 .review .stars{color:#e0a52e;font-size:13px;letter-spacing:1px;margin-left:auto}
 .review .rtext{font-size:13.5px;color:#4a463c;line-height:1.6}
+.review .rmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.review .rmeta .p{font-size:11px;font-weight:700;background:#eef2e8;color:var(--moss);padding:2px 8px;border-radius:10px}
+.review .rmeta .p.spot{background:var(--forest);color:#fff}
+.review .rmeta .p.gear{background:#fdeee2;color:var(--terra-d)}
+.review.mine{border-color:var(--sage);background:linear-gradient(90deg,#f6faf2,#fff)}
+.review .del{margin-left:auto;font-size:11px;color:var(--muted);cursor:pointer;background:none;border:none;text-decoration:underline}
+
+/* ---------- Review form ---------- */
+.rform{background:linear-gradient(165deg,#fff,#faf8f2);border:1px solid var(--line);border-radius:20px;padding:20px 16px;box-shadow:var(--shadow-lg);margin-bottom:20px}
+.rform h3{font-size:17px;font-weight:850;margin-bottom:3px}
+.rform .fdesc{font-size:12.5px;color:var(--muted);margin-bottom:16px}
+.fld{margin-bottom:13px}
+.fld label{display:block;font-size:12.5px;font-weight:800;margin-bottom:6px;color:var(--forest)}
+.fld label .opt-tx{color:var(--muted);font-weight:600}
+.fld input,.fld select,.fld textarea{width:100%;font-size:14px;font-family:inherit;padding:11px 12px;
+  border:1.5px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);-webkit-appearance:none}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px rgba(139,166,118,.18)}
+.fld textarea{resize:vertical;min-height:84px;line-height:1.6}
+.fld .cnt{text-align:right;font-size:11px;color:var(--muted);margin-top:3px}
+.starpick{display:flex;gap:5px}
+.starpick span{font-size:28px;cursor:pointer;color:#d8d2c2;transition:.1s;line-height:1}
+.starpick span.on{color:#e0a52e;transform:scale(1.05)}
+.tagpick{display:flex;gap:7px;flex-wrap:wrap}
+.tagpick .tg{font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:18px;border:1.5px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+.tagpick .tg.on{background:var(--moss);color:#fff;border-color:var(--moss)}
+.rform .fnote2{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5}
+
+/* ---------- Contact / Join ---------- */
+.join{background:linear-gradient(160deg,var(--moss),var(--forest));color:#f4f1e8;border-radius:22px;padding:26px 20px;text-align:center;box-shadow:var(--shadow-lg)}
+.join h3{font-size:21px;font-weight:900;margin-bottom:6px}
+.join p{font-size:14px;opacity:.92;margin-bottom:18px}
+.join .btns{display:flex;flex-direction:column;gap:10px}
+.join .jbtn{display:flex;align-items:center;justify-content:center;gap:9px;font-weight:850;font-size:15px;padding:15px;border-radius:14px;border:none;cursor:pointer;transition:.15s}
+.join .jbtn:active{transform:translateY(1px)}
+.jbtn.kakao{background:#FEE500;color:#191600}
+.jbtn.insta{background:linear-gradient(45deg,#f09433,#e6683c 30%,#dc2743 50%,#cc2366 75%,#bc1888);color:#fff}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;
+  font-size:13.5px;font-weight:700;padding:12px 20px;border-radius:30px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;color:var(--muted);font-size:14px;padding:20px}
 
 @media(min-width:560px){
@@ -311,13 +350,77 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- REVIEWS -->
-<section id="reviews"><div class="wrap">
+<section id="reviews" class="section-alt"><div class="wrap">
   <div class="eyebrow">Crew Voices</div>
-  <h2>크루 후기</h2>
-  <p class="sub">팀아온다와 함께한 멤버들의 한마디.</p>
+  <h2>다녀온 후기</h2>
+  <p class="sub">직접 다녀오신 분들의 생생한 기록. 아래에서 나도 후기를 남겨보세요.</p>
+
+  <!-- 후기 작성 폼 -->
+  <div class="rform">
+    <h3>✍️ 후기 남기기</h3>
+    <p class="fdesc">다녀온 박지·시기·장비를 구체적으로 남길수록 다음 사람에게 큰 도움이 돼요.</p>
+
+    <div class="fld">
+      <label>닉네임</label>
+      <input id="f-name" type="text" maxlength="12" placeholder="예: 준호" autocomplete="off">
+    </div>
+
+    <div class="fld">
+      <label>다녀온 박지</label>
+      <select id="f-spot"></select>
+    </div>
+
+    <div class="fld">
+      <label>방문 시기 <span class="opt-tx">(선택)</span></label>
+      <input id="f-when" type="text" maxlength="16" placeholder="예: 2026.06 / 지난 주말" autocomplete="off">
+    </div>
+
+    <div class="fld">
+      <label>내 스타일 <span class="opt-tx">(여러 개 선택 가능)</span></label>
+      <div class="tagpick" id="f-tags">
+        <span class="tg" data-t="솔캠">🌙 솔캠</span>
+        <span class="tg" data-t="친목">🔥 친목</span>
+        <span class="tg" data-t="UL">🪶 UL</span>
+        <span class="tg" data-t="BPL">🎒 경량</span>
+        <span class="tg" data-t="헤비">🧳 헤비</span>
+        <span class="tg" data-t="입문">🌱 입문</span>
+      </div>
+    </div>
+
+    <div class="fld">
+      <label>사용 장비 <span class="opt-tx">(선택 · 텐트/침낭 등)</span></label>
+      <input id="f-gear" type="text" maxlength="40" placeholder="예: 네이처하이크 클라우드업2" autocomplete="off">
+    </div>
+
+    <div class="fld">
+      <label>만족도</label>
+      <div class="starpick" id="f-stars">
+        <span data-s="1">★</span><span data-s="2">★</span><span data-s="3">★</span><span data-s="4">★</span><span data-s="5">★</span>
+      </div>
+    </div>
+
+    <div class="fld">
+      <label>후기 <span class="opt-tx">(날씨·접근·풍경·꿀팁 등 구체적으로)</span></label>
+      <textarea id="f-text" maxlength="300" placeholder="예: 굴업도 개머리언덕. 금요일 막배 타고 들어가 노지에서 1박. 바람 강해 팩다운 단단히! 일몰 최고였고 물은 미리 챙겨가세요."></textarea>
+      <div class="cnt"><span id="f-cnt">0</span>/300</div>
+    </div>
+
+    <button class="btn btn-primary" style="width:100%" onclick="submitReview()">후기 등록하기</button>
+    <p class="fnote2">등록하면 이 페이지에 바로 보여요. 크루 전체와 공유하려면 등록 후 뜨는 <b>카톡 공유</b> 버튼을 눌러주세요.</p>
+  </div>
+
   <div id="reviewList"></div>
-  <div style="text-align:center;margin-top:8px">
-    <button class="btn btn-primary" onclick="scrollTo2('tool')" style="width:100%">🎒 나도 장비 매칭 해보기</button>
+</div></section>
+
+<!-- JOIN / CONTACT -->
+<section id="join"><div class="wrap">
+  <div class="join">
+    <h3>🥾 함께 걸어요</h3>
+    <p>팀아온다와 다음 박지를 함께할 크루를 기다려요.<br>궁금한 건 오픈채팅으로 편하게!</p>
+    <div class="btns">
+      <a class="jbtn kakao" id="join-kakao" href="#" target="_blank" rel="noopener">💬 카카오 오픈채팅 참여</a>
+      <a class="jbtn insta" id="join-insta" href="#" target="_blank" rel="noopener">📸 인스타그램</a>
+    </div>
   </div>
 </div></section>
 
@@ -325,13 +428,15 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <div class="fl">🌿 팀아온다</div>
   <div class="fq">"아니온듯 다녀갑니다"</div>
   <div class="hero-cta" style="justify-content:center">
-    <button class="btn btn-primary" onclick="scrollTo2('tool')">장비 매칭 다시하기</button>
+    <button class="btn btn-primary" onclick="scrollTo2('join')">💬 크루 참여하기</button>
   </div>
   <div class="fnote">
     가격·무게·박지 정보는 참고용 대략치입니다. 실제 구매·산행 전 최신 정보와 기상·입산 통제를 꼭 확인하세요.<br>
     Leave No Trace · 흔적 없이 자연을 지키는 백패킹
   </div>
 </footer>
+
+<div class="toast" id="toast"></div>
 
 <script src="data.js"></script>
 <script src="app.js"></script>
