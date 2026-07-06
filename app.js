@@ -319,7 +319,11 @@ function reviewCard(r, mine){
 /* ── Supabase 백엔드 (설정 시 전체공유, 미설정 시 localStorage) ── */
 let remoteReviews = null;      // 원격 로드 결과 (enabled일 때)
 const supaOn = () => typeof SUPABASE!=='undefined' && SUPABASE.url && SUPABASE.key;
-const supaHeaders = () => ({ apikey:SUPABASE.key, Authorization:'Bearer '+SUPABASE.key, 'Content-Type':'application/json' });
+const supaHeaders = () => {
+  const h = { apikey: SUPABASE.key, 'Content-Type':'application/json' };
+  if(String(SUPABASE.key).startsWith('eyJ')) h.Authorization = 'Bearer '+SUPABASE.key; // 레거시 anon JWT일 때만
+  return h;
+};
 async function fetchRemoteReviews(){
   try{
     const res = await fetch(`${SUPABASE.url}/rest/v1/reviews?select=*&order=id.desc`, { headers: supaHeaders() });

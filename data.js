@@ -402,8 +402,8 @@ const CONTACT = {
 // 설정법: Supabase 프로젝트 생성 → SQL로 reviews 테이블 생성(README 참고) →
 //         Project Settings > API 의 Project URL 과 anon public key 를 아래에 붙여넣기.
 const SUPABASE = {
-  url: "",   // 예: "https://xxxxxxxx.supabase.co"
-  key: "",   // anon public key (공개되어도 되는 키)
+  url: "https://wzlapxdnfhgapheuuqnl.supabase.co",   // keto-fridge 프로젝트 (reviews 테이블 공유)
+  key: "sb_publishable_I7P96pUCMlS9eGv_uGdRfg_Etx_0ooc",   // publishable key — 공개돼도 안전한 키
 };
 
 // 크루 활동 방식 / 가치
