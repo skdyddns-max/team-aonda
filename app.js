@@ -341,6 +341,32 @@ function renderDeals(){
     </div>`).join('');
 }
 
+/* ---------- 행사 (백패킹 · 트레일러닝) ---------- */
+let evtFilter = 'all';
+function eventCardHTML(ev){
+  const tr = ev.type==='트레일러닝';
+  return `<a class="evt" href="${naverURL(ev.q)}" target="_blank" rel="noopener">
+    <div class="eh"><span class="enm">${esc(ev.name)}</span>
+      <span class="etype ${tr?'tr':'bp'}">${tr?'🏃':'🎒'} ${esc(ev.type)}</span></div>
+    <div class="emeta">🗓 ${esc(ev.when)} · 📍 ${esc(ev.region)}</div>
+    <div class="edesc">${esc(ev.desc)}</div>
+    <span class="tsearch">🔗 접수·정보 보기 →</span>
+  </a>`;
+}
+function renderEvents(){
+  const items = EVENTS.filter(ev=> evtFilter==='all' || ev.type===evtFilter);
+  $('#eventList').innerHTML = items.length ? items.map(eventCardHTML).join('') : `<div class="empty">해당 행사가 없어요.</div>`;
+}
+function setupEvents(){
+  $$('#evtFilter .fchip').forEach(f=>{
+    f.addEventListener('click',()=>{
+      $$('#evtFilter .fchip').forEach(x=>x.classList.remove('on'));
+      f.classList.add('on');
+      evtFilter=f.dataset.e; renderEvents();
+    });
+  });
+}
+
 /* ---------- 4. 박지 + 필터 ---------- */
 const SPOT_PAGE = 12;
 const REGION_ORDER = ['수도권','강원','충청','경상','전라','제주'];
@@ -646,6 +672,7 @@ function renderStars(){
 
 /* ---------- init ---------- */
 renderCrew(); setupTentControls(); renderTents(); renderDeals(); setupSpots(); renderSpots();
+setupEvents(); renderEvents();
 renderReviews(); renderCheck(); renderStars();
 setupReviewForm(); setupContact();
 if(supaOn()) fetchRemoteReviews();   // 백엔드 설정 시 전체 후기 로드
