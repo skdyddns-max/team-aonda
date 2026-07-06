@@ -325,9 +325,14 @@ function spotTheme(sp){
   if(sp.type==='캠핑장') return 'deck';
   return 'ridge';
 }
+// 박지 네이버 검색 URL (실제 장소 사진·후기 바로 보기)
+function spotSearch(sp){
+  const name = sp.name.replace(/[()·]/g,' ').replace(/\s+/g,' ').trim();
+  return 'https://search.naver.com/search.naver?query=' + encodeURIComponent(name + ' 백패킹');
+}
 function spotCardHTML(sp){
   const th = spotTheme(sp);
-  return `<div class="spot">
+  return `<a class="spot" href="${spotSearch(sp)}" target="_blank" rel="noopener">
     <div class="sthumb theme-${th}" style="background-image:url('assets/spots/${th}.jpg')">
       <span class="stype">${esc(sp.type)}</span>
     </div>
@@ -340,8 +345,9 @@ function spotCardHTML(sp){
         <span class="pill ${sp.car?'car':''}">${sp.car?'🚗 자차권장':'🚌 자차없이 OK'}</span>
         ${sp.keyword.map(k=>`<span class="pill">#${esc(k)}</span>`).join('')}
       </div>
+      <span class="tsearch">🔍 네이버에서 사진·후기 보기 →</span>
     </div>
-  </div>`;
+  </a>`;
 }
 function renderSpots(){
   const items = filteredSpots();
