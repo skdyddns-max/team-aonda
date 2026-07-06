@@ -171,10 +171,22 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .deal .dd{font-size:13px;color:var(--muted);line-height:1.55}
 
 /* ---------- Spots ---------- */
-.spot{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:11px;box-shadow:var(--shadow)}
-.spot .sh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px}
+.spot{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:11px;box-shadow:var(--shadow)}
+.spot .sthumb{height:130px;background-size:cover;background-position:center;position:relative;display:flex}
+.spot .sthumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.22))}
+.spot .sbody{padding:14px 15px}
+.spot .sh{display:flex;align-items:baseline;gap:8px;margin-bottom:5px;flex-wrap:wrap}
 .spot .snm{font-weight:850;font-size:17px}
-.spot .stype{font-size:11px;font-weight:800;padding:3px 10px;border-radius:12px;background:var(--forest);color:#fff}
+.spot .stype{position:absolute;top:10px;right:10px;z-index:2;font-size:11px;font-weight:800;padding:3px 10px;border-radius:12px;background:rgba(43,54,36,.82);color:#fff;backdrop-filter:blur(2px)}
+/* 사진 없을 때 테마 그라데이션 폴백 */
+.theme-island{background:linear-gradient(135deg,#3f86bd,#6fb3d8)}
+.theme-grass{background:linear-gradient(135deg,#b78f33,#dcb95f)}
+.theme-snow{background:linear-gradient(135deg,#8ba6c6,#cbd8e6)}
+.theme-galaxy{background:linear-gradient(135deg,#242a55,#4a3d78)}
+.theme-sunrise{background:linear-gradient(135deg,#d3823f,#ecb56b)}
+.theme-meadow{background:linear-gradient(135deg,#5f9a45,#9cc26a)}
+.theme-deck{background:linear-gradient(135deg,#46683a,#6d8f4b)}
+.theme-ridge{background:linear-gradient(135deg,#586a58,#7f9068)}
 .spot .sregion{font-size:12px;color:var(--muted);font-weight:600}
 .spot .sdesc{font-size:13.5px;color:#4a463c;margin:7px 0}
 .spot .sinfo{display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;font-weight:700}

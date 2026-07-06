@@ -269,18 +269,33 @@ function filteredSpots(){
     return true;
   });
 }
+// 박지 키워드·유형으로 테마 사진 매칭 (assets/spots/{theme}.jpg)
+function spotTheme(sp){
+  const k = sp.keyword.join(' '), s = sp.season || '';
+  if(/은하수|별/.test(k)) return 'galaxy';
+  if(/억새/.test(k)) return 'grass';
+  if(/설경|상고대/.test(k) || /겨울/.test(s)) return 'snow';
+  if(/일출|운해/.test(k)) return 'sunrise';
+  if(/철쭉|야생화|참꽃|청보리|유채|화원|초원|고원|고지대|풍력/.test(k)) return 'meadow';
+  if(sp.type==='섬') return 'island';
+  if(sp.type==='캠핑장') return 'deck';
+  return 'ridge';
+}
 function spotCardHTML(sp){
+  const th = spotTheme(sp);
   return `<div class="spot">
-    <div class="sh">
-      <div><span class="snm">${esc(sp.name)}</span> <span class="sregion">${esc(sp.region)}</span></div>
+    <div class="sthumb theme-${th}" style="background-image:url('assets/spots/${th}.jpg')">
       <span class="stype">${esc(sp.type)}</span>
     </div>
-    <div class="sdesc">${esc(sp.desc)}</div>
-    <div class="sinfo">
-      <span class="pill diff d${DIFF_LV[sp.difficulty]||2}">난이도 ${esc(sp.difficulty)}</span>
-      <span class="pill">${esc(sp.season)}</span>
-      <span class="pill ${sp.car?'car':''}">${sp.car?'🚗 자차권장':'🚌 자차없이 OK'}</span>
-      ${sp.keyword.map(k=>`<span class="pill">#${esc(k)}</span>`).join('')}
+    <div class="sbody">
+      <div class="sh"><span class="snm">${esc(sp.name)}</span> <span class="sregion">${esc(sp.region)}</span></div>
+      <div class="sdesc">${esc(sp.desc)}</div>
+      <div class="sinfo">
+        <span class="pill diff d${DIFF_LV[sp.difficulty]||2}">난이도 ${esc(sp.difficulty)}</span>
+        <span class="pill">${esc(sp.season)}</span>
+        <span class="pill ${sp.car?'car':''}">${sp.car?'🚗 자차권장':'🚌 자차없이 OK'}</span>
+        ${sp.keyword.map(k=>`<span class="pill">#${esc(k)}</span>`).join('')}
+      </div>
     </div>
   </div>`;
 }
