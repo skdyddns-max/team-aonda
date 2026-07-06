@@ -138,8 +138,9 @@ function filteredTents(){
     if(tState.kw && !kwPass(t,tState.kw)) return false;
     if(tState.brand && t.brand!==tState.brand) return false;
     if(tState.cap){
-      if(tState.cap==='4인'){ if(!/[4-9]인/.test(t.cap)) return false; }
-      else if(t.cap!==tState.cap) return false;
+      const tn = parseInt(t.cap);
+      if(tState.cap==='3인'){ if(tn<3) return false; }        // 3인+
+      else if(tn !== parseInt(tState.cap)) return false;      // 1인·2인 정확히
     }
     if(q){
       const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[t.brand]) || '';
@@ -159,7 +160,10 @@ function filteredTents(){
 function tentCardHTML(t){
   return `<div class="tcard">
     <div class="row1">
-      <div><div class="brand">${esc(t.brand)}</div><div class="tname">${esc(t.name)}</div></div>
+      <div><div class="brand">${esc(t.brand)}
+        ${t.verified?'<span class="vbadge" title="웹 조사로 확인된 실측 스펙">✓ 실측</span>'
+                    :'<span class="ebadge" title="대표값에서 인원별 스케일한 추정치">≈ 추정</span>'}</div>
+        <div class="tname">${esc(t.name)}</div></div>
       <span class="season ${t.season===4?'s4':'s3'}">${t.season===4?'사계절':'삼계절'}</span>
     </div>
     <div class="stats">
@@ -207,8 +211,16 @@ function setupTentControls(){
     deb = setTimeout(()=>{ tState.q=e.target.value; resetLimit(); renderTents(); }, 160);
   });
   $('#fBrand').addEventListener('change', e=>{ tState.brand=e.target.value; resetLimit(); renderTents(); });
-  $('#fCap').addEventListener('change',   e=>{ tState.cap=e.target.value;   resetLimit(); renderTents(); });
   $('#fSort').addEventListener('change',  e=>{ tState.sort=e.target.value;  resetLimit(); renderTents(); });
+  // 무게·가격 기준 세그먼트 (전체 / 1인 / 2인 / 3인+)
+  $$('#capSeg button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      $$('#capSeg button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      tState.cap = b.dataset.cap;
+      resetLimit(); renderTents();
+    });
+  });
   // 키워드 칩
   $$('#kwRow .kw').forEach(kw=>{
     kw.addEventListener('click',()=>{
@@ -304,10 +316,28 @@ function reviewCard(r, mine){
     ${mine?`<div style="text-align:right;margin-top:6px"><button class="del" onclick="deleteReview(${r.id})">삭제</button></div>`:''}
   </div>`;
 }
+/* ── Supabase 백엔드 (설정 시 전체공유, 미설정 시 localStorage) ── */
+let remoteReviews = null;      // 원격 로드 결과 (enabled일 때)
+const supaOn = () => typeof SUPABASE!=='undefined' && SUPABASE.url && SUPABASE.key;
+const supaHeaders = () => ({ apikey:SUPABASE.key, Authorization:'Bearer '+SUPABASE.key, 'Content-Type':'application/json' });
+async function fetchRemoteReviews(){
+  try{
+    const res = await fetch(`${SUPABASE.url}/rest/v1/reviews?select=*&order=id.desc`, { headers: supaHeaders() });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const rows = await res.json();
+    remoteReviews = rows.map(r=>({ ...r, when:r.visited }));   // visited 컬럼 → when 필드
+  }catch(e){ remoteReviews = []; console.warn('후기 로드 실패:', e.message); }
+  renderReviews();
+}
 function renderReviews(){
-  const mine = loadMine();
-  const html = mine.map(r=>reviewCard(r,true)).join('')
-             + REVIEWS.map(r=>reviewCard(r,false)).join('');
+  let html;
+  if(supaOn()){
+    html = (remoteReviews||[]).map(r=>reviewCard(r,false)).join('')
+         + REVIEWS.map(r=>reviewCard(r,false)).join('');
+  }else{
+    html = loadMine().map(r=>reviewCard(r,true)).join('')
+         + REVIEWS.map(r=>reviewCard(r,false)).join('');
+  }
   $('#reviewList').innerHTML = html;
 }
 function deleteReview(id){
@@ -340,10 +370,17 @@ function setupReviewForm(){
   });
   // 글자수
   $('#f-text').addEventListener('input', e=> $('#f-cnt').textContent = e.target.value.length);
+  // 백엔드 설정 시 안내문 갱신
+  if(supaOn()){ const n=$('.rform .fnote2'); if(n) n.innerHTML='등록하면 <b>크루 전체</b>에게 바로 공유되고 모든 기기에서 보여요.'; }
 }
 function paintStars(){ $$('#f-stars span').forEach(s=> s.classList.toggle('on', +s.dataset.s <= fStars)); }
 
-function submitReview(){
+function clearForm(){
+  ['f-name','f-when','f-gear','f-text'].forEach(id=>$('#'+id).value='');
+  $('#f-cnt').textContent='0'; $('#f-spot').value=''; fStars=0; paintStars();
+  fTags.clear(); $$('#f-tags .tg').forEach(t=>t.classList.remove('on'));
+}
+async function submitReview(ev){
   const name = $('#f-name').value.trim();
   const text = $('#f-text').value.trim();
   const spot = $('#f-spot').value;
@@ -353,16 +390,31 @@ function submitReview(){
   if(!fStars){ toast('만족도(별점)를 선택해 주세요 ⭐'); return; }
   if(text.length < 10){ toast('후기를 조금만 더 구체적으로 적어주세요 (10자 이상)'); $('#f-text').focus(); return; }
 
-  const r = { id: Date.now(), name, text, spot, when, gear, stars: fStars, tags:[...fTags] };
+  const tags = [...fTags];
+
+  // 백엔드 설정 시: 전체 공유 (Supabase에 저장)
+  if(supaOn()){
+    const btn = ev && ev.target; if(btn){ btn.disabled=true; btn.textContent='등록 중…'; }
+    try{
+      const res = await fetch(`${SUPABASE.url}/rest/v1/reviews`, {
+        method:'POST', headers:{ ...supaHeaders(), Prefer:'return=minimal' },
+        body: JSON.stringify({ name, text, spot, visited:when, gear, stars:fStars, tags })
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      clearForm();
+      await fetchRemoteReviews();
+      toast('✅ 후기 등록 완료! 크루 모두에게 공유됐어요');
+    }catch(e){
+      toast('등록에 실패했어요 😢 잠시 후 다시 시도해 주세요');
+      console.warn('후기 등록 실패:', e.message);
+    }finally{ if(btn){ btn.disabled=false; btn.textContent='후기 등록하기'; } }
+    return;
+  }
+
+  // 미설정 시: 이 기기에 저장 + 카톡 공유
+  const r = { id: Date.now(), name, text, spot, when, gear, stars: fStars, tags };
   const mine = loadMine(); mine.unshift(r); saveMine(mine);
-  renderReviews();
-
-  // 폼 초기화
-  ['f-name','f-when','f-gear','f-text'].forEach(id=>$('#'+id).value='');
-  $('#f-cnt').textContent='0'; $('#f-spot').value=''; fStars=0; paintStars();
-  fTags.clear(); $$('#f-tags .tg').forEach(t=>t.classList.remove('on'));
-
-  showShare(r);
+  renderReviews(); clearForm(); showShare(r);
 }
 
 // 등록 후 카톡 공유 안내
@@ -418,3 +470,4 @@ function renderStars(){
 renderCrew(); setupTentControls(); renderTents(); renderDeals(); renderSpots();
 renderReviews(); renderCheck(); renderStars();
 setupReviewForm(); setupContact();
+if(supaOn()) fetchRemoteReviews();   // 백엔드 설정 시 전체 후기 로드

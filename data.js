@@ -324,22 +324,39 @@ const BRAND_KR = {
   "Forceatt":"포스캣","Featherstone":"페더스톤","Paria":"파리아","Durango":"듀랑고"
 };
 
+/* ── 웹 조사(2026.07)로 확인한 실측 스펙 — [대표인원 min/trail 무게(kg), KR 대략가(만원)] ──
+   출처: 제조사·REI·OutdoorGearLab·Switchback 등. 이 라인들은 카드에 '실측' 표시.
+   나머지는 추정치(대표값에서 인원별 스케일) — 실측 대비 무게 ±10~15%, 가격 ±20% 오차 가능. */
+const VERIFIED = {
+  "Big Agnes|코퍼스퍼 HV UL":[1.36,68], "MSR|허바허바":[1.30,62], "MSR|프리라이트":[0.96,68],
+  "NEMO|호넷 오스모":[0.95,60], "NEMO|대거 오스모":[1.48,66], "Zpacks|듀플렉스":[0.54,95],
+  "Durston|X-Mid":[1.12,40], "Durston|X-Mid Pro":[0.55,78], "Six Moon Designs|루나 솔로":[0.71,33],
+  "Sea to Summit|알토 TR":[1.15,62], "Sea to Summit|텔로스 TR":[1.50,75],
+  "The North Face|스톰브레이크":[2.66,26], "REI Co-op|하프돔":[2.50,30], "Marmot|텅스텐":[2.40,28],
+  "Naturehike|클라우드업":[1.50,18], "Zerogram|올뉴 엘찰텐 프로":[1.86,58], "Hilleberg|알락":[2.70,165]
+};
+
 // 무게 등급: UL(<1.3kg) / BPL(경량 <2.2kg) / 헤비(거주성·오토·동계)
-// 인원 변형에 따른 무게·가격 스케일 계수
+// 인원 변형 스케일 계수. 대표(anchor) 인원을 기준으로 정규화해 스케일 → 1인전용/대형 텐트 오차 보정.
 const _CW = {1:.74, 2:1, 3:1.32, 4:1.7, 5:2.1, 6:2.5};
 const _CP = {1:.84, 2:1, 3:1.24, 4:1.5, 5:1.8, 6:2.1};
 const _wc = w => w < 1.3 ? "UL" : w < 2.2 ? "BPL" : "헤비";
 const TENTS = [];
 TENT_MODELS.forEach(m => {
-  const [brand, line, w2, season, p2, caps, value, ...tags] = m;
-  for (const ch of String(caps)) {
-    const c = +ch, w = +(w2 * _CW[c]).toFixed(2);
+  let [brand, line, w2, season, p2, caps, value, ...tags] = m;
+  const vkey = `${brand}|${line}`, ver = VERIFIED[vkey];
+  if (ver) { w2 = ver[0]; p2 = ver[1]; }
+  const capList = [...String(caps)].map(Number);
+  const anchor = capList.includes(2) ? 2 : capList[0];   // 대표 인원(2인 우선)
+  capList.forEach(c => {
+    const w = +(w2 * _CW[c] / _CW[anchor]).toFixed(2);
     TENTS.push({
       brand, name: `${line} ${c}P`, weight: w, season,
-      price: Math.round(p2 * 10000 * _CP[c] / 1000) * 1000,
-      cap: `${c}인`, wclass: _wc(w), value: !!value, tags
+      price: Math.round(p2 * 10000 * (_CP[c] / _CP[anchor]) / 1000) * 1000,
+      cap: `${c}인`, wclass: _wc(w), value: !!value, tags,
+      verified: !!ver && c === anchor          // 실측 확인 = 대표 인원 카드만
     });
-  }
+  });
 });
 
 // 박지(캠핑 장소) — car: 자차 없이 접근 난이도, type: 섬/캠핑장/오지
@@ -378,6 +395,15 @@ const DEALS = [
 const CONTACT = {
   kakao: "https://open.kakao.com/o/g9pC3BIh",
   instagram: "",            // 예: "https://instagram.com/team_aonda"
+};
+
+// 후기 전체공유 백엔드 (Supabase) — url·key 둘 다 채우면 크루 전체 공유 활성화.
+// 비워두면 자동으로 기기별 localStorage 저장으로 동작.
+// 설정법: Supabase 프로젝트 생성 → SQL로 reviews 테이블 생성(README 참고) →
+//         Project Settings > API 의 Project URL 과 anon public key 를 아래에 붙여넣기.
+const SUPABASE = {
+  url: "",   // 예: "https://xxxxxxxx.supabase.co"
+  key: "",   // anon public key (공개되어도 되는 키)
 };
 
 // 크루 활동 방식 / 가치
