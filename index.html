@@ -51,6 +51,10 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .navlinks a{flex:0 0 auto;font-size:13.5px;font-weight:800;color:var(--muted);padding:10px 13px;white-space:nowrap;border-bottom:2.5px solid transparent;cursor:pointer}
 .navlinks a.active{color:var(--forest);border-bottom-color:var(--brand)}
 .navlinks a:active{opacity:.7}
+.domain-bar{border-top:1px solid var(--line);background:var(--brand-soft);padding:7px 0}
+.domain-seg{display:flex;background:#fff;border-radius:11px;padding:3px;gap:2px;border:1px solid var(--line)}
+.domain-seg button{flex:1;font-size:13px;font-weight:850;font-family:inherit;padding:8px 4px;border:none;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;transition:.12s}
+.domain-seg button.on{background:var(--forest);color:#fff}
 .logo{font-weight:900;font-size:16px;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;color:var(--forest)}
 .logo .emblem{height:30px;flex:0 0 auto}
 .logo .lt span{color:var(--brand-d)}
@@ -396,6 +400,12 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
     <a data-tab="deals">할인</a>
     <a data-tab="reviews">후기·갤러리</a>
   </div></nav>
+  <div class="domain-bar"><div class="wrap">
+    <div class="seg domain-seg" id="domainSeg">
+      <button class="on" data-dm="bp">백패킹</button>
+      <button data-dm="camp">캠핑</button>
+    </div>
+  </div></div>
 </div>
 
 <!-- HERO -->
@@ -503,14 +513,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <div class="eyebrow">Gear Catalog</div>
   <h2>장비 카탈로그</h2>
   <p class="sub">종류별로 골라보세요. 카드를 누르면 네이버로 사진·가격을 바로 확인해요.</p>
-  <div class="cat-tabs" id="catTabs">
-    <button class="on" data-cat="텐트">텐트</button>
-    <button data-cat="침낭">침낭</button>
-    <button data-cat="매트">매트</button>
-    <button data-cat="배낭">배낭</button>
-    <button data-cat="스토브">스토브</button>
-    <button data-cat="랜턴">랜턴</button>
-  </div>
+  <div class="cat-tabs" id="catTabs"></div>
 
   <!-- 텐트 전용 컨트롤 -->
   <div id="tentControls">
@@ -745,7 +748,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 
 <div class="toast" id="toast"></div>
 
-<script src="data.js?v=8"></script>
-<script src="app.js?v=8"></script>
+<script src="data.js?v=9"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

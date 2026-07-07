@@ -327,7 +327,10 @@ const BRAND_KR = {
   "Jetboil":"제트보일","Soto":"소토","Therm-a-Rest":"써머레스트","Black Diamond":"블랙다이아몬드",
   "Millet":"밀레","Kovea":"코베아","Primus":"프리머스","Trangia":"트랑기아","Fire Maple":"파이어메이플",
   "Klymit":"클라이밋","Ledlenser":"레드렌서","Goal Zero":"고제로","Fenix":"페닉스",
-  "Granite Gear":"그래닛기어","Western Mountaineering":"웨스턴마운티니어링","Marmot":"마모트"
+  "Granite Gear":"그래닛기어","Western Mountaineering":"웨스턴마운티니어링","Marmot":"마모트",
+  // 캠핑 브랜드
+  "Helinox":"헬리녹스","Minimworks":"미니멀웍스","Vidalido":"비달리도","Petromax":"페트로막스",
+  "Solo Stove":"솔로스토브","YETI":"예티","Igloo":"이글루","Orca":"오르카","Barebones":"베어본즈","Kermit":"커밋체어"
 };
 
 /* ── 웹 조사(2026.07)로 확인한 실측 스펙 — [대표인원 min/trail 무게(kg), KR 대략가(만원)] ──
@@ -640,6 +643,72 @@ const _GEAR_RAW = {
 };
 const GEAR_ITEMS = {};
 GEAR_CATS.forEach(c=>{ GEAR_ITEMS[c] = _GEAR_RAW[c].map(m=>{ const[brand,name,price,value,...tags]=m; return {brand,name,price,value:!!value,tags}; }); });
+
+// ── 캠핑(오토캠핑) 장비 카탈로그 ──
+const CAMP_GEAR_CATS = ["대형텐트","타프","테이블·체어","화로대","랜턴","아이스박스"];
+const _CAMP_RAW = {
+  "대형텐트":[
+    ["Snow Peak","랜드락",120,0,"터널형","거실형","프리미엄"],
+    ["Snow Peak","리빙쉘 롱 Pro.",95,0,"거실형","프리미엄"],
+    ["Snow Peak","엔트리 2룸 엘필드",55,0,"2룸","입문"],
+    ["Kovea","네스트 II",35,1,"돔형","국산","가성비"],
+    ["Coleman","4S 와이드 2룸 코쿤 III",40,1,"2룸","가성비"],
+    ["Coleman","터프 스크린 2룸 하우스",30,1,"거실형","가성비"],
+    ["Nordisk","아스가르드 12.6",90,0,"벨텐트","감성"],
+    ["Minimworks","쉘터G",45,0,"국산","쉘터"],
+    ["Helinox","택티컬 필드 6.0",70,0,"경량대형","프리미엄"],
+    ["Vidalido","옥타곤 돔텐트",20,1,"돔형","가성비"],
+  ],
+  "타프":[
+    ["Snow Peak","HD 타프 쉴드 헥사",25,0,"헥사","내구성"],
+    ["MSR","론지 타프",18,0,"경량","방수"],
+    ["Kovea","일자형 그늘막 타프",8,1,"일자","가성비"],
+    ["Minimworks","어반 타프",15,0,"국산","도심감성"],
+    ["Nordisk","카리 20",30,0,"대형","감성"],
+    ["Coleman","XP 헥사 타프",9,1,"헥사","가성비"],
+    ["Helinox","타프 5.0",40,0,"경량","프리미엄"],
+    ["Naturehike","방수 사각 타프",6,1,"가성비","입문"],
+  ],
+  "테이블·체어":[
+    ["Helinox","체어 원",13,0,"경량","베스트셀러"],
+    ["Helinox","택티컬 체어",15,0,"경량","프리미엄"],
+    ["Kovea","롱 릴렉스 체어",6,1,"릴렉스","가성비"],
+    ["Snow Peak","IGT 아이언그릴테이블",40,0,"모듈시스템","확장성"],
+    ["Coleman","4단 롤 테이블",7,1,"롤테이블","가성비"],
+    ["Helinox","테이블 원",9,0,"경량","컴팩트"],
+    ["Kermit","커밋 체어",25,0,"우드","감성"],
+    ["Naturehike","경량 폴딩 체어",4,1,"가성비","입문"],
+  ],
+  "화로대":[
+    ["Snow Peak","화로대 L",25,0,"스테디셀러","내구성"],
+    ["Kovea","슬림 화로대",8,1,"슬림","가성비"],
+    ["Coleman","파이어 디스크",12,1,"디스크","간편"],
+    ["Minimworks","인디안 화로대",30,0,"국산","감성"],
+    ["Petromax","아타고",20,0,"멀티","조리"],
+    ["Solo Stove","레인저",25,0,"무연","화목"],
+    ["Naturehike","접이식 화로대",6,1,"가성비","휴대"],
+  ],
+  "랜턴":[
+    ["Coleman","노스스타 가솔린 랜턴",15,0,"가솔린","밝기"],
+    ["Snow Peak","리틀램프 노쿠토",9,0,"가스","감성"],
+    ["Goal Zero","라이트하우스 600",10,0,"충전","캠핑"],
+    ["Kovea","경질 가스 랜턴",7,1,"가스","가성비"],
+    ["Barebones","비콘 라이트",6,0,"감성","충전"],
+    ["Fenix","CL30R",8,0,"충전","고광량"],
+    ["Naturehike","캠핑 랜턴",3,1,"가성비","입문"],
+  ],
+  "아이스박스":[
+    ["Coleman","익스트림 쿨러 58L",9,1,"대용량","가성비"],
+    ["YETI","툰드라 45",45,0,"프리미엄","보냉끝판왕"],
+    ["Igloo","맥스콜드 62L",7,1,"가성비","대용량"],
+    ["Kovea","아이스박스 25L",6,1,"중형","가성비"],
+    ["Coleman","소프트 쿨러",4,1,"소프트","경량"],
+    ["Orca","하드 쿨러 40",40,0,"프리미엄","내구성"],
+    ["Naturehike","폴딩 쿨러백",3,1,"가성비","휴대"],
+  ],
+};
+const CAMP_GEAR_ITEMS = {};
+CAMP_GEAR_CATS.forEach(c=>{ CAMP_GEAR_ITEMS[c] = _CAMP_RAW[c].map(m=>{ const[brand,name,price,value,...tags]=m; return {brand,name,price,value:!!value,tags}; }); });
 
 // 크루 활동 방식 / 가치
 const CREW = [

@@ -256,7 +256,22 @@ function listMoreButtons(total, limit, unit){
 }
 function resetLimit(){ tState.limit = PAGE; }
 
-/* ── 장비 카테고리 (텐트 / 침낭 / 매트 / 배낭 / 스토브 / 랜턴) ── */
+/* ── 도메인(백패킹/캠핑) + 장비 카테고리 ── */
+let domain = 'bp';   // 'bp'(백패킹) | 'camp'(캠핑)
+const catsFor = d => d==='camp' ? CAMP_GEAR_CATS.slice() : ['텐트', ...GEAR_CATS];
+const gearItemsFor = cat => (typeof CAMP_GEAR_ITEMS!=='undefined' && CAMP_GEAR_ITEMS[cat]) || GEAR_ITEMS[cat] || [];
+function renderCatTabs(){
+  const cats = catsFor(domain);
+  $('#catTabs').innerHTML = cats.map((c,i)=>`<button class="${i===0?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
+  $$('#catTabs button').forEach(b=> b.addEventListener('click', ()=>selectCat(b.dataset.cat)) );
+}
+function selectDomain(d){
+  domain = d;
+  $$('#domainSeg button').forEach(b=>b.classList.toggle('on', b.dataset.dm===d));
+  renderCatTabs();
+  selectCat(catsFor(domain)[0]);   // 첫 카테고리로
+  renderReviews(); renderGallery();
+}
 let curCat = '텐트', gearQuery = '', gearLimit = PAGE;
 function gearCardHTML(g){
   return `<a class="tcard" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">
@@ -272,7 +287,7 @@ function gearCardHTML(g){
 }
 function renderGear(cat){
   const q = gearQuery.trim().toLowerCase();
-  const items = (GEAR_ITEMS[cat]||[]).filter(g=>{
+  const items = gearItemsFor(cat).filter(g=>{
     if(!q) return true;
     const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[g.brand]) || '';
     return (g.brand+' '+g.name+' '+kr+' '+g.tags.join(' ')).toLowerCase().includes(q);
@@ -345,8 +360,10 @@ function setupTentControls(){
       refreshTents();
     });
   });
-  // 카테고리 탭 (텐트 / 침낭 / 매트 / 배낭 / 스토브 / 랜턴)
-  $$('#catTabs button').forEach(b=> b.addEventListener('click', ()=>selectCat(b.dataset.cat)) );
+  // 도메인 토글 (백패킹 / 캠핑)
+  $$('#domainSeg button').forEach(b=> b.addEventListener('click', ()=>selectDomain(b.dataset.dm)) );
+  // 카테고리 탭 (도메인별 동적 생성 + 클릭 연결)
+  renderCatTabs();
   // 기타 장비 검색
   let gdeb;
   $('#gearSearch').addEventListener('input', e=>{
@@ -542,7 +559,7 @@ const loadMine = () => { try{ return JSON.parse(localStorage.getItem(LS_KEY)) ||
 const saveMine = arr => localStorage.setItem(LS_KEY, JSON.stringify(arr));
 
 function reviewCard(r, mine){
-  const tags = (r.tags && r.tags.length) ? r.tags : (r.tag ? [r.tag] : []);
+  const tags = ((r.tags && r.tags.length) ? r.tags : (r.tag ? [r.tag] : [])).filter(t=>!String(t).startsWith('__'));
   const meta = [
     r.gear ? `<span class="p gear">${esc(r.gear)}</span>` : '',
     ...tags.map(t=>`<span class="p">#${esc(t)}</span>`)
@@ -582,13 +599,17 @@ async function fetchRemoteReviews(){
 }
 const REV_PAGE = 5;
 let revLimit = REV_PAGE;
+// 후기 도메인 마커 (태그 기반 — 새 컬럼 없이 백패킹/캠핑 분리)
+const DOMAIN_TAG = { bp:'__bp', camp:'__camp' };
+const reviewDomain = r => (r.tags && r.tags.includes('__camp')) ? 'camp' : 'bp';   // 마커 없으면 백패킹(기본)
 function renderReviews(){
-  const all = supaOn()
+  const raw = supaOn()
     ? (remoteReviews||[]).map(r=>({r,mine:false})).concat(REVIEWS.map(r=>({r,mine:false})))
     : loadMine().map(r=>({r,mine:true})).concat(REVIEWS.map(r=>({r,mine:false})));
+  const all = raw.filter(o=> reviewDomain(o.r)===domain);   // 현재 도메인만
   const shown = all.slice(0, revLimit);
   $('#reviewList').innerHTML = shown.map(o=>reviewCard(o.r, o.mine)).join('')
-    || `<div class="empty">아직 후기가 없어요. 첫 후기를 남겨보세요!</div>`;
+    || `<div class="empty">아직 ${domain==='camp'?'캠핑':'백패킹'} 후기가 없어요. 첫 후기를 남겨보세요!</div>`;
   const more=$('#reviewMore'), coll=$('#reviewCollapse');
   if(more){ if(all.length>revLimit){ more.style.display=''; more.textContent=`후기 더 보기 (남은 ${all.length-revLimit}개)`; } else more.style.display='none'; }
   if(coll) coll.style.display = revLimit>REV_PAGE ? '' : 'none';
@@ -606,7 +627,7 @@ function deleteReview(id){
 let galPhotos = [];
 function renderGallery(){
   const src = supaOn() ? (remoteReviews||[]).concat(REVIEWS) : loadMine().concat(REVIEWS);
-  galPhotos = src.filter(r=> typeof r.photo==='string' && /^data:image\//.test(r.photo));
+  galPhotos = src.filter(r=> typeof r.photo==='string' && /^data:image\//.test(r.photo) && reviewDomain(r)===domain);
   const grid = $('#galGrid'); if(!grid) return;
   if(!galPhotos.length){
     grid.innerHTML = `<div class="gal-empty">아직 갤러리가 비어 있어요.<br>후기 작성 시 <b>사진을 첨부</b>하면 여기에 모여요.<br>
@@ -709,7 +730,7 @@ async function submitReview(ev){
   if(!fStars){ toast('만족도(별점)를 선택해 주세요 ⭐'); return; }
   if(text.length < 10){ toast('후기를 조금만 더 구체적으로 적어주세요 (10자 이상)'); $('#f-text').focus(); return; }
 
-  const tags = [...fTags];
+  const tags = [...fTags, DOMAIN_TAG[domain]];   // 현재 도메인(백패킹/캠핑) 마커 포함
 
   // 백엔드 설정 시: 전체 공유 (Supabase에 저장)
   if(supaOn()){
