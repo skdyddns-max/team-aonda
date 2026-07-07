@@ -17,6 +17,9 @@
 <meta name="twitter:title" content="팀아온다 · Team A.O.D — 백패킹 크루">
 <meta name="twitter:description" content="장비 500종·박지 100곳·행사·후기까지. 아니온듯 다녀갑니다.">
 <meta name="twitter:image" content="https://skdyddns-max.github.io/team-aonda/assets/hero.jpg">
+<!-- 지도(후기 탭) 리소스 DNS 선조회 — 실제 로드는 탭 진입 시 -->
+<link rel="dns-prefetch" href="//unpkg.com">
+<link rel="dns-prefetch" href="//tile.openstreetmap.org">
 <style>
 :root{
   /* 브랜드 골든 옐로 (네온 → 세련된 골드) */
@@ -800,10 +803,8 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 
 <div class="toast" id="toast"></div>
 
-<!-- 발자국 지도 (Leaflet + OpenStreetMap, 무료) -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="data.js?v=16"></script>
-<script src="app.js?v=16"></script>
+<!-- 발자국 지도(Leaflet)는 후기 탭 첫 진입 시에만 동적 로드 (초기 로딩 ~180KB 절약) -->
+<script src="data.js?v=17"></script>
+<script src="app.js?v=17"></script>
 </body>
 </html>

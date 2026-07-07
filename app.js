@@ -885,17 +885,30 @@ function tripPopupHTML(tr){
     ${tr.insta?`<a class="tpa" href="${tr.insta}" target="_blank" rel="noopener">인스타 게시물 보기 ↗</a>`:''}
   </div>`;
 }
-function initTripMap(){
-  if(tripMap || typeof TRIPS==='undefined') return;
-  const el = $('#tripMap'); if(!el) return;
-  const cnt = $('#tripCount'); if(cnt) cnt.textContent = TRIPS.length;
-  if(typeof L==='undefined'){   // 지도 스크립트 미로드(오프라인 등) → 목록 폴백
-    el.classList.add('trip-fallback');
-    el.innerHTML = TRIPS.map(tr=>`<div class="trow"><b>${esc(tr.name)}</b>
-      <span>${esc(tr.date||'')}${tripPeople(tr)?' · '+esc(tripPeople(tr)):''}</span>
-      ${tr.note?`<small>${esc(tr.note)}</small>`:''}</div>`).join('');
-    return;
-  }
+// Leaflet은 후기 탭 첫 진입 때만 동적 로드 (초기 로딩 최적화, 실패 시 목록 폴백)
+let leafletLoading = false;
+function tripFallbackList(){
+  const el = $('#tripMap'); if(!el || el.classList.contains('trip-fallback')) return;
+  el.classList.add('trip-fallback');
+  el.innerHTML = TRIPS.map(tr=>`<div class="trow"><b>${esc(tr.name)}</b>
+    <span>${esc(tr.date||'')}${tripPeople(tr)?' · '+esc(tripPeople(tr)):''}</span>
+    ${tr.note?`<small>${esc(tr.note)}</small>`:''}</div>`).join('');
+}
+function loadLeaflet(cb){
+  if(typeof L!=='undefined') return cb();
+  if(leafletLoading) return;
+  leafletLoading = true;
+  const css = document.createElement('link');
+  css.rel='stylesheet'; css.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  document.head.appendChild(css);
+  const js = document.createElement('script');
+  js.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  js.onload = cb;
+  js.onerror = ()=>{ leafletLoading=false; tripFallbackList(); };
+  document.head.appendChild(js);
+}
+function buildTripMap(){
+  if(tripMap) return;
   tripMap = L.map('tripMap', {scrollWheelZoom:false});
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     {attribution:'&copy; OpenStreetMap', maxZoom:18}).addTo(tripMap);
@@ -907,6 +920,13 @@ function initTripMap(){
   });
   if(pts.length) tripMap.fitBounds(pts, {padding:[36,36], maxZoom:9});
   else tripMap.setView([36.5,127.8], 6);   // 기록 없으면 한반도 전체
+  setTimeout(()=>tripMap.invalidateSize(), 80);
+}
+function initTripMap(){
+  if(tripMap || typeof TRIPS==='undefined') return;
+  const el = $('#tripMap'); if(!el) return;
+  const cnt = $('#tripCount'); if(cnt) cnt.textContent = TRIPS.length;
+  loadLeaflet(buildTripMap);
 }
 
 /* ---------- 후기 폼 ---------- */
