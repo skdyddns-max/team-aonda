@@ -5,7 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#2f3d2a">
 <title>팀아온다 · 아니온듯 다녀갑니다</title>
-<meta name="description" content="팀아온다 백패킹 크루 — 장비 비교, 나에게 맞는 장비·박지 추천, 할인·블랙프라이데이 정보">
+<meta name="description" content="팀아온다 백패킹 크루 — 장비 500종·박지 100곳·행사·후기까지. 아니온듯 다녀갑니다.">
+<!-- 링크 공유(인스타·카톡 등) 미리보기 카드 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Team A.O.D · 팀아온다">
+<meta property="og:title" content="팀아온다 · Team A.O.D — 백패킹 크루">
+<meta property="og:description" content="장비 500종·박지 100곳·행사·후기까지. 아니온듯 다녀갑니다.">
+<meta property="og:image" content="https://skdyddns-max.github.io/team-aonda/assets/hero.jpg">
+<meta property="og:url" content="https://skdyddns-max.github.io/team-aonda/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="팀아온다 · Team A.O.D — 백패킹 크루">
+<meta name="twitter:description" content="장비 500종·박지 100곳·행사·후기까지. 아니온듯 다녀갑니다.">
+<meta name="twitter:image" content="https://skdyddns-max.github.io/team-aonda/assets/hero.jpg">
 <style>
 :root{
   /* 브랜드 골든 옐로 (네온 → 세련된 골드) */
@@ -242,6 +253,7 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .photo-del{margin-top:6px;font-size:12px;font-weight:700;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:inherit}
 .review .rphoto{width:100%;max-height:280px;object-fit:cover;border-radius:12px;margin-top:10px;border:1px solid var(--line)}
 /* 갤러리 */
+.gal-head{font-size:18px;font-weight:850;margin:26px 0 2px;padding-top:20px;border-top:1px solid var(--line)}
 .gal-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(min-width:520px){ .gal-grid{grid-template-columns:1fr 1fr 1fr} }
 .gal-item{position:relative;padding:0;border:none;background:#eee;border-radius:12px;overflow:hidden;cursor:pointer;aspect-ratio:1/1;box-shadow:var(--shadow)}
@@ -374,7 +386,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
       </svg>
       <span class="lt">Team <span>A.O.D</span></span>
     </div>
-    <a class="mini" href="#" onclick="showView('reviews');return false">참여</a>
+    <a class="mini" href="#" onclick="openKakao();return false">참여</a>
   </div>
   <nav class="navlinks"><div class="wrap" id="navTabs">
     <a data-tab="home">홈</a>
@@ -382,8 +394,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
     <a data-tab="spots">박지</a>
     <a data-tab="events">행사</a>
     <a data-tab="deals">할인</a>
-    <a data-tab="reviews">후기</a>
-    <a data-tab="gallery">갤러리</a>
+    <a data-tab="reviews">후기·갤러리</a>
   </div></nav>
 </div>
 
@@ -688,6 +699,10 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
     <button id="reviewMore" class="btn btn-ghost more-btn" onclick="moreReviews()" style="display:none">후기 더 보기</button>
     <button id="reviewCollapse" class="btn btn-ghost more-btn" onclick="collapseReviews()" style="display:none">접기</button>
   </div>
+
+  <h3 class="gal-head">사진 갤러리</h3>
+  <p class="sub" style="margin-bottom:14px">후기에 첨부된 사진이 모여요. 눌러서 크게 보기.</p>
+  <div id="galGrid" class="gal-grid"></div>
 </div></section>
 
 <!-- CHECKLIST -->
@@ -705,17 +720,9 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
     <p>팀아온다와 다음 박지를 함께할 크루를 기다려요.<br>궁금한 건 오픈채팅으로 편하게!</p>
     <div class="btns">
       <a class="jbtn kakao" id="join-kakao" href="#" target="_blank" rel="noopener">카카오 오픈채팅 참여</a>
-      <a class="jbtn insta" id="join-insta" href="#" target="_blank" rel="noopener">📸 인스타그램</a>
+      <a class="jbtn insta" id="join-insta" href="#" target="_blank" rel="noopener">인스타그램 @team_a.o.d</a>
     </div>
   </div>
-</div></section>
-
-<!-- GALLERY -->
-<section id="gallery" data-view="gallery"><div class="wrap">
-  <div class="eyebrow">Gallery</div>
-  <h2>크루 갤러리</h2>
-  <p class="sub">후기에 첨부된 사진이 여기 모여요. 사진을 누르면 크게 볼 수 있어요.</p>
-  <div id="galGrid" class="gal-grid"></div>
 </div></section>
 
 <!-- LIGHTBOX -->

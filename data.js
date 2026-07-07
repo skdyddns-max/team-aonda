@@ -513,7 +513,7 @@ const DEALS = [
 // 연락처 / 채널  (인스타 핸들 알려주시면 instagram 값만 바꾸면 됩니다)
 const CONTACT = {
   kakao: "https://open.kakao.com/o/g9pC3BIh",
-  instagram: "",            // 예: "https://instagram.com/team_aonda"
+  instagram: "https://www.instagram.com/team_a.o.d",   // 팀아온다 인스타
 };
 
 // 후기 전체공유 백엔드 (Supabase) — url·key 둘 다 채우면 크루 전체 공유 활성화.

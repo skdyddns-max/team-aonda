@@ -501,8 +501,7 @@ function renderMenu(){
     { v:'spots',   t:'박지 가이드',   d:`전국 백패킹 성지 ${SPOTS.length}곳 · 사진·날씨` },
     { v:'events',  t:'행사',          d:`백패킹·트레일러닝 ${EVENTS.length}개 · 미리 접수` },
     { v:'deals',   t:'할인·블프',     d:`장비 세일·블랙프라이데이 캘린더` },
-    { v:'reviews', t:'다녀온 후기',   d:`크루 후기·사진 + 오픈채팅 참여` },
-    { v:'gallery', t:'크루 갤러리',   d:`후기 사진 모아보기` },
+    { v:'reviews', t:'후기 · 갤러리',  d:`크루 후기·사진 모아보기 + 오픈채팅 참여` },
   ];
   $('#menuGrid').innerHTML = items.map(m=>`
     <button class="mcard" onclick="showView('${m.v}')">
