@@ -10,15 +10,30 @@ function openKakao(){
   const url = (typeof CONTACT!=='undefined' && CONTACT.kakao) ? CONTACT.kakao : '';
   if(url) window.open(url,'_blank','noopener'); else showView('reviews');
 }
-// 앱형 탭 뷰 전환 (한 번에 한 섹션만)
-function showView(v){
+// 앱형 탭 뷰 전환 (한 번에 한 섹션만) + 브라우저 뒤로가기 연동
+let currentView = 'home';
+const VALID_VIEWS = ['home','gear','spots','events','deals','reviews'];
+function showView(v, push=true){
+  if(!VALID_VIEWS.includes(v)) v='home';
   document.querySelectorAll('[data-view]').forEach(el=>{ el.style.display = (el.dataset.view===v) ? '' : 'none'; });
   $$('#navTabs a').forEach(a=>a.classList.toggle('active', a.dataset.tab===v));
+  currentView = v;
   window.scrollTo(0,0);
+  if(push){ try{ history.pushState({view:v}, '', '#'+v); }catch(e){} }
 }
 function setupViews(){
   $$('#navTabs a').forEach(a=> a.addEventListener('click', ()=>showView(a.dataset.tab)) );
-  showView('home');
+  // 초기 뷰: URL 해시가 유효하면 그걸로, 아니면 home
+  const initial = (location.hash||'').replace('#','');
+  const v = VALID_VIEWS.includes(initial) ? initial : 'home';
+  try{ history.replaceState({view:v}, '', '#'+v); }catch(e){}
+  showView(v, false);
+  // 뒤로가기/앞으로가기 → 이전 탭으로 (사이트 이탈 대신)
+  window.addEventListener('popstate', e=>{
+    const lb = $('#lightbox');
+    if(lb && lb.style.display==='flex'){ closeLightbox(); }   // 라이트박스 열려있으면 먼저 닫기
+    showView((e.state && e.state.view) || 'home', false);
+  });
 }
 
 /* ---------- 1. 매칭 도구: 옵션 선택 ---------- */
@@ -611,6 +626,7 @@ function openLightbox(i){
   const when = (r.when||r.visited) ? ` · ${esc(r.when||r.visited)}` : '';
   $('#lb-cap').innerHTML = `<b>${esc(r.name||'')}</b>${spot}${when}${r.text?`<br>"${esc(r.text)}"`:''}`;
   $('#lightbox').style.display = 'flex';
+  try{ history.pushState({view:currentView, lb:1}, '', location.hash); }catch(e){}
 }
 function closeLightbox(){ $('#lightbox').style.display='none'; $('#lb-img').src=''; }
 

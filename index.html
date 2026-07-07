@@ -726,8 +726,8 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" style="display:none" onclick="closeLightbox()">
-  <button class="lb-close" onclick="closeLightbox()" aria-label="닫기">✕</button>
+<div class="lightbox" id="lightbox" style="display:none" onclick="history.back()">
+  <button class="lb-close" onclick="history.back()" aria-label="닫기">✕</button>
   <div class="lb-inner" onclick="event.stopPropagation()">
     <img id="lb-img" alt="사진">
     <div class="lb-cap" id="lb-cap"></div>
