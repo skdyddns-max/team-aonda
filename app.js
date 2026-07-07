@@ -277,7 +277,10 @@ function resetLimit(){ tState.limit = PAGE; }
 /* ── 도메인(백패킹/캠핑) + 장비 카테고리 ── */
 let domain = 'bp';   // 'bp'(백패킹) | 'camp'(캠핑)
 const catsFor = d => d==='camp' ? CAMP_GEAR_CATS.slice() : ['텐트', ...GEAR_CATS];
-const gearItemsFor = cat => (typeof CAMP_GEAR_ITEMS!=='undefined' && CAMP_GEAR_ITEMS[cat]) || GEAR_ITEMS[cat] || [];
+// 도메인 우선 조회 — '랜턴'처럼 양쪽에 있는 카테고리는 현재 도메인 것을 사용
+const gearItemsFor = cat => domain==='camp'
+  ? ((typeof CAMP_GEAR_ITEMS!=='undefined' && CAMP_GEAR_ITEMS[cat]) || [])
+  : (GEAR_ITEMS[cat] || (typeof CAMP_GEAR_ITEMS!=='undefined' && CAMP_GEAR_ITEMS[cat]) || []);
 function renderCatTabs(){
   const cats = catsFor(domain);
   $('#catTabs').innerHTML = cats.map((c,i)=>`<button class="${i===0?'on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
@@ -302,10 +305,13 @@ function gearCardHTML(g){
     <div class="stats">
       <div class="stat">가격<b>~${g.price}만</b></div>
       ${g.temp!==undefined?`<div class="stat">리밋<b class="w">${g.temp>0?'+':''}${g.temp}℃</b></div>`:''}
+      ${g.rval!==undefined?`<div class="stat">R값<b class="w">${g.rval}</b></div>`:''}
+      ${g.vol?`<div class="stat">용량<b>${g.vol}L</b></div>`:''}
+      ${g.lumen?`<div class="stat">밝기<b>${g.lumen}lm</b></div>`:''}
       ${g.weight?`<div class="stat">무게<b>${_fmtW(g.weight)}</b></div>`:''}
     </div>
     <div class="tags">
-      ${g.fill?`<span class="tag attr">${esc(g.fill)}</span>`:''}
+      ${(g.fill||g.type)?`<span class="tag attr">${esc(g.fill||g.type)}</span>`:''}
       ${g.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}
     </div>
   </div></a>`;
@@ -320,6 +326,33 @@ const CAT_CHIPS = {
     ['summer','여름·간절기', g=>g.temp!==undefined && g.temp>2],
     ['sub1k','1kg 이하', g=>g.weight && g.weight<=1000],
     ['quilt','퀼트', g=>g.tags.includes('퀼트')],
+  ],
+  "매트": [
+    ['air','에어', g=>g.type==='에어'],
+    ['foam','폼', g=>g.type==='폼'],
+    ['si','자충', g=>g.type==='자충'],
+    ['r4','R4↑ 동계', g=>g.rval!==undefined && g.rval>=4],
+    ['sub500','500g 이하', g=>g.weight && g.weight<=500],
+  ],
+  "배낭": [
+    ['ul','UL 1kg↓', g=>g.weight && g.weight<=1000],
+    ['v40','~40L', g=>g.vol && g.vol<=40],
+    ['v55','41~55L', g=>g.vol && g.vol>=41 && g.vol<=55],
+    ['v56','56L+', g=>g.vol && g.vol>=56],
+  ],
+  "스토브": [
+    ['gas','가스', g=>g.type==='가스'],
+    ['sys','일체형', g=>g.type==='일체형'],
+    ['alc','알콜·고체', g=>/알콜|고체/.test(g.type||'')],
+    ['wood','화목', g=>g.type==='화목'],
+    ['liq','휘발유·멀티', g=>g.type==='휘발유'],
+    ['sub100','100g 이하', g=>g.weight && g.weight<=100],
+  ],
+  "랜턴": [
+    ['head','헤드랜턴', g=>g.tags.includes('헤드랜턴')],
+    ['lant','랜턴형', g=>g.tags.includes('랜턴')],
+    ['lm500','500lm+', g=>g.lumen && g.lumen>=500],
+    ['sub100','100g 이하', g=>g.weight && g.weight<=100],
   ],
 };
 const gearKws = new Set();
@@ -345,7 +378,7 @@ function renderGear(cat){
     for(const k of gearKws){ const d=defs.find(x=>x[0]===k); if(d && !d[2](g)) return false; }
     if(!q) return true;
     const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[g.brand]) || '';
-    return (g.brand+' '+g.name+' '+kr+' '+(g.fill||'')+' '+g.tags.join(' ')).toLowerCase().includes(q);
+    return (g.brand+' '+g.name+' '+kr+' '+(g.fill||'')+' '+(g.type||'')+' '+g.tags.join(' ')).toLowerCase().includes(q);
   });
   const shown = items.slice(0, gearLimit);
   $('#tentList').innerHTML = shown.length ? shown.map(gearCardHTML).join('') : `<div class="empty">검색 결과가 없어요.</div>`;
