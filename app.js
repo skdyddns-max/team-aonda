@@ -296,11 +296,21 @@ function selectDomain(d){
 }
 let curCat = '텐트', gearQuery = '', gearLimit = PAGE;
 const _fmtW = w => w>=1000 ? (Math.round(w/10)/100)+'kg' : w+'g';
+// 침낭 계절 구분 (리밋온도 기준): 동계 ≤-10℃ · 삼계절 -9~2℃ · 여름·간절기 3℃~
+function bagSeason(g){
+  if(g.temp===undefined) return null;
+  return g.temp<=-10 ? '동계' : (g.temp<=2 ? '삼계절' : '여름·간절기');
+}
+const _BAG_SEASON_CLS = { '동계':'s4', '삼계절':'s3', '여름·간절기':'s0' };
 function gearCardHTML(g){
+  const bs = bagSeason(g);
   return `<a class="tcard withthumb" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">${searchThumb()}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(g.brand)}</div><div class="tname">${esc(g.name)}</div></div>
-      ${g.value?'<span class="season s3">가성비</span>':''}
+      <span style="display:flex;gap:4px;align-items:center">
+        ${bs?`<span class="season ${_BAG_SEASON_CLS[bs]}">${bs}</span>`:''}
+        ${g.value?'<span class="season s3">가성비</span>':''}
+      </span>
     </div>
     <div class="stats">
       <div class="stat">가격<b>~${g.price}만</b></div>
@@ -321,9 +331,6 @@ const CAT_CHIPS = {
   "침낭": [
     ['down','다운', g=>/구스|덕/.test(g.fill||'')],
     ['syn','합성', g=>/합성/.test(g.fill||'')],
-    ['winter','동계 -10℃↓', g=>g.temp!==undefined && g.temp<=-10],
-    ['s3','삼계절', g=>g.temp!==undefined && g.temp>-10 && g.temp<=2],
-    ['summer','여름·간절기', g=>g.temp!==undefined && g.temp>2],
     ['sub1k','1kg 이하', g=>g.weight && g.weight<=1000],
     ['quilt','퀼트', g=>g.tags.includes('퀼트')],
   ],
@@ -356,6 +363,25 @@ const CAT_CHIPS = {
   ],
 };
 const gearKws = new Set();
+// 계절 세그먼트 (침낭: 전체/동계/삼계절/여름·간절기)
+const CAT_SEG = { "침낭": ['동계','삼계절','여름·간절기'] };
+let gearSeason = '';
+function renderGearSeg(cat){
+  const seasons = CAT_SEG[cat], seg = $('#gearSeg');
+  gearSeason = '';
+  if(!seasons){ seg.style.display='none'; seg.innerHTML=''; return; }
+  seg.style.display='';
+  seg.innerHTML = `<button class="on" data-gs="">전체</button>`
+    + seasons.map(s=>`<button data-gs="${s}">${s}</button>`).join('');
+  $$('#gearSeg button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      $$('#gearSeg button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      gearSeason = b.dataset.gs;
+      gearLimit=PAGE; renderGear(curCat);
+    });
+  });
+}
 function renderGearChips(cat){
   const defs = CAT_CHIPS[cat], row = $('#gearChips');
   gearKws.clear();
@@ -371,17 +397,35 @@ function renderGearChips(cat){
     });
   });
 }
+const _SEASON_ORDER = { '동계':0, '삼계절':1, '여름·간절기':2 };
 function renderGear(cat){
   const q = gearQuery.trim().toLowerCase();
   const defs = CAT_CHIPS[cat] || [];
-  const items = gearItemsFor(cat).filter(g=>{
+  const seasonal = !!CAT_SEG[cat];
+  let items = gearItemsFor(cat).filter(g=>{
+    if(seasonal && gearSeason && bagSeason(g)!==gearSeason) return false;
     for(const k of gearKws){ const d=defs.find(x=>x[0]===k); if(d && !d[2](g)) return false; }
     if(!q) return true;
     const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[g.brand]) || '';
     return (g.brand+' '+g.name+' '+kr+' '+(g.fill||'')+' '+(g.type||'')+' '+g.tags.join(' ')).toLowerCase().includes(q);
   });
+  // 계절 카테고리는 동계→삼계절→여름 순 정렬 (같은 계절 안에선 추운 순)
+  if(seasonal) items = items.slice().sort((a,b)=>
+    (_SEASON_ORDER[bagSeason(a)]-_SEASON_ORDER[bagSeason(b)]) || (a.temp-b.temp));
   const shown = items.slice(0, gearLimit);
-  $('#tentList').innerHTML = shown.length ? shown.map(gearCardHTML).join('') : `<div class="empty">검색 결과가 없어요.</div>`;
+  let html='';
+  if(seasonal && !gearSeason){   // 전체 보기: 계절 그룹 헤더 삽입
+    const totals={}; items.forEach(g=>{ const s=bagSeason(g); totals[s]=(totals[s]||0)+1; });
+    let prev=null;
+    shown.forEach(g=>{
+      const s=bagSeason(g);
+      if(s!==prev){ html+=`<div class="ghead"><span class="season ${_BAG_SEASON_CLS[s]}">${s}</span> ${totals[s]}종</div>`; prev=s; }
+      html+=gearCardHTML(g);
+    });
+  } else {
+    html = shown.map(gearCardHTML).join('');
+  }
+  $('#tentList').innerHTML = html || `<div class="empty">검색 결과가 없어요.</div>`;
   $('#tentCount').textContent = items.length;
   listMoreButtons(items.length, gearLimit, '개');
 }
@@ -393,7 +437,7 @@ function selectCat(cat){
   $('#gearControls').style.display = isTent ? 'none' : '';
   $('#tentAccuracy').style.display = isTent ? '' : 'none';
   if(isTent){ resetLimit(); renderTents(); }
-  else { gearQuery=''; $('#gearSearch').value=''; gearLimit=PAGE; renderGearChips(cat); renderGear(cat); }
+  else { gearQuery=''; $('#gearSearch').value=''; gearLimit=PAGE; renderGearSeg(cat); renderGearChips(cat); renderGear(cat); }
 }
 function moreTents(){
   if(curCat==='텐트'){ tState.limit += PAGE; renderTents(); }

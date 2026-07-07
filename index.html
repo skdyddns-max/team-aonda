@@ -142,6 +142,11 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .tcard .season{font-size:11px;font-weight:800;padding:3px 8px;border-radius:12px;white-space:nowrap}
 .s3{background:#eaf3e4;color:#4a5d3a}
 .s4{background:#e4ecf5;color:#33507a}
+.s0{background:#fdf3e0;color:var(--brand-d)}
+.gear-seg{margin-bottom:12px}
+.ghead{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:850;color:var(--muted);margin:18px 2px 10px}
+.ghead:first-child{margin-top:2px}
+.ghead .season{font-size:11px;font-weight:800;padding:3px 8px;border-radius:12px}
 .tcard .stats{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
 .tcard .stat{font-size:12px;color:var(--muted)}
 .tcard .stat b{display:block;font-size:15px;color:var(--ink);font-weight:850}
@@ -587,6 +592,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <!-- 기타 장비 검색 -->
   <div id="gearControls" style="display:none">
     <input id="gearSearch" class="search" type="search" placeholder="브랜드·모델·태그 검색" autocomplete="off">
+    <div class="seg gear-seg" id="gearSeg" style="display:none"></div>
     <div class="kw-row" id="gearChips" style="display:none"></div>
   </div>
 
@@ -797,7 +803,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 <!-- 발자국 지도 (Leaflet + OpenStreetMap, 무료) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="data.js?v=15"></script>
-<script src="app.js?v=15"></script>
+<script src="data.js?v=16"></script>
+<script src="app.js?v=16"></script>
 </body>
 </html>
