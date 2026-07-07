@@ -292,6 +292,7 @@ function selectDomain(d){
   applyDomainToSpots();            // 박지 ↔ 오토캠핑장 스위칭
 }
 let curCat = '텐트', gearQuery = '', gearLimit = PAGE;
+const _fmtW = w => w>=1000 ? (Math.round(w/10)/100)+'kg' : w+'g';
 function gearCardHTML(g){
   return `<a class="tcard withthumb" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">${searchThumb()}<div class="tcontent">
     <div class="row1">
@@ -300,16 +301,51 @@ function gearCardHTML(g){
     </div>
     <div class="stats">
       <div class="stat">가격<b>~${g.price}만</b></div>
+      ${g.temp!==undefined?`<div class="stat">리밋<b class="w">${g.temp>0?'+':''}${g.temp}℃</b></div>`:''}
+      ${g.weight?`<div class="stat">무게<b>${_fmtW(g.weight)}</b></div>`:''}
     </div>
-    <div class="tags">${g.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+    <div class="tags">
+      ${g.fill?`<span class="tag attr">${esc(g.fill)}</span>`:''}
+      ${g.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}
+    </div>
   </div></a>`;
+}
+// 카테고리별 필터 칩 (침낭: 충전재·온도대·무게)
+const CAT_CHIPS = {
+  "침낭": [
+    ['down','다운', g=>/구스|덕/.test(g.fill||'')],
+    ['syn','합성', g=>/합성/.test(g.fill||'')],
+    ['winter','동계 -10℃↓', g=>g.temp!==undefined && g.temp<=-10],
+    ['s3','삼계절', g=>g.temp!==undefined && g.temp>-10 && g.temp<=2],
+    ['summer','여름·간절기', g=>g.temp!==undefined && g.temp>2],
+    ['sub1k','1kg 이하', g=>g.weight && g.weight<=1000],
+    ['quilt','퀼트', g=>g.tags.includes('퀼트')],
+  ],
+};
+const gearKws = new Set();
+function renderGearChips(cat){
+  const defs = CAT_CHIPS[cat], row = $('#gearChips');
+  gearKws.clear();
+  if(!defs){ row.style.display='none'; row.innerHTML=''; return; }
+  row.style.display='';
+  row.innerHTML = defs.map(([k,label])=>`<div class="kw" data-gk="${k}">${label}</div>`).join('');
+  $$('#gearChips .kw').forEach(ch=>{
+    ch.addEventListener('click',()=>{
+      const k=ch.dataset.gk;
+      if(gearKws.has(k)){ gearKws.delete(k); ch.classList.remove('on'); }
+      else{ gearKws.add(k); ch.classList.add('on'); }
+      gearLimit=PAGE; renderGear(curCat);
+    });
+  });
 }
 function renderGear(cat){
   const q = gearQuery.trim().toLowerCase();
+  const defs = CAT_CHIPS[cat] || [];
   const items = gearItemsFor(cat).filter(g=>{
+    for(const k of gearKws){ const d=defs.find(x=>x[0]===k); if(d && !d[2](g)) return false; }
     if(!q) return true;
     const kr = (typeof BRAND_KR!=='undefined' && BRAND_KR[g.brand]) || '';
-    return (g.brand+' '+g.name+' '+kr+' '+g.tags.join(' ')).toLowerCase().includes(q);
+    return (g.brand+' '+g.name+' '+kr+' '+(g.fill||'')+' '+g.tags.join(' ')).toLowerCase().includes(q);
   });
   const shown = items.slice(0, gearLimit);
   $('#tentList').innerHTML = shown.length ? shown.map(gearCardHTML).join('') : `<div class="empty">검색 결과가 없어요.</div>`;
@@ -324,7 +360,7 @@ function selectCat(cat){
   $('#gearControls').style.display = isTent ? 'none' : '';
   $('#tentAccuracy').style.display = isTent ? '' : 'none';
   if(isTent){ resetLimit(); renderTents(); }
-  else { gearQuery=''; $('#gearSearch').value=''; gearLimit=PAGE; renderGear(cat); }
+  else { gearQuery=''; $('#gearSearch').value=''; gearLimit=PAGE; renderGearChips(cat); renderGear(cat); }
 }
 function moreTents(){
   if(curCat==='텐트'){ tState.limit += PAGE; renderTents(); }
