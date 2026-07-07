@@ -342,7 +342,10 @@ const BRAND_KR = {
   "Nitecore":"나이트코어","Claymore":"크레모아","Lumena":"루메나","38explore":"38익스플로러 38등","UCO":"유코",
   "Snowline":"스노우라인","DOD":"디오디","Ogawa":"오가와","Uniflame":"유니프레임 유니플레임","Lodge":"롯지",
   "Stanley":"스탠리","Pelican":"펠리칸","Iwatani":"이와타니","Paseco":"파세코","Alpaca":"알파카 난로",
-  "Aladdin":"알라딘 난로","Toyotomi":"도요토미","Mr.Heater":"미스터히터","EcoFlow":"에코플로우","Jackery":"잭커리","Hanil":"한일"
+  "Aladdin":"알라딘 난로","Toyotomi":"도요토미","Mr.Heater":"미스터히터","EcoFlow":"에코플로우","Jackery":"잭커리","Hanil":"한일",
+  "Optimus":"옵티머스","Olight":"올라이트","Leki":"레키","Sawyer":"소이어","Katadyn":"카타딘","LifeStraw":"라이프스트로우",
+  "Platypus":"플래티퍼스","Nalgene":"날진","Cocoon":"코쿤","Anker":"앵커","Garmin":"가민","Leatherman":"레더맨",
+  "Opinel":"오피넬","Mora":"모라","SOL":"에스오엘","PackTowl":"팩타올","Mystery Ranch":"미스터리랜치","3F UL Gear":"3F 취류","Light My Fire":"라이트마이파이어"
 };
 
 /* ── 웹 조사(2026.07)로 확인한 실측 스펙 — [대표인원 min/trail 무게(kg), KR 대략가(만원)] ──
@@ -625,7 +628,8 @@ const EVENTS = [
 ];
 
 // 장비 카탈로그 (텐트 외) — 카테고리별 전용 DB. 가격 만원 단위, 스펙(무게·R값·용량·루멘 등)은 대략치.
-const GEAR_CATS = ["침낭","매트","배낭","스토브","랜턴"];
+// '의류'는 캠핑 도메인과 목록 공유(gearItemsFor 폴백 — 아웃도어 의류는 공통이라 중복 유지 안 함)
+const GEAR_CATS = ["침낭","매트","배낭","스토브","랜턴","취사·식수","소품·안전","의류"];
 const GEAR_ITEMS = {};
 
 // ── 매트 DB — [브랜드,모델,가격만,가성비,무게g,R값,타입(에어/폼/자충),...태그] R값·무게 대략치 ──
@@ -657,6 +661,12 @@ const _MAT_RAW = [
   ["Forclaz","MT500 에어",6,1,500,3.3,"에어","가성비"],
   ["Forclaz","MT100 폼",2,1,450,1.5,"폼","초저가","입문"],
   ["Trekology","UL80 에어매트",5,1,450,2.0,"에어","초저가"],
+  ["Therm-a-Rest","네오에어 유버라이트",35,0,250,2.3,"에어","극한경량","UL"],
+  ["NEMO","쿼자 3D",18,1,550,3.3,"에어","가성비","입체구조"],
+  ["Big Agnes","디바이드 인슐레이티드",15,1,720,4.0,"에어","가성비동계"],
+  ["Exped","플렉스맷 플러스",6,1,590,2.2,"폼","두꺼운폼","내구성"],
+  ["Klymit","이너샤 오존",10,0,355,0.6,"에어","여름","베개일체"],
+  ["Sea to Summit","캠프 SI",12,1,950,4.2,"자충","캠핑겸용"],
 ];
 GEAR_ITEMS["매트"] = _MAT_RAW.map(m=>{ const[brand,name,price,value,weight,rval,type,...tags]=m; return {brand,name,price,value:!!value,weight,rval,type,tags}; });
 
@@ -692,6 +702,12 @@ const _PACK_RAW = [
   ["Naturehike","로버 55",9,1,1400,55,"가성비"],
   ["Naturehike","울트라라이트 40",6,1,700,40,"가성비","경량"],
   ["Naturehike","65L 대용량",11,1,1600,65,"가성비","대용량"],
+  ["Gregory","줄루 55",28,0,1700,55,"통기등판"],
+  ["Hyperlite","언바운드 40",60,0,870,40,"UL","DCF","신형"],
+  ["ULA","옴 2.0",42,0,940,63,"UL","경량프레임"],
+  ["Mystery Ranch","쿨리 40",35,0,2200,40,"내구성","군용감성"],
+  ["3F UL Gear","취류 45+10",12,1,850,55,"UL가성비"],
+  ["REI Co-op","플래시 에어 50",35,0,780,50,"UL"],
 ];
 GEAR_ITEMS["배낭"] = _PACK_RAW.map(m=>{ const[brand,name,price,value,weight,vol,...tags]=m; return {brand,name,price,value:!!value,weight,vol,tags}; });
 
@@ -723,6 +739,11 @@ const _STOVE_RAW = [
   ["Vargo","헥사곤 화목 스토브",6,0,116,"화목","티타늄","연료불필요"],
   ["Solo Stove","라이트",12,0,255,"화목","이중연소"],
   ["FireHiking","레온 화목난로",25,0,2800,"화목","핫텐트용","동계"],
+  ["Kovea","큐브",3,1,155,"가스","미니멀","국산"],
+  ["Kovea","슈퍼라이트 티타늄",6,0,60,"가스","티타늄","국산"],
+  ["Primus","에센셜 트레일",6,1,105,"가스","안정"],
+  ["Optimus","크럭스 라이트",8,0,72,"가스","컴팩트"],
+  ["Vargo","트라이어드 티타늄",5,0,30,"알콜","티타늄","고체겸용"],
 ];
 GEAR_ITEMS["스토브"] = _STOVE_RAW.map(m=>{ const[brand,name,price,value,weight,type,...tags]=m; return {brand,name,price,value:!!value,weight,type,tags}; });
 
@@ -748,8 +769,57 @@ const _LIGHT_RAW = [
   ["38explore","38라이트",7,0,100,100,"랜턴","감성","무드등"],
   ["UCO","캔들 랜턴",3,0,110,15,"랜턴","감성","캔들"],
   ["Naturehike","캠핑 랜턴",3,1,120,150,"랜턴","가성비"],
+  ["Petzl","빈디",6,0,35,200,"헤드랜턴","초경량","충전"],
+  ["Black Diamond","코즈모 350-R",7,1,77,350,"헤드랜턴","충전","가성비"],
+  ["Nitecore","NU33",7,0,89,700,"헤드랜턴","충전","고광량"],
+  ["Olight","페룬 2 미니",6,0,53,500,"헤드랜턴","클립겸용"],
+  ["Claymore","캡온 40B",5,1,36,230,"캡라이트","모자클립","국내인기"],
 ];
 GEAR_ITEMS["랜턴"] = _LIGHT_RAW.map(m=>{ const[brand,name,price,value,weight,lumen,...tags]=m; return {brand,name,price,value:!!value,weight,lumen,tags}; });
+
+// ── 취사·식수 DB — [브랜드,모델,가격만,가성비,무게g,...태그] 코펠·머그·수저·정수·물통 ──
+const _COOK_RAW = [
+  ["Toaks","티타늄 팟 750",5,1,103,"티타늄","솔로","UL"],
+  ["Evernew","티탄 UL 쿠커 900",8,0,95,"티타늄","일본","초경량"],
+  ["Snow Peak","트렉 900 티탄",6,0,175,"티타늄","스테디셀러"],
+  ["Snow Peak","티탄 싱글월 머그 450",4,0,70,"티타늄","머그"],
+  ["MSR","알파인 스토우어웨이 775",4,1,242,"스텐","견고","뚜껑잠금"],
+  ["Sea to Summit","X-컵",2,1,45,"실리콘","접이식"],
+  ["Primus","라이트테크 트렉케틀",4,0,150,"알루","케틀겸용"],
+  ["Sea to Summit","알파라이트 롱 스포크",1,1,12,"수저","롱핸들"],
+  ["Snow Peak","티탄 스푼",1,0,17,"티타늄","수저"],
+  ["Light My Fire","스포크 오리지널",1,1,9,"수저","BPA프리"],
+  ["Sawyer","스퀴즈 정수필터",5,1,85,"정수","스테디셀러"],
+  ["Sawyer","미니 정수필터",3,1,54,"정수","가성비"],
+  ["Katadyn","비프리 1.0L",5,0,63,"정수","빠른유속"],
+  ["MSR","트레일샷",6,0,142,"정수","펌프식"],
+  ["LifeStraw","퍼스널",3,1,46,"정수","비상용"],
+  ["Platypus","2L 물백",2,1,36,"물통","경량","접이식"],
+  ["Nalgene","와이드마우스 1L",2,0,178,"물통","BPA프리","내구성"],
+];
+GEAR_ITEMS["취사·식수"] = _COOK_RAW.map(m=>{ const[brand,name,price,value,weight,...tags]=m; return {brand,name,price,value:!!value,weight,tags}; });
+
+// ── 소품·안전 DB — [브랜드,모델,가격만,가성비,무게g,...태그] 폴·베개·라이너·배터리·툴·비상 ──
+const _MISC_RAW = [
+  ["Black Diamond","디스턴스 카본 Z",18,0,340,"트레킹폴","카본","Z폴"],
+  ["Leki","마카루 라이트",12,0,480,"트레킹폴","독일"],
+  ["Naturehike","카본 트레킹폴 (2개)",4,1,380,"트레킹폴","가성비"],
+  ["Sea to Summit","에어로 프리미엄 필로우",5,0,79,"베개","에어"],
+  ["Trekology","에어 베개",2,1,110,"베개","가성비"],
+  ["Sea to Summit","리액터 라이너",6,0,248,"침낭라이너","보온+8도"],
+  ["Cocoon","실크 라이너",7,0,130,"침낭라이너","실크"],
+  ["Nitecore","NB10000",9,0,150,"보조배터리","카본","UL"],
+  ["Anker","파워코어 10000",4,1,194,"보조배터리","가성비"],
+  ["Garmin","인리치 미니 2",55,0,100,"위성통신","오지안전","SOS"],
+  ["Leatherman","스퀴트 PS4",7,0,56,"멀티툴","컴팩트"],
+  ["Opinel","No.8 나이프",2,1,45,"나이프","클래식"],
+  ["Mora","컴패니언",2,1,84,"나이프","부시크래프트"],
+  ["SOL","이머전시 비비",3,1,108,"비상","보온","경량"],
+  ["Sea to Summit","울트라실 드라이색 8L",3,0,30,"방수색","UL"],
+  ["PackTowl","퍼스널 타월 M",3,0,50,"타월","속건"],
+  ["Sea to Summit","모스키토 헤드넷",1,1,24,"모기장","여름"],
+];
+GEAR_ITEMS["소품·안전"] = _MISC_RAW.map(m=>{ const[brand,name,price,value,weight,...tags]=m; return {brand,name,price,value:!!value,weight,tags}; });
 
 // ── 침낭 전용 DB (웹 조사 기반 확장) ──
 // [브랜드, 모델, 가격(만원, 국내가 대략), 가성비, 무게(g), 리밋온도(℃, 추정), 충전재, ...태그]
