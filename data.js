@@ -505,7 +505,7 @@ const DEALS = [
   { period: "1월", title: "겨울 시즌오프", desc: "동계 텐트·침낭 재고소진 할인. 힐레베르그·MSR 동계 라인 노려볼 시즌.", hot:false },
   { period: "3~4월", title: "봄 캠핑 시즌 오픈", desc: "신상 출시 + 이월 특가 공존. 삼계절 텐트 입문 타이밍.", hot:false },
   { period: "6~7월", title: "여름 클리어런스", desc: "네이처하이크 등 가성비 브랜드 상반기 최저가 구간.", hot:false },
-  { period: "11월", title: "블랙프라이데이 🔥", desc: "연중 최대 세일. 빅아그네스·MSR·써머레스트 해외직구 최저. 배대지/관세 미리 확인!", hot:true },
+  { period: "11월", title: "블랙프라이데이", desc: "연중 최대 세일. 빅아그네스·MSR·써머레스트 해외직구 최저. 배대지/관세 미리 확인!", hot:true },
   { period: "11월 말", title: "코리안 블프 (11번가·무신사 등)", desc: "국내몰 동시 세일. 제로그램·국산 브랜드 쿠폰 중복 노리기.", hot:true },
   { period: "12월", title: "연말 결산세일", desc: "블프 놓친 재고 추가 인하. 침낭·매트 등 소품 보충 적기.", hot:false },
 ];
@@ -528,23 +528,23 @@ const SUPABASE = {
 // 예산별 장비 추천 (텐트 외) — low(~30만)/mid(30~70만)/high(70만+) 예산 티어별 · 여러 브랜드
 // 가격은 해당 품목 1개 기준 대략치입니다.
 const GEAR = [
-  { cat:"🛏 침낭",
+  { cat:"침낭",
     low:{ name:"네이처하이크 CW280 다운", price:"8~13만", note:"3계절 가성비 다운" },
     mid:{ name:"씨투써밋 스파크 / 이스케이프", price:"25~42만", note:"경량 다운·압축성 우수" },
     high:{ name:"컴포트라이트 / 웨스턴마운티니어링", price:"55만+", note:"초경량 고급 구스다운" } },
-  { cat:"🟦 매트",
+  { cat:"매트",
     low:{ name:"네이처하이크 에어매트 / 폼매트", price:"3~6만", note:"입문용, 여름 위주" },
     mid:{ name:"써머레스트 Z라이트 / 넴 프로라이트", price:"12~20만", note:"R값·내구성 밸런스" },
     high:{ name:"써머레스트 넴프로 / 엑스페드 UL", price:"25만+", note:"고R값 초경량, 동계까지" } },
-  { cat:"🎒 배낭",
+  { cat:"배낭",
     low:{ name:"네이처하이크 55L / 트레커리", price:"6~12만", note:"가성비 55L 백패킹팩" },
     mid:{ name:"오스프리 / 그레고리 60L급", price:"22~38만", note:"背面 편한 종주용" },
     high:{ name:"하이퍼라이트 / 그래닛기어", price:"45만+", note:"초경량 UL 배낭" } },
-  { cat:"🔥 스토브",
+  { cat:"스토브",
     low:{ name:"BRS-3000T / 파이어메이플", price:"1~4만", note:"초경량 가스 스토브" },
     mid:{ name:"MSR 포켓로켓 / 소토 아미카스", price:"6~13만", note:"화력·안정성 좋음" },
     high:{ name:"MSR 윈드버너 / 소토 윈드마스터", price:"14만+", note:"내풍·정밀 화력" } },
-  { cat:"💡 헤드랜턴",
+  { cat:"헤드랜턴",
     low:{ name:"페츨 티키나 / 가성비 충전식", price:"2~4만", note:"입문 헤드랜턴" },
     mid:{ name:"페츨 액틱 / 블랙다이아몬드 스팟", price:"5~9만", note:"충전·밝기 균형" },
     high:{ name:"페츨 스위프트 RL", price:"12만+", note:"고광량·리액티브 조명" } },
@@ -557,7 +557,7 @@ const EVENTS = [
   { name:"2026 MoonwaRk ORIGIN (문워크)", type:"백패킹", when:"2026.10.10~11", region:"산악 노지", desc:"밤을 걷는 감성 나이트 백패킹 시리즈. 문워크 오리진.", url:"https://www.instagram.com/moonwark_/" },
   { name:"B.T.C 베어트레일캠프 · 안동 (Second Forest)", type:"백패킹", when:"2026.10.17~18", region:"경북 안동", desc:"에코라인 주최 소셜 하이킹 캠프. 'Leave No Trace, Create New Trace'.", q:"BTC 베어트레일캠프 안동 신청" },
   { name:"BASED IN NATURE · 강진", type:"백패킹", when:"2026.10.17~18", region:"전남 강진", desc:"아웃도어 컬처 페스티벌. Spread the outdoor culture.", q:"강진 Based in Nature 아웃도어 2026" },
-  { name:"off_index · Carry the Trail (53K)", type:"트레일러닝", when:"2026.10.24~25", region:"트레일 53km·4000m+", desc:"53km·누적고도 4000m+ 하드코어 트레일 챌린지.", url:"https://www.instagram.com/ott_onthetrail/" },
+  { name:"off_index · Carry the Trail (53K)", type:"백패킹", when:"2026.10.24~25", region:"트레일 53km·4000m+", desc:"53km·누적고도 4000m+ 하드코어 트레일 챌린지(패스트패킹).", url:"https://www.instagram.com/ott_onthetrail/" },
   // 트레일러닝 (정기·시즌)
   { name:"코리아 50K", type:"트레일러닝", when:"매년 4~5월", region:"경기 가평·강원", desc:"국내 대표 트레일러닝 대회. 50K/25K 등 코스.", q:"코리아50K 트레일러닝 대회 접수" },
   { name:"트랜스제주 (Trans Jeju)", type:"트레일러닝", when:"매년 10월", region:"제주", desc:"UTMB 월드시리즈. 제주 오름·곶자왈 종주.", q:"트랜스제주 트레일러닝 접수" },
@@ -651,9 +651,9 @@ const CREW = [
 
 // 크루 후기 (실제 멤버 후기로 교체하세요)
 const REVIEWS = [
-  { name:"준호", tag:"솔캠 · UL 파", stars:5, text:"굴업도 첫 백패킹인데 장비 매칭으로 고른 텐트가 딱이었어요. 짐 무게 확 줄었습니다." },
-  { name:"세아", tag:"친목 · 감성캠", stars:5, text:"자차 없이 갈 수 있는 박지 정리가 최고. 대중교통으로 섬백패킹 다녀왔어요!" },
-  { name:"도현", tag:"오지 · 헤비", stars:4, text:"블프 캘린더 보고 힐레베르그 세일 타이밍 잡음. 겨울 선자령 든든했습니다." },
+  { name:"준호", spot:"굴업도", when:"2026.05", tag:"솔캠 · UL 파", stars:5, text:"굴업도 첫 백패킹인데 장비 매칭으로 고른 텐트가 딱이었어요. 짐 무게 확 줄었습니다." },
+  { name:"세아", spot:"대이작도", when:"2026.06", tag:"친목 · 감성캠", stars:5, text:"자차 없이 갈 수 있는 박지 정리가 최고. 대중교통으로 섬백패킹 다녀왔어요!" },
+  { name:"도현", spot:"선자령", when:"2026.01", tag:"오지 · 헤비", stars:4, text:"블프 캘린더 보고 힐레베르그 세일 타이밍 잡음. 겨울 선자령 든든했습니다." },
 ];
 
 // 초보 체크리스트

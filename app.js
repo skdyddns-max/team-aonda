@@ -90,22 +90,22 @@ function runMatch(){
 function renderResult(tents, spots, a){
   const res = $('#result');
   const profile = [
-    a.vibe && (a.vibe==='솔캠'?'🌙 솔캠':'🔥 친목'),
+    a.vibe && (a.vibe==='솔캠'?'솔캠':'친목'),
     a.place, a.weight && `${a.weight} 무게`,
-    a.car && (a.car==='no'?'🚌 대중교통':'🚗 자차'),
+    a.car && (a.car==='no'?'대중교통':'자차'),
     a.budget && ({low:'가성비 예산',mid:'중급 예산',high:'프리미엄 예산'})[a.budget]
   ].filter(Boolean).join(' · ');
 
-  let html = `<div class="res-head">🎯 당신의 프로필 — ${profile}</div>`;
+  let html = `<div class="res-head">당신의 프로필 — ${profile}</div>`;
 
   html += `<div style="font-size:13px;font-weight:800;color:var(--forest);margin:4px 0 8px">추천 텐트</div>`;
   tents.forEach((x,i)=>{
     const t=x.t;
     html += `<div class="pick">
-      <div class="top"><span class="nm">${i===0?'🥇 ':'🥈 '}${t.name}</span>
+      <div class="top"><span class="nm">${i===0?'':''}${t.name}</span>
         <span class="badge">${t.wclass}</span></div>
       <div class="meta">${t.brand} · ${t.weight}kg · ${t.cap} · <span class="price">${won(t.price)}</span></div>
-      <div class="why">👉 ${x.reasons.slice(0,3).join(', ') || '전반적으로 무난한 선택'}</div>
+      <div class="why">${x.reasons.slice(0,3).join(', ') || '전반적으로 무난한 선택'}</div>
     </div>`;
   });
 
@@ -120,7 +120,7 @@ function renderResult(tents, spots, a){
         <div class="top"><span class="nm">${esc(g.cat)}</span>
           <span class="badge" style="background:var(--brand);color:#2c2408">${esc(it.price)}</span></div>
         <div class="meta">${esc(it.name)}</div>
-        <div class="why">👉 ${esc(it.note)}</div>
+        <div class="why">${esc(it.note)}</div>
       </div>`;
     });
     html += `<p style="font-size:11px;color:var(--muted);margin:2px 2px 4px">※ 예산은 텐트 예산과 같은 기준으로 맞췄어요. 품목별 대략가이며 브랜드는 예시입니다.</p>`;
@@ -131,10 +131,10 @@ function renderResult(tents, spots, a){
     spots.forEach((x,i)=>{
       const sp=x.sp;
       html += `<div class="pick">
-        <div class="top"><span class="nm">📍 ${sp.name}</span>
+        <div class="top"><span class="nm">${sp.name}</span>
           <span class="badge" style="background:var(--forest)">${sp.type}</span></div>
         <div class="meta">${sp.region} · 난이도 ${sp.difficulty} · ${sp.season}</div>
-        <div class="why">👉 ${x.reasons.slice(0,3).join(', ')}</div>
+        <div class="why">${x.reasons.slice(0,3).join(', ')}</div>
       </div>`;
     });
   } else {
@@ -143,9 +143,9 @@ function renderResult(tents, spots, a){
 
   html += `<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
     <button class="btn btn-ghost" style="flex:1;min-width:130px;color:var(--forest);border-color:var(--sage)"
-      onclick="showView('gear')">⛺ 전체 텐트 보기</button>
+      onclick="showView('gear')">전체 텐트 보기</button>
     <button class="btn btn-ghost" style="flex:1;min-width:130px;color:var(--forest);border-color:var(--sage)"
-      onclick="showView('spots')">📍 전체 박지 보기</button>
+      onclick="showView('spots')">전체 박지 보기</button>
   </div>`;
 
   res.innerHTML = html;
@@ -221,7 +221,6 @@ function tentCardHTML(t){
       ${t.value?'<span class="tag value">가성비</span>':''}
       ${t.tags.map(tag=>`<span class="tag">${esc(tag)}</span>`).join('')}
     </div>
-    <span class="tsearch">🔍 네이버에서 사진·가격 보기 →</span>
   </a>`;
 }
 function renderTents(){
@@ -254,7 +253,6 @@ function gearCardHTML(g){
       <div class="stat">가격<b>~${g.price}만</b></div>
     </div>
     <div class="tags">${g.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
-    <span class="tsearch">🔍 네이버에서 사진·가격 보기 →</span>
   </a>`;
 }
 function renderGear(cat){
@@ -352,28 +350,34 @@ function renderDeals(){
 }
 
 /* ---------- 행사 (백패킹 · 트레일러닝) ---------- */
-let evtFilter = 'all';
+const EVT_PAGE = 8;
+let evtFilter = 'all', evtLimit = EVT_PAGE;
 function eventCardHTML(ev){
   const tr = ev.type==='트레일러닝';
   const href = ev.url || naverURL(ev.q);
   return `<a class="evt" href="${href}" target="_blank" rel="noopener">
     <div class="eh"><span class="enm">${esc(ev.name)}</span>
-      <span class="etype ${tr?'tr':'bp'}">${tr?'🏃':'🎒'} ${esc(ev.type)}</span></div>
-    <div class="emeta">🗓 ${esc(ev.when)} · 📍 ${esc(ev.region)}</div>
+      <span class="etype ${tr?'tr':'bp'}">${esc(ev.type)}</span></div>
+    <div class="emeta">${esc(ev.when)} · ${esc(ev.region)}</div>
     <div class="edesc">${esc(ev.desc)}</div>
-    <span class="tsearch">🔗 접수·정보 보기 →</span>
   </a>`;
 }
 function renderEvents(){
   const items = EVENTS.filter(ev=> evtFilter==='all' || ev.type===evtFilter);
-  $('#eventList').innerHTML = items.length ? items.map(eventCardHTML).join('') : `<div class="empty">해당 행사가 없어요.</div>`;
+  const shown = items.slice(0, evtLimit);
+  $('#eventList').innerHTML = shown.length ? shown.map(eventCardHTML).join('') : `<div class="empty">해당 행사가 없어요.</div>`;
+  const more=$('#eventMore'), coll=$('#eventCollapse');
+  if(items.length>evtLimit){ more.style.display=''; more.textContent=`더 보기 (남은 ${items.length-evtLimit}개)`; } else more.style.display='none';
+  coll.style.display = evtLimit>EVT_PAGE ? '' : 'none';
 }
+function moreEvents(){ evtLimit+=EVT_PAGE; renderEvents(); }
+function collapseEvents(){ evtLimit=EVT_PAGE; renderEvents(); scrollTo2('events'); }
 function setupEvents(){
   $$('#evtFilter .fchip').forEach(f=>{
     f.addEventListener('click',()=>{
       $$('#evtFilter .fchip').forEach(x=>x.classList.remove('on'));
       f.classList.add('on');
-      evtFilter=f.dataset.e; renderEvents();
+      evtFilter=f.dataset.e; evtLimit=EVT_PAGE; renderEvents();
     });
   });
 }
@@ -434,12 +438,12 @@ function spotCardHTML(sp){
       <div class="sinfo">
         <span class="pill diff d${DIFF_LV[sp.difficulty]||2}">난이도 ${esc(sp.difficulty)}</span>
         <span class="pill">${esc(sp.season)}</span>
-        <span class="pill ${sp.car?'car':''}">${sp.car?'🚗 자차권장':'🚌 자차없이 OK'}</span>
+        <span class="pill ${sp.car?'car':''}">${sp.car?'자차권장':'자차없이 OK'}</span>
         ${sp.keyword.map(k=>`<span class="pill">#${esc(k)}</span>`).join('')}
       </div>
       <div class="sacts">
-        <a class="sact" href="${spotSearch(sp)}" target="_blank" rel="noopener">🔍 사진·후기</a>
-        <a class="sact wx" href="${spotWeather(sp)}" target="_blank" rel="noopener">🌤 날씨</a>
+        <a class="sact" href="${spotSearch(sp)}" target="_blank" rel="noopener">사진·후기</a>
+        <a class="sact wx" href="${spotWeather(sp)}" target="_blank" rel="noopener">날씨</a>
       </div>
     </div>
   </div>`;
@@ -493,15 +497,14 @@ function renderCheck(){
 /* ---------- 홈 바로가기 카드 ---------- */
 function renderMenu(){
   const items = [
-    { v:'gear',    ic:'⛺', t:'장비 카탈로그', d:`텐트 ${TENTS.length}종 + 침낭·매트·배낭·스토브·랜턴` },
-    { v:'spots',   ic:'📍', t:'박지 가이드',   d:`전국 백패킹 성지 ${SPOTS.length}곳 · 사진·날씨` },
-    { v:'events',  ic:'🎽', t:'행사',          d:`백패킹·트레일러닝 ${EVENTS.length}개 · 미리 접수` },
-    { v:'deals',   ic:'🔥', t:'할인·블프',     d:`장비 세일·블랙프라이데이 캘린더` },
-    { v:'reviews', ic:'✍️', t:'다녀온 후기',   d:`크루 후기·사진 + 오픈채팅 참여` },
+    { v:'gear',    t:'장비 카탈로그', d:`텐트 ${TENTS.length}종 + 침낭·매트·배낭·스토브·랜턴` },
+    { v:'spots',   t:'박지 가이드',   d:`전국 백패킹 성지 ${SPOTS.length}곳 · 사진·날씨` },
+    { v:'events',  t:'행사',          d:`백패킹·트레일러닝 ${EVENTS.length}개 · 미리 접수` },
+    { v:'deals',   t:'할인·블프',     d:`장비 세일·블랙프라이데이 캘린더` },
+    { v:'reviews', t:'다녀온 후기',   d:`크루 후기·사진 + 오픈채팅 참여` },
   ];
   $('#menuGrid').innerHTML = items.map(m=>`
     <button class="mcard" onclick="showView('${m.v}')">
-      <div class="mic">${m.ic}</div>
       <div class="mtxt"><div class="mt">${m.t}</div><div class="md">${esc(m.d)}</div></div>
       <div class="marrow">→</div>
     </button>`).join('');
@@ -526,12 +529,12 @@ const saveMine = arr => localStorage.setItem(LS_KEY, JSON.stringify(arr));
 function reviewCard(r, mine){
   const tags = (r.tags && r.tags.length) ? r.tags : (r.tag ? [r.tag] : []);
   const meta = [
-    r.gear ? `<span class="p gear">⛺ ${esc(r.gear)}</span>` : '',
+    r.gear ? `<span class="p gear">${esc(r.gear)}</span>` : '',
     ...tags.map(t=>`<span class="p">#${esc(t)}</span>`)
   ].filter(Boolean).join('');
   // 다녀온 박지를 헤더에 눈에 띄게 노출 (#4)
-  const sub = r.spot ? `📍 ${esc(r.spot)}${r.when?` · ${esc(r.when)}`:''}`
-            : (r.when ? `🗓 ${esc(r.when)}` : (tags.slice(0,2).map(esc).join(' · ') || '팀아온다'));
+  const sub = r.spot ? `${esc(r.spot)}${r.when?` · ${esc(r.when)}`:''}`
+            : (r.when ? `${esc(r.when)}` : (tags.slice(0,2).map(esc).join(' · ') || '팀아온다'));
   return `<div class="review${mine?' mine':''}">
     <div class="rh">
       <div class="av">${esc(r.name.slice(0,1))}</div>
@@ -562,17 +565,21 @@ async function fetchRemoteReviews(){
   }catch(e){ remoteReviews = []; console.warn('후기 로드 실패:', e.message); }
   renderReviews();
 }
+const REV_PAGE = 5;
+let revLimit = REV_PAGE;
 function renderReviews(){
-  let html;
-  if(supaOn()){
-    html = (remoteReviews||[]).map(r=>reviewCard(r,false)).join('')
-         + REVIEWS.map(r=>reviewCard(r,false)).join('');
-  }else{
-    html = loadMine().map(r=>reviewCard(r,true)).join('')
-         + REVIEWS.map(r=>reviewCard(r,false)).join('');
-  }
-  $('#reviewList').innerHTML = html;
+  const all = supaOn()
+    ? (remoteReviews||[]).map(r=>({r,mine:false})).concat(REVIEWS.map(r=>({r,mine:false})))
+    : loadMine().map(r=>({r,mine:true})).concat(REVIEWS.map(r=>({r,mine:false})));
+  const shown = all.slice(0, revLimit);
+  $('#reviewList').innerHTML = shown.map(o=>reviewCard(o.r, o.mine)).join('')
+    || `<div class="empty">아직 후기가 없어요. 첫 후기를 남겨보세요!</div>`;
+  const more=$('#reviewMore'), coll=$('#reviewCollapse');
+  if(more){ if(all.length>revLimit){ more.style.display=''; more.textContent=`후기 더 보기 (남은 ${all.length-revLimit}개)`; } else more.style.display='none'; }
+  if(coll) coll.style.display = revLimit>REV_PAGE ? '' : 'none';
 }
+function moreReviews(){ revLimit+=REV_PAGE; renderReviews(); }
+function collapseReviews(){ revLimit=REV_PAGE; renderReviews(); }
 function deleteReview(id){
   if(!confirm('이 후기를 삭제할까요?')) return;
   saveMine(loadMine().filter(r=>r.id!==id));
@@ -690,8 +697,8 @@ async function submitReview(ev){
 function showShare(r){
   const spot = r.spot && r.spot!=='기타' ? r.spot : '';
   const share = `[팀아온다 후기] ${r.name} ${'★'.repeat(r.stars)}\n`
-    + (spot?`📍 ${spot}${r.when?' · '+r.when:''}\n`:'')
-    + (r.gear?`⛺ ${r.gear}\n`:'')
+    + (spot?`${spot}${r.when?' · '+r.when:''}\n`:'')
+    + (r.gear?`${r.gear}\n`:'')
     + `\n${r.text}`;
   const kakao = (typeof CONTACT!=='undefined' && CONTACT.kakao) ? CONTACT.kakao : '';
   const doShare = async ()=>{
