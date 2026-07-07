@@ -502,6 +502,7 @@ function renderMenu(){
     { v:'events',  t:'행사',          d:`백패킹·트레일러닝 ${EVENTS.length}개 · 미리 접수` },
     { v:'deals',   t:'할인·블프',     d:`장비 세일·블랙프라이데이 캘린더` },
     { v:'reviews', t:'다녀온 후기',   d:`크루 후기·사진 + 오픈채팅 참여` },
+    { v:'gallery', t:'크루 갤러리',   d:`후기 사진 모아보기` },
   ];
   $('#menuGrid').innerHTML = items.map(m=>`
     <button class="mcard" onclick="showView('${m.v}')">
@@ -563,7 +564,7 @@ async function fetchRemoteReviews(){
     const rows = await res.json();
     remoteReviews = rows.map(r=>({ ...r, when:r.visited }));   // visited 컬럼 → when 필드
   }catch(e){ remoteReviews = []; console.warn('후기 로드 실패:', e.message); }
-  renderReviews();
+  renderReviews(); renderGallery();
 }
 const REV_PAGE = 5;
 let revLimit = REV_PAGE;
@@ -583,9 +584,36 @@ function collapseReviews(){ revLimit=REV_PAGE; renderReviews(); }
 function deleteReview(id){
   if(!confirm('이 후기를 삭제할까요?')) return;
   saveMine(loadMine().filter(r=>r.id!==id));
-  renderReviews();
+  renderReviews(); renderGallery();
   toast('후기를 삭제했어요');
 }
+
+/* ---------- 갤러리 (후기 사진 모아보기 + 라이트박스) ---------- */
+let galPhotos = [];
+function renderGallery(){
+  const src = supaOn() ? (remoteReviews||[]).concat(REVIEWS) : loadMine().concat(REVIEWS);
+  galPhotos = src.filter(r=> typeof r.photo==='string' && /^data:image\//.test(r.photo));
+  const grid = $('#galGrid'); if(!grid) return;
+  if(!galPhotos.length){
+    grid.innerHTML = `<div class="gal-empty">아직 갤러리가 비어 있어요.<br>후기 작성 시 <b>사진을 첨부</b>하면 여기에 모여요.<br>
+      <button class="btn btn-ghost" style="margin-top:14px;color:var(--forest);border-color:var(--sage)" onclick="showView('reviews')">후기 남기러 가기</button></div>`;
+    return;
+  }
+  grid.innerHTML = galPhotos.map((r,i)=>`
+    <button class="gal-item" onclick="openLightbox(${i})">
+      <img src="${r.photo}" loading="lazy" alt="">
+      <span class="gal-cap">${esc(r.name||'')}${r.spot?' · '+esc(r.spot):''}</span>
+    </button>`).join('');
+}
+function openLightbox(i){
+  const r = galPhotos[i]; if(!r) return;
+  $('#lb-img').src = r.photo;
+  const spot = r.spot ? ` · ${esc(r.spot)}` : '';
+  const when = (r.when||r.visited) ? ` · ${esc(r.when||r.visited)}` : '';
+  $('#lb-cap').innerHTML = `<b>${esc(r.name||'')}</b>${spot}${when}${r.text?`<br>"${esc(r.text)}"`:''}`;
+  $('#lightbox').style.display = 'flex';
+}
+function closeLightbox(){ $('#lightbox').style.display='none'; $('#lb-img').src=''; }
 
 /* ---------- 후기 폼 ---------- */
 let fStars = 0;
@@ -690,7 +718,7 @@ async function submitReview(ev){
   // 미설정 시: 이 기기에 저장 + 카톡 공유
   const r = { id: Date.now(), name, text, spot, when, gear, stars: fStars, tags, photo: fPhoto };
   const mine = loadMine(); mine.unshift(r); saveMine(mine);
-  renderReviews(); clearForm(); showShare(r);
+  renderReviews(); renderGallery(); clearForm(); showShare(r);
 }
 
 // 등록 후 카톡 공유 안내
@@ -745,7 +773,7 @@ function renderStars(){
 /* ---------- init ---------- */
 renderMenu(); renderCrew(); setupTentControls(); renderTents(); renderDeals(); setupSpots(); renderSpots();
 setupEvents(); renderEvents();
-renderReviews(); renderCheck(); renderStars();
+renderReviews(); renderGallery(); renderCheck(); renderStars();
 setupReviewForm(); setupContact();
 setupViews();                        // 앱형 탭 뷰 전환 (홈 뷰로 시작)
 if(supaOn()) fetchRemoteReviews();   // 백엔드 설정 시 전체 후기 로드
