@@ -217,8 +217,12 @@ function tentMatch(t, opt){
 function naverURL(q){ return 'https://search.naver.com/search.naver?query=' + encodeURIComponent(q); }
 function krBrand(brand){ return (typeof BRAND_KR!=='undefined' && BRAND_KR[brand]) ? BRAND_KR[brand].split(' ')[0] : brand; }
 function naverSearch(t){ return naverURL(krBrand(t.brand) + ' ' + t.name); }
+// 검색 연동 썸네일: 실물 사진을 카드에 박는 대신, 탭하면 네이버 검색으로 실제 제품 사진이 뜸
+function searchThumb(){
+  return `<div class="tthumb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.5"/><path d="M5 16.4l4-3 3 2 3-2.2 4 3.2"/></svg><span>실물↗</span></div>`;
+}
 function tentCardHTML(t){
-  return `<a class="tcard" href="${naverSearch(t)}" target="_blank" rel="noopener">
+  return `<a class="tcard withthumb" href="${naverSearch(t)}" target="_blank" rel="noopener">${searchThumb()}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(t.brand)}
         ${t.verified?'<span class="vbadge" title="웹 조사로 확인된 실측 스펙">✓ 실측</span>'
@@ -236,7 +240,7 @@ function tentCardHTML(t){
       ${t.value?'<span class="tag value">가성비</span>':''}
       ${t.tags.map(tag=>`<span class="tag">${esc(tag)}</span>`).join('')}
     </div>
-  </a>`;
+  </div></a>`;
 }
 function renderTents(){
   const list = $('#tentList');
@@ -274,7 +278,7 @@ function selectDomain(d){
 }
 let curCat = '텐트', gearQuery = '', gearLimit = PAGE;
 function gearCardHTML(g){
-  return `<a class="tcard" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">
+  return `<a class="tcard withthumb" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">${searchThumb()}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(g.brand)}</div><div class="tname">${esc(g.name)}</div></div>
       ${g.value?'<span class="season s3">가성비</span>':''}
@@ -283,7 +287,7 @@ function gearCardHTML(g){
       <div class="stat">가격<b>~${g.price}만</b></div>
     </div>
     <div class="tags">${g.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
-  </a>`;
+  </div></a>`;
 }
 function renderGear(cat){
   const q = gearQuery.trim().toLowerCase();
@@ -458,12 +462,17 @@ function spotTheme(sp){
 function spotCleanName(sp){ return sp.name.replace(/[()·]/g,' ').replace(/\s+/g,' ').trim(); }
 function spotSearch(sp){ return naverURL(spotCleanName(sp) + ' 백패킹'); }
 function spotWeather(sp){ return naverURL(spotCleanName(sp) + ' 날씨'); }
+// 박지 인스타 링크: 게시물 URL 있으면 그 게시물, 없으면 아온다 프로필로
+function spotInsta(sp){ return sp.insta || (typeof CONTACT!=='undefined' && CONTACT.instagram) || '#'; }
 function spotCardHTML(sp){
   const th = spotTheme(sp);
+  const ig = spotInsta(sp);
+  const igLabel = sp.insta ? '이 박지 인스타' : '아온다 인스타';
   return `<div class="spot card-static">
-    <div class="sthumb theme-${th}" style="background-image:url('assets/spots/${th}.jpg')">
+    <a class="sthumb theme-${th}" href="${ig}" target="_blank" rel="noopener" style="background-image:url('assets/spots/${th}.jpg')">
       <span class="stype">${esc(sp.type)}</span>
-    </div>
+      <span class="sig">인스타에서 보기 ↗</span>
+    </a>
     <div class="sbody">
       <div class="sh"><span class="snm">${esc(sp.name)}</span> <span class="sregion">${esc(sp.region)}</span></div>
       <div class="sdesc">${esc(sp.desc)}</div>
@@ -471,10 +480,9 @@ function spotCardHTML(sp){
         <span class="pill diff d${DIFF_LV[sp.difficulty]||2}">난이도 ${esc(sp.difficulty)}</span>
         <span class="pill">${esc(sp.season)}</span>
         <span class="pill ${sp.car?'car':''}">${sp.car?'자차권장':'자차없이 OK'}</span>
-        ${sp.keyword.map(k=>`<span class="pill">#${esc(k)}</span>`).join('')}
       </div>
       <div class="sacts">
-        <a class="sact" href="${spotSearch(sp)}" target="_blank" rel="noopener">사진·후기</a>
+        <a class="sact ig" href="${ig}" target="_blank" rel="noopener">${igLabel}</a>
         <a class="sact wx" href="${spotWeather(sp)}" target="_blank" rel="noopener">날씨</a>
       </div>
     </div>

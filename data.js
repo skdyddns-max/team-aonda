@@ -369,6 +369,8 @@ TENT_MODELS.forEach(m => {
 });
 
 // 박지(캠핑 장소) — car: 자차 없이 접근 난이도, type: 섬/캠핑장/오지
+// 각 박지에 insta:"https://www.instagram.com/p/XXXX/" 를 넣으면 그 게시물로,
+// 없으면 CONTACT.instagram(아온다 프로필)로 연결됩니다. (박지 정보는 인스타에 하나씩 올려 링크)
 const SPOTS = [
   { name: "굴업도", type: "섬", region: "인천 옹진", car: false, difficulty: "중", season: "봄·가을·초겨울",
     desc: "백패커의 성지. 개머리언덕 능선 노지. 배편+도보 접근이라 자차 없이 OK.", vibe:["솔캠","친목"], keyword:["노지","일몰","억새"] },

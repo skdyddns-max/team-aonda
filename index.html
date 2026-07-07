@@ -146,6 +146,12 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .tcard .stat{font-size:12px;color:var(--muted)}
 .tcard .stat b{display:block;font-size:15px;color:var(--ink);font-weight:850}
 .tcard .stat b.w{color:var(--terra-d)}
+.tcard.withthumb{display:flex;gap:12px;align-items:stretch}
+.tcard.withthumb .tcontent{flex:1;min-width:0}
+.tcard .tthumb{flex:0 0 60px;align-self:stretch;min-height:60px;border-radius:11px;border:1px solid #ecdca4;background:linear-gradient(150deg,#fbf3d4,#f3e3ad);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--brand-d)}
+.tcard .tthumb svg{width:25px;height:25px}
+.tcard .tthumb span{font-size:9.5px;font-weight:800;letter-spacing:.2px}
+.tcard:hover .tthumb{border-color:var(--brand);background:linear-gradient(150deg,#faedbf,#eed896)}
 .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
 .tag{font-size:10.5px;font-weight:700;color:var(--moss);background:#eef2e8;padding:2px 8px;border-radius:10px}
 .tag.value{background:#fdeee2;color:var(--terra-d)}
@@ -223,6 +229,11 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .spot .sact{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:800;padding:9px 6px;border-radius:10px;border:1.5px solid var(--line);background:#fff;color:var(--forest);text-decoration:none;transition:.12s;white-space:nowrap}
 .spot .sact:active{transform:translateY(1px)}
 .spot .sact.wx{color:var(--brand-d);border-color:#e8daa9;background:#fdf8e8}
+.spot .sact.ig{color:#fff;background:var(--forest);border-color:var(--forest)}
+.spot .sact.ig:hover{filter:brightness(1.08)}
+.spot .sig{position:absolute;left:10px;bottom:10px;z-index:2;font-size:11px;font-weight:800;padding:4px 10px;border-radius:12px;background:rgba(234,195,58,.94);color:#3a2f0a;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.spot .sthumb{cursor:pointer}
+.spot .sthumb:hover .sig{background:var(--brand);text-decoration:underline}
 .spot.card-static{cursor:default}
 .spot.card-static:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow)}
 /* 행사 카드 */
@@ -748,7 +759,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 
 <div class="toast" id="toast"></div>
 
-<script src="data.js?v=10"></script>
-<script src="app.js?v=10"></script>
+<script src="data.js?v=11"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>
