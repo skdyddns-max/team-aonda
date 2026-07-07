@@ -232,6 +232,7 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .spot .sact.ig{color:#fff;background:var(--forest);border-color:var(--forest)}
 .spot .sact.ig:hover{filter:brightness(1.08)}
 .spot .sig{position:absolute;left:10px;bottom:10px;z-index:2;font-size:11px;font-weight:800;padding:4px 10px;border-radius:12px;background:rgba(234,195,58,.94);color:#3a2f0a;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.spot .sig.cg{background:rgba(43,54,36,.9);color:#fff}
 .spot .sthumb{cursor:pointer}
 .spot .sthumb:hover .sig{background:var(--brand);text-decoration:underline}
 .spot.card-static{cursor:default}
@@ -303,6 +304,8 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .spot .sinfo{display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;font-weight:700}
 .spot .pill{background:#eef2e8;color:var(--moss);padding:3px 9px;border-radius:11px}
 .spot .pill.car{background:#fdeee2;color:var(--terra-d)}
+.spot .pill.amen{background:#e4f3e5;color:#2f7d3a}
+.spot .pill.price{background:#fdf3e0;color:var(--brand-d)}
 
 /* ---------- Checklist ---------- */
 .check-grid{display:grid;grid-template-columns:1fr;gap:8px}
@@ -581,9 +584,9 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 
 <!-- SPOTS -->
 <section id="spots" data-view="spots"><div class="wrap">
-  <div class="eyebrow">Backpacking Spots</div>
-  <h2>박지 가이드 · <span id="spotTotal">100</span>곳</h2>
-  <p class="sub">국내 백패킹 성지·명소. 검색·필터로 찾아보세요. (입산·야영 통제는 방문 전 꼭 확인!)</p>
+  <div class="eyebrow" id="spotEyebrow">Backpacking Spots</div>
+  <h2><span id="spotHeadLabel">박지 가이드</span> · <span id="spotTotal">100</span>곳</h2>
+  <p class="sub" id="spotSub">국내 백패킹 성지·명소. 검색·필터로 찾아보세요. (입산·야영 통제는 방문 전 꼭 확인!)</p>
   <input id="spotSearch" class="search" type="search" placeholder="이름·지역·키워드 검색 (예: 통영, 억새, 은하수)" autocomplete="off">
   <div class="selrow">
     <select id="fRegion" aria-label="지역"><option value="">전국(전체)</option></select>
@@ -759,7 +762,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 
 <div class="toast" id="toast"></div>
 
-<script src="data.js?v=11"></script>
-<script src="app.js?v=11"></script>
+<script src="data.js?v=12"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>

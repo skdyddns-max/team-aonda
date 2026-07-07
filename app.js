@@ -275,6 +275,7 @@ function selectDomain(d){
   renderCatTabs();
   selectCat(catsFor(domain)[0]);   // 첫 카테고리로
   renderReviews(); renderGallery();
+  applyDomainToSpots();            // 박지 ↔ 오토캠핑장 스위칭
 }
 let curCat = '텐트', gearQuery = '', gearLimit = PAGE;
 function gearCardHTML(g){
@@ -432,15 +433,25 @@ function regionGroup(region){
 }
 const DIFF_LV = { '하':1, '중':2, '상':3 };
 let spotFilter='all', spotQuery='', spotRegion='', spotDiff='', spotLimit=SPOT_PAGE;
+// 도메인별 데이터: 백패킹=박지(SPOTS), 캠핑=오토캠핑장(CAMPGROUNDS)
+const activeSpotData = () => (domain==='camp' && typeof CAMPGROUNDS!=='undefined') ? CAMPGROUNDS : SPOTS;
 function filteredSpots(){
   const q = spotQuery.trim().toLowerCase();
-  return SPOTS.filter(sp=>{
-    if(spotFilter==='nocar'){ if(sp.car) return false; }
-    else if(spotFilter!=='all'){ if(sp.type!==spotFilter) return false; }
+  const camp = domain==='camp';
+  return activeSpotData().filter(sp=>{
+    if(camp){
+      if(spotFilter==='pet'){ if(!sp.pet) return false; }
+      else if(spotFilter!=='all'){ if(sp.type!==spotFilter) return false; }
+    } else {
+      if(spotFilter==='nocar'){ if(sp.car) return false; }
+      else if(spotFilter!=='all'){ if(sp.type!==spotFilter) return false; }
+      if(spotDiff && sp.difficulty!==spotDiff) return false;
+    }
     if(spotRegion && regionGroup(sp.region)!==spotRegion) return false;
-    if(spotDiff && sp.difficulty!==spotDiff) return false;
     if(q){
-      const hay = (sp.name+' '+sp.region+' '+sp.season+' '+sp.keyword.join(' ')+' '+sp.vibe.join(' ')).toLowerCase();
+      const hay = camp
+        ? (sp.name+' '+sp.region+' '+sp.type+' '+sp.season+' '+(sp.keyword||[]).join(' ')+' '+sp.desc).toLowerCase()
+        : (sp.name+' '+sp.region+' '+sp.season+' '+sp.keyword.join(' ')+' '+sp.vibe.join(' ')).toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
@@ -488,12 +499,48 @@ function spotCardHTML(sp){
     </div>
   </div>`;
 }
+// ── 오토캠핑장 카드 (캠핑 도메인) ──
+function campTheme(cg){
+  if(/제주/.test(cg.region)) return 'island';
+  if(cg.type==='노지') return 'meadow';
+  if(cg.type==='휴양림') return 'ridge';
+  return 'deck';   // 오토·글램핑
+}
+function campInfo(cg){ return naverURL(spotCleanName(cg) + ' 캠핑장'); }
+function campgroundCardHTML(cg){
+  const th = campTheme(cg);
+  const am = [];
+  if(cg.elec) am.push('전기');
+  if(cg.hot) am.push('온수');
+  if(cg.pet) am.push('반려동물 OK');
+  return `<div class="spot card-static">
+    <a class="sthumb theme-${th}" href="${campInfo(cg)}" target="_blank" rel="noopener" style="background-image:url('assets/spots/${th}.jpg')">
+      <span class="stype">${esc(cg.type)}</span>
+      <span class="sig cg">사진·예약 검색 ↗</span>
+    </a>
+    <div class="sbody">
+      <div class="sh"><span class="snm">${esc(cg.name)}</span> <span class="sregion">${esc(cg.region)}</span></div>
+      <div class="sdesc">${esc(cg.desc)}</div>
+      <div class="sinfo">
+        <span class="pill">${esc(cg.season||'사계절')}</span>
+        ${cg.price?`<span class="pill price">${esc(cg.price)}</span>`:''}
+        ${am.map(a=>`<span class="pill amen">${esc(a)}</span>`).join('')}
+      </div>
+      <div class="sacts">
+        <a class="sact ig" href="${campInfo(cg)}" target="_blank" rel="noopener">정보·예약</a>
+        <a class="sact wx" href="${naverURL(spotCleanName(cg)+' 날씨')}" target="_blank" rel="noopener">날씨</a>
+      </div>
+    </div>
+  </div>`;
+}
 function renderSpots(){
+  const camp = domain==='camp';
   const items = filteredSpots();
   const shown = items.slice(0, spotLimit);
+  const card = camp ? campgroundCardHTML : spotCardHTML;
   $('#spotList').innerHTML = shown.length
-    ? shown.map(spotCardHTML).join('')
-    : `<div class="empty">조건에 맞는 박지가 없어요. 검색어나 필터를 바꿔보세요 🙂</div>`;
+    ? shown.map(card).join('')
+    : `<div class="empty">조건에 맞는 ${camp?'캠핑장':'박지'}이 없어요. 검색어나 필터를 바꿔보세요 🙂</div>`;
   $('#spotCount').textContent = items.length;
   const more = $('#spotMore'), coll = $('#spotCollapse');
   if(items.length > spotLimit){ more.style.display=''; more.textContent = `더 보기 ▾ (남은 ${items.length - spotLimit}곳)`; }
@@ -502,22 +549,20 @@ function renderSpots(){
 }
 function moreSpots(){ spotLimit += SPOT_PAGE; renderSpots(); }
 function collapseSpots(){ spotLimit = SPOT_PAGE; renderSpots(); scrollTo2('spots'); }
-function setupSpots(){
-  $('#spotTotal').textContent = SPOTS.length;
-  // 지역 드롭다운 (권역별 개수)
+// 도메인별 필터 칩 정의
+const SPOT_CHIPS = {
+  bp:   [['all','전체'],['섬','섬'],['오지','오지'],['캠핑장','캠핑장'],['nocar','자차없이']],
+  camp: [['all','전체'],['오토','오토'],['휴양림','휴양림'],['노지','노지'],['글램핑','글램핑'],['pet','반려동물']],
+};
+function buildRegionOptions(){
   const gc = {};
-  SPOTS.forEach(sp=>{ const g=regionGroup(sp.region); gc[g]=(gc[g]||0)+1; });
+  activeSpotData().forEach(sp=>{ const g=regionGroup(sp.region); gc[g]=(gc[g]||0)+1; });
   const regs = REGION_ORDER.filter(g=>gc[g]);
   if(gc['기타']) regs.push('기타');
-  $('#fRegion').insertAdjacentHTML('beforeend',
-    regs.map(g=>`<option value="${g}">${g} (${gc[g]})</option>`).join(''));
-  $('#fRegion').addEventListener('change', e=>{ spotRegion=e.target.value; spotLimit=SPOT_PAGE; renderSpots(); });
-  $('#fDiff').addEventListener('change',  e=>{ spotDiff=e.target.value;  spotLimit=SPOT_PAGE; renderSpots(); });
-  let deb;
-  $('#spotSearch').addEventListener('input', e=>{
-    clearTimeout(deb);
-    deb = setTimeout(()=>{ spotQuery=e.target.value; spotLimit=SPOT_PAGE; renderSpots(); }, 160);
-  });
+  $('#fRegion').innerHTML = `<option value="">전국(전체)</option>`
+    + regs.map(g=>`<option value="${g}">${g} (${gc[g]})</option>`).join('');
+}
+function bindSpotChips(){
   $$('#spotFilter .fchip').forEach(f=>{
     f.addEventListener('click',()=>{
       $$('#spotFilter .fchip').forEach(x=>x.classList.remove('on'));
@@ -525,6 +570,42 @@ function setupSpots(){
       spotFilter=f.dataset.f; spotLimit=SPOT_PAGE; renderSpots();
     });
   });
+}
+function renderSpotChips(){
+  $('#spotFilter').innerHTML = SPOT_CHIPS[domain].map(([f,l],i)=>
+    `<div class="fchip${i===0?' on':''}" data-f="${f}">${l}</div>`).join('');
+  bindSpotChips();
+}
+// 도메인 전환 시 박지↔캠핑장 UI 스위칭
+function applyDomainToSpots(){
+  const camp = domain==='camp';
+  const eb=$('#spotEyebrow'), hl=$('#spotHeadLabel'), sub=$('#spotSub');
+  if(eb) eb.textContent = camp?'Car Camping Sites':'Backpacking Spots';
+  if(hl) hl.textContent = camp?'오토캠핑장':'박지 가이드';
+  if(sub) sub.textContent = camp
+    ? '오토·글램핑·자연휴양림 캠핑장. 시설·요금은 참고용이며 예약·정확한 정보는 카드 링크에서 확인하세요.'
+    : '국내 백패킹 성지·명소. 검색·필터로 찾아보세요. (입산·야영 통제는 방문 전 꼭 확인!)';
+  $('#spotTotal').textContent = activeSpotData().length;
+  $('#fDiff').style.display = camp?'none':'';   // 캠핑장은 난이도 필터 없음
+  const tab = document.querySelector('[data-tab="spots"]'); if(tab) tab.textContent = camp?'캠핑장':'박지';
+  // 필터 초기화 후 재구성
+  spotFilter='all'; spotRegion=''; spotDiff=''; spotQuery=''; spotLimit=SPOT_PAGE;
+  const ss=$('#spotSearch'); if(ss) ss.value='';
+  const fd=$('#fDiff'); if(fd) fd.value='';
+  buildRegionOptions();
+  renderSpotChips();
+  renderSpots();
+}
+function setupSpots(){
+  buildRegionOptions();
+  $('#fRegion').addEventListener('change', e=>{ spotRegion=e.target.value; spotLimit=SPOT_PAGE; renderSpots(); });
+  $('#fDiff').addEventListener('change',  e=>{ spotDiff=e.target.value;  spotLimit=SPOT_PAGE; renderSpots(); });
+  let deb;
+  $('#spotSearch').addEventListener('input', e=>{
+    clearTimeout(deb);
+    deb = setTimeout(()=>{ spotQuery=e.target.value; spotLimit=SPOT_PAGE; renderSpots(); }, 160);
+  });
+  applyDomainToSpots();   // 초기(백패킹) 헤더·칩·목록 구성
 }
 
 /* ---------- 5. 체크리스트 ---------- */

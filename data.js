@@ -330,7 +330,10 @@ const BRAND_KR = {
   "Granite Gear":"그래닛기어","Western Mountaineering":"웨스턴마운티니어링","Marmot":"마모트",
   // 캠핑 브랜드
   "Helinox":"헬리녹스","Minimworks":"미니멀웍스","Vidalido":"비달리도","Petromax":"페트로막스",
-  "Solo Stove":"솔로스토브","YETI":"예티","Igloo":"이글루","Orca":"오르카","Barebones":"베어본즈","Kermit":"커밋체어"
+  "Solo Stove":"솔로스토브","YETI":"예티","Igloo":"이글루","Orca":"오르카","Barebones":"베어본즈","Kermit":"커밋체어",
+  "Arcteryx":"아크테릭스","Patagonia":"파타고니아","Montbell":"몽벨","Black Yak":"블랙야크","Kolon Sport":"코오롱스포츠",
+  "Columbia":"컬럼비아","Icebreaker":"아이스브레이커","Smartwool":"스마트울","Salomon":"살로몬","K2":"케이투 K2",
+  "Nepa":"네파","Helly Hansen":"헬리한센","Discovery":"디스커버리","Decathlon":"데카트론"
 };
 
 /* ── 웹 조사(2026.07)로 확인한 실측 스펙 — [대표인원 min/trail 무게(kg), KR 대략가(만원)] ──
@@ -647,7 +650,7 @@ const GEAR_ITEMS = {};
 GEAR_CATS.forEach(c=>{ GEAR_ITEMS[c] = _GEAR_RAW[c].map(m=>{ const[brand,name,price,value,...tags]=m; return {brand,name,price,value:!!value,tags}; }); });
 
 // ── 캠핑(오토캠핑) 장비 카탈로그 ──
-const CAMP_GEAR_CATS = ["대형텐트","타프","테이블·체어","화로대","랜턴","아이스박스"];
+const CAMP_GEAR_CATS = ["대형텐트","타프","테이블·체어","화로대","랜턴","아이스박스","의류"];
 const _CAMP_RAW = {
   "대형텐트":[
     ["Snow Peak","랜드락",120,0,"터널형","거실형","프리미엄"],
@@ -708,9 +711,90 @@ const _CAMP_RAW = {
     ["Orca","하드 쿨러 40",40,0,"프리미엄","내구성"],
     ["Naturehike","폴딩 쿨러백",3,1,"가성비","휴대"],
   ],
+  "의류":[
+    ["Arcteryx","베타 AR 재킷",95,0,"하드쉘","고어텍스","방수"],
+    ["The North Face","눕시 다운자켓",35,0,"다운","보온","겨울"],
+    ["Patagonia","나노퍼프 재킷",29,1,"경량패딩","간절기"],
+    ["Patagonia","R1 플리스",16,0,"플리스","베이스","보온"],
+    ["Mountain Hardwear","고스트휘스퍼러 후디",30,0,"다운","초경량","백패킹"],
+    ["Rab","마이크로라이트 다운",30,0,"다운","경량","보온"],
+    ["Montbell","퍼마프로스트 다운",28,1,"다운","경량","보온"],
+    ["Marmot","프리시피 레인자켓",18,1,"레인","방수","경량"],
+    ["Black Yak","고어텍스 등산자켓",42,0,"하드쉘","방수","등산"],
+    ["Kolon Sport","안타티카 다운",40,0,"다운","보온","겨울"],
+    ["Millet","트리로지 다운",33,0,"다운","알파인","보온"],
+    ["Columbia","옴니히트 플리스",12,1,"플리스","가성비","보온"],
+    ["Icebreaker","메리노 베이스레이어",14,0,"베이스레이어","메리노","보온"],
+    ["Smartwool","메리노 티셔츠",11,0,"베이스레이어","메리노","속건"],
+    ["Fjallraven","베그포스 팬츠",22,0,"팬츠","내구성","G-1000"],
+    ["Salomon","트레일 팬츠",13,0,"팬츠","트레킹"],
+    ["K2","트레킹 팬츠",9,1,"팬츠","신축성","가성비"],
+    ["Nepa","경량 바람막이",7,1,"바람막이","간절기","가성비"],
+    ["Helly Hansen","방수 쉘자켓",25,0,"하드쉘","방수"],
+    ["Discovery","플리스 집업",9,1,"플리스","가성비","캐주얼"],
+    ["Decathlon","MH100 플리스",3,1,"플리스","초가성비","입문"],
+    ["Decathlon","레인코트 방수자켓",5,1,"레인","방수","가성비"],
+  ],
 };
 const CAMP_GEAR_ITEMS = {};
 CAMP_GEAR_CATS.forEach(c=>{ CAMP_GEAR_ITEMS[c] = _CAMP_RAW[c].map(m=>{ const[brand,name,price,value,...tags]=m; return {brand,name,price,value:!!value,tags}; }); });
+
+// 오토캠핑 캠핑장 (캠핑 도메인의 '박지' 대체) — 시설·요금은 참고용, 예약·정확한 정보는 카드 링크에서 확인.
+// type: 오토 / 휴양림(자연휴양림 데크) / 노지 / 글램핑 · elec 전기 · hot 온수 · pet 반려동물 동반
+const CAMPGROUNDS = [
+  { name:"자라섬 오토캠핑장", type:"오토", region:"경기 가평", season:"사계절", elec:true, hot:true, pet:false, price:"2~4만",
+    desc:"북한강 섬 오토캠핑의 대명사. 사이트가 넓고 접근이 편해 초보·가족에게 인기.", keyword:["섬","입문","가족"] },
+  { name:"난지 한강공원 캠핑장", type:"오토", region:"서울 마포", season:"사계절", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"도심 속 한강 캠핑. 지하철로 접근 가능해 장비 없이도 부담 없는 입문지.", keyword:["도심","한강","입문"] },
+  { name:"유명산자연휴양림", type:"휴양림", region:"경기 가평", season:"봄·여름·가을", elec:true, hot:true, pet:false, price:"3~5만",
+    desc:"계곡 옆 데크 오토. 서울 근교라 여름 물놀이 캠핑으로 붐빈다.", keyword:["계곡","숲","가족"] },
+  { name:"중미산자연휴양림", type:"휴양림", region:"경기 양평", season:"봄·가을", elec:true, hot:true, pet:false, price:"3~5만",
+    desc:"고지대 데크라 별 보기 좋음. 천문대가 인접해 밤하늘 명소.", keyword:["별","숲","고지대"] },
+  { name:"호명호수 글램핑", type:"글램핑", region:"경기 가평", season:"사계절", elec:true, hot:true, pet:true, price:"8~15만",
+    desc:"침구·난방 완비 글램핑. 초보·커플용, 반려동물 동반 사이트 운영.", keyword:["글램핑","커플","반려동물"] },
+  { name:"오대산자연휴양림", type:"휴양림", region:"강원 평창", season:"봄·여름·가을", elec:true, hot:true, pet:false, price:"3~5만",
+    desc:"국립. 전나무숲과 맑은 계곡으로 여름에 시원한 대표 휴양림.", keyword:["숲","계곡","국립"] },
+  { name:"대관령자연휴양림", type:"휴양림", region:"강원 강릉", season:"봄·여름·가을", elec:true, hot:true, pet:false, price:"3~5만",
+    desc:"국내 1호 자연휴양림. 아름드리 소나무 숲 데크가 인상적.", keyword:["소나무","숲","국립"] },
+  { name:"방태산자연휴양림", type:"휴양림", region:"강원 인제", season:"여름·가을", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"이단폭포와 청정 계곡. 가을 단풍 절경으로 유명.", keyword:["계곡","단풍","폭포"] },
+  { name:"청태산자연휴양림", type:"휴양림", region:"강원 횡성", season:"사계절", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"잣나무 숲과 눈 많은 겨울 설경. 사계절 데크 오토 가능.", keyword:["잣나무","설경","숲"] },
+  { name:"아우라지 오토캠핑장", type:"오토", region:"강원 정선", season:"사계절", elec:true, hot:true, pet:true, price:"2~4만",
+    desc:"강변 오토캠핑. 레일바이크가 인접해 아이와 즐기기 좋고 반려동물 동반 가능.", keyword:["강변","반려동물","가족"] },
+  { name:"덕산기계곡 노지", type:"노지", region:"강원 정선", season:"여름·가을", elec:false, hot:false, pet:true, price:"무료~1만",
+    desc:"화장실 정도만 있는 청정 계곡 노지. 물놀이·차박 겸용, 무료급.", keyword:["계곡","노지","무료"] },
+  { name:"동강 노지 캠핑", type:"노지", region:"강원 영월", season:"여름·가을", elec:false, hot:false, pet:true, price:"무료~1만",
+    desc:"동강 래프팅 명소의 강변 노지. 밤하늘 별 보기가 일품.", keyword:["강변","별","노지"] },
+  { name:"안면도자연휴양림", type:"휴양림", region:"충남 태안", season:"사계절", elec:true, hot:true, pet:false, price:"3~5만",
+    desc:"국내 유일 소나무 자연림에 해변까지 인접. 서해 노을 명소.", keyword:["바다","소나무","노을"] },
+  { name:"몽산포 오토캠핑장", type:"오토", region:"충남 태안", season:"사계절", elec:true, hot:true, pet:false, price:"2~4만",
+    desc:"솔숲과 해변을 낀 오토캠핑. 갯벌 체험으로 가족 캠핑 인기.", keyword:["바다","솔숲","가족"] },
+  { name:"대야산자연휴양림", type:"휴양림", region:"충북 괴산", season:"봄·여름·가을", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"용추계곡 옆 데크. 물이 맑고 트레킹 코스가 좋다.", keyword:["계곡","트레킹","숲"] },
+  { name:"희리산해송자연휴양림", type:"휴양림", region:"충남 서천", season:"사계절", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"해송림에서 서해가 조망되는 휴양림. 겨울에도 비교적 온화.", keyword:["바다","해송","조망"] },
+  { name:"지리산자연휴양림", type:"휴양림", region:"경남 함양", season:"봄·여름·가을", elec:true, hot:true, pet:false, price:"3~5만",
+    desc:"지리산 자락 숲속 데크. 계곡과 둘레길을 함께 즐긴다.", keyword:["지리산","계곡","숲"] },
+  { name:"가야산자연휴양림", type:"휴양림", region:"경남 합천", season:"봄·가을", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"가야산 조망과 해인사 인접. 가을 단풍이 특히 좋다.", keyword:["산","조망","단풍"] },
+  { name:"운문산자연휴양림", type:"휴양림", region:"경북 청도", season:"봄·여름·가을", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"맑은 계곡과 숲. 영남알프스 등산 베이스로도 좋다.", keyword:["계곡","등산","숲"] },
+  { name:"학동몽돌 오토캠핑장", type:"오토", region:"경남 거제", season:"사계절", elec:true, hot:true, pet:false, price:"2~4만",
+    desc:"몽돌해변 바로 앞 오토캠핑. 남해 물놀이와 파도 소리.", keyword:["바다","몽돌","물놀이"] },
+  { name:"회문산자연휴양림", type:"휴양림", region:"전북 순창", season:"봄·가을", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"숲과 계곡이 어우러진 조용한 힐링 휴양림.", keyword:["숲","계곡","힐링"] },
+  { name:"방장산자연휴양림", type:"휴양림", region:"전북 고창", season:"봄·가을", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"고창 방장산 자락의 편백숲 데크. 피톤치드 산책 좋음.", keyword:["편백","숲","산책"] },
+  { name:"축령산편백휴양림", type:"휴양림", region:"전남 장성", season:"사계절", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"국내 최대 편백 조림지. 치유의 숲으로 유명.", keyword:["편백","치유","숲"] },
+  { name:"나로우주해변 오토캠핑장", type:"오토", region:"전남 고흥", season:"여름·가을", elec:true, hot:true, pet:false, price:"2~3만",
+    desc:"우주센터 근처 해변 오토. 별과 바다를 함께 보는 곳.", keyword:["바다","별","해변"] },
+  { name:"절물자연휴양림", type:"휴양림", region:"제주", season:"사계절", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"삼나무 숲 야영장. 사려니숲길과 이어져 산책이 좋다.", keyword:["삼나무","숲","제주"] },
+  { name:"서귀포자연휴양림", type:"휴양림", region:"제주 서귀포", season:"사계절", elec:true, hot:true, pet:false, price:"3~4만",
+    desc:"한라산이 조망되는 편백·삼나무 숲. 안개 감성이 매력.", keyword:["편백","한라산","제주"] },
+];
 
 // 크루 활동 방식 / 가치
 const CREW = [
