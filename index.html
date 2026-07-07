@@ -154,6 +154,23 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .tcard:hover .tthumb{border-color:var(--brand);background:linear-gradient(150deg,#faedbf,#eed896)}
 .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
 .tag{font-size:10.5px;font-weight:700;color:var(--moss);background:#eef2e8;padding:2px 8px;border-radius:10px}
+.tag.attr{background:#e4ecf5;color:#33507a}
+
+/* ---------- 아온다 발자국 (방문 기록 지도) ---------- */
+.trips-block{margin-bottom:28px}
+.trip-note{font-size:12.5px;color:var(--muted);margin:4px 0 12px}
+.trip-map{height:320px;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1;background:#eef2e8}
+.trip-map.trip-fallback{height:auto;padding:14px 15px}
+.trip-fallback .trow{padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.trip-fallback .trow:last-child{border-bottom:none}
+.trip-fallback .trow span{color:var(--muted);font-size:12px;margin-left:6px}
+.trip-fallback .trow small{display:block;color:var(--muted)}
+.tpop{font-family:inherit;min-width:150px}
+.tpop .tpn{font-weight:850;font-size:15px}
+.tpop .tpm{font-size:12px;color:var(--muted);font-weight:700;margin:2px 0 4px}
+.tpop .tpd{font-size:12.5px;line-height:1.5}
+.tpop .tpi{width:100%;border-radius:8px;margin-top:6px}
+.tpop .tpa{display:inline-block;margin-top:7px;font-size:12px;font-weight:800;color:var(--brand-d)}
 .tag.value{background:#fdeee2;color:var(--terra-d)}
 .search{width:100%;font-size:15px;font-family:inherit;padding:13px 15px;border:1.5px solid var(--line);
   border-radius:13px;background:#fff;color:var(--ink);margin-bottom:10px;-webkit-appearance:none}
@@ -557,6 +574,13 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
       <div class="kw" data-kw="s4">사계절</div>
       <div class="kw" data-kw="light">1~2kg대</div>
       <div class="kw" data-kw="ul">초경량 UL</div>
+      <div class="kw" data-kw="fs">자립</div>
+      <div class="kw" data-kw="semi">반자립</div>
+      <div class="kw" data-kw="nfs">비자립</div>
+      <div class="kw" data-kw="sw">싱글월</div>
+      <div class="kw" data-kw="dw">더블월</div>
+      <div class="kw" data-kw="mesh">메쉬</div>
+      <div class="kw" data-kw="nomesh">노메쉬</div>
     </div>
   </div>
 
@@ -644,6 +668,13 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <div class="eyebrow">Crew Voices</div>
   <h2>다녀온 후기</h2>
   <p class="sub">직접 다녀온 분들의 기록. 다녀온 박지·장비까지 함께 남겨주세요.</p>
+
+  <!-- 아온다 발자국: 크루 방문 기록 지도 -->
+  <div class="trips-block">
+    <h3 class="gal-head">아온다 발자국 · <span id="tripCount">0</span>곳</h3>
+    <p class="trip-note">우리가 다녀온 곳. 핀을 누르면 날짜·인원·사진이 보여요. (기록 추가는 data.js의 TRIPS)</p>
+    <div id="tripMap" class="trip-map"></div>
+  </div>
 
   <!-- 후기 작성 폼 (접이식) -->
   <details class="rform-wrap">
@@ -762,7 +793,10 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 
 <div class="toast" id="toast"></div>
 
-<script src="data.js?v=12"></script>
-<script src="app.js?v=12"></script>
+<!-- 발자국 지도 (Leaflet + OpenStreetMap, 무료) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="data.js?v=13"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>

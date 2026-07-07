@@ -353,6 +353,23 @@ const VERIFIED = {
 const _CW = {1:.74, 2:1, 3:1.32, 4:1.7, 5:2.1, 6:2.5};
 const _CP = {1:.84, 2:1, 3:1.24, 4:1.5, 5:1.8, 6:2.1};
 const _wc = w => w < 1.3 ? "UL" : w < 2.2 ? "BPL" : "헤비";
+// 구조(자립/반자립/비자립)·월(싱글월/더블월)·메쉬 — 명시 태그 우선, 없으면 태그·모델명으로 추정
+function _struct(tags, line){
+  const T = tags.join(' ');
+  if(/비자립/.test(T)) return '비자립';
+  if(/반자립/.test(T)) return '반자립';
+  if(/자립|프리스탠딩|돔형|팝업|에어/.test(T)) return '자립';
+  if(/트레킹폴|타프(?!텐트)/.test(T) || /미드|피라미드|티피|모노폴|플렉사/.test(line)) return '비자립';
+  if(/터널형/.test(T)) return '비자립';
+  return '자립';                                // 일반 돔형 기본값
+}
+function _wall(tags, line){
+  const T = tags.join(' ');
+  if(/싱글월/.test(T)) return '싱글월';
+  if(/더블월/.test(T)) return '더블월';
+  if(/DCF|핫텐트|알파인/.test(T) || /미드|피라미드|티피|플렉사/.test(line)) return '싱글월';
+  return '더블월';                              // 일반 백패킹 텐트 기본값
+}
 const TENTS = [];
 TENT_MODELS.forEach(m => {
   let [brand, line, w2, season, p2, caps, value, ...tags] = m;
@@ -360,12 +377,15 @@ TENT_MODELS.forEach(m => {
   if (ver) { w2 = ver[0]; p2 = ver[1]; }
   const capList = [...String(caps)].map(Number);
   const anchor = capList.includes(2) ? 2 : capList[0];   // 대표 인원(2인 우선)
+  const struct = _struct(tags, line), wall = _wall(tags, line);
+  const mesh = season === 3 && !/핫텐트/.test(tags.join(' '));  // 삼계절=메쉬 이너, 동계·핫텐트=최소화
   capList.forEach(c => {
     const w = +(w2 * _CW[c] / _CW[anchor]).toFixed(2);
     TENTS.push({
       brand, name: `${line} ${c}P`, weight: w, season,
       price: Math.round(p2 * 10000 * (_CP[c] / _CP[anchor]) / 1000) * 1000,
       cap: `${c}인`, wclass: _wc(w), value: !!value, tags,
+      struct, wall, mesh,
       verified: !!ver && c === anchor          // 실측 확인 = 대표 인원 카드만
     });
   });
@@ -519,6 +539,19 @@ const DEALS = [
 ];
 
 // 연락처 / 채널  (인스타 핸들 알려주시면 instagram 값만 바꾸면 됩니다)
+// ── 아온다 발자국: 크루가 실제 다녀온 기록 (후기·갤러리 탭 지도에 핀으로 표시) ──
+// 새 기록 추가: name(장소), lat/lng(좌표 — 네이버지도에서 장소 우클릭하면 확인),
+// date(날짜), people(함께한 크루 이름 배열 또는 숫자), note(한 줄 메모),
+// photo(사진 경로 assets/... 또는 https 주소), insta(인스타 게시물 주소 — 있으면 팝업에 버튼)
+const TRIPS = [
+  { name:"굴업도", lat:37.190, lng:125.998, date:"2026.05", people:["준호","세아","도현"],
+    note:"개머리언덕 능선 1박 — 정기 백패킹", photo:"", insta:"" },
+  { name:"대이작도", lat:37.255, lng:126.293, date:"2026.06", people:["세아","민지"],
+    note:"풀등 모래섬 + 해변 박", photo:"", insta:"" },
+  { name:"선자령", lat:37.687, lng:128.760, date:"2026.01", people:["도현","준호"],
+    note:"칼바람 설산 능선 — 동계 첫 도전", photo:"", insta:"" },
+];
+
 const CONTACT = {
   kakao: "https://open.kakao.com/o/g9pC3BIh",
   instagram: "https://www.instagram.com/team_a.o.d",   // 팀아온다 인스타

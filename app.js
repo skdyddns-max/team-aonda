@@ -20,6 +20,10 @@ function showView(v, push=true){
   currentView = v;
   window.scrollTo(0,0);
   if(push){ try{ history.pushState({view:v}, '', '#'+v); }catch(e){} }
+  if(v==='reviews'){   // 발자국 지도: 뷰가 보일 때 초기화(숨김 상태 init 시 타일 깨짐)
+    initTripMap();
+    if(tripMap) setTimeout(()=>tripMap.invalidateSize(), 80);
+  }
 }
 function setupViews(){
   $$('#navTabs a').forEach(a=> a.addEventListener('click', ()=>showView(a.dataset.tab)) );
@@ -179,6 +183,13 @@ function kwPass(t,kw){
     case 's4':    return t.season===4;
     case 'light': return t.weight>=1 && t.weight<2;
     case 'ul':    return t.wclass==='UL';
+    case 'fs':    return t.struct==='자립';
+    case 'semi':  return t.struct==='반자립';
+    case 'nfs':   return t.struct==='비자립';
+    case 'sw':    return t.wall==='싱글월';
+    case 'dw':    return t.wall==='더블월';
+    case 'mesh':  return !!t.mesh;
+    case 'nomesh':return !t.mesh;
     default:      return true;
   }
 }
@@ -238,7 +249,10 @@ function tentCardHTML(t){
     </div>
     <div class="tags">
       ${t.value?'<span class="tag value">가성비</span>':''}
-      ${t.tags.map(tag=>`<span class="tag">${esc(tag)}</span>`).join('')}
+      <span class="tag attr">${t.struct}</span>
+      <span class="tag attr">${t.wall}</span>
+      <span class="tag attr">${t.mesh?'메쉬':'노메쉬'}</span>
+      ${t.tags.filter(tag=>!/^(자립|반자립|비자립|싱글월|더블월|프리스탠딩)$/.test(tag) && !(t.value&&tag==='가성비')).map(tag=>`<span class="tag">${esc(tag)}</span>`).join('')}
     </div>
   </div></a>`;
 }
@@ -743,6 +757,44 @@ function openLightbox(i){
   try{ history.pushState({view:currentView, lb:1}, '', location.hash); }catch(e){}
 }
 function closeLightbox(){ $('#lightbox').style.display='none'; $('#lb-img').src=''; }
+
+/* ---------- 아온다 발자국 (크루 방문 기록 지도) ---------- */
+let tripMap = null;
+function tripPeople(tr){
+  return Array.isArray(tr.people) ? tr.people.join(' · ') : (tr.people ? tr.people+'명' : '');
+}
+function tripPopupHTML(tr){
+  return `<div class="tpop">
+    <div class="tpn">${esc(tr.name)}</div>
+    <div class="tpm">${esc(tr.date||'')}${tripPeople(tr)?' · '+esc(tripPeople(tr)):''}</div>
+    ${tr.note?`<div class="tpd">${esc(tr.note)}</div>`:''}
+    ${tr.photo?`<img class="tpi" src="${tr.photo}" alt="">`:''}
+    ${tr.insta?`<a class="tpa" href="${tr.insta}" target="_blank" rel="noopener">인스타 게시물 보기 ↗</a>`:''}
+  </div>`;
+}
+function initTripMap(){
+  if(tripMap || typeof TRIPS==='undefined') return;
+  const el = $('#tripMap'); if(!el) return;
+  const cnt = $('#tripCount'); if(cnt) cnt.textContent = TRIPS.length;
+  if(typeof L==='undefined'){   // 지도 스크립트 미로드(오프라인 등) → 목록 폴백
+    el.classList.add('trip-fallback');
+    el.innerHTML = TRIPS.map(tr=>`<div class="trow"><b>${esc(tr.name)}</b>
+      <span>${esc(tr.date||'')}${tripPeople(tr)?' · '+esc(tripPeople(tr)):''}</span>
+      ${tr.note?`<small>${esc(tr.note)}</small>`:''}</div>`).join('');
+    return;
+  }
+  tripMap = L.map('tripMap', {scrollWheelZoom:false});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {attribution:'&copy; OpenStreetMap', maxZoom:18}).addTo(tripMap);
+  const pts = [];
+  TRIPS.forEach(tr=>{
+    if(typeof tr.lat!=='number' || typeof tr.lng!=='number') return;
+    pts.push([tr.lat, tr.lng]);
+    L.marker([tr.lat, tr.lng]).addTo(tripMap).bindPopup(tripPopupHTML(tr));
+  });
+  if(pts.length) tripMap.fitBounds(pts, {padding:[36,36], maxZoom:9});
+  else tripMap.setView([36.5,127.8], 6);   // 기록 없으면 한반도 전체
+}
 
 /* ---------- 후기 폼 ---------- */
 let fStars = 0;
