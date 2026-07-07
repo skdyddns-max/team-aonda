@@ -575,7 +575,7 @@ function reviewCard(r, mine){
       <div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
     </div>
     <div class="rtext">"${esc(r.text)}"</div>
-    ${(typeof r.photo==='string' && /^data:image\//.test(r.photo)) ? `<img class="rphoto" src="${r.photo}" loading="lazy" alt="후기 사진">` : ''}
+    ${validPhoto(r.photo) ? `<img class="rphoto" src="${r.photo}" loading="lazy" alt="후기 사진">` : ''}
     ${meta?`<div class="rmeta">${meta}</div>`:''}
     ${mine?`<div style="text-align:right;margin-top:6px"><button class="del" onclick="deleteReview(${r.id})">삭제</button></div>`:''}
   </div>`;
@@ -602,11 +602,15 @@ let revLimit = REV_PAGE;
 // 후기 도메인 마커 (태그 기반 — 새 컬럼 없이 백패킹/캠핑 분리)
 const DOMAIN_TAG = { bp:'__bp', camp:'__camp' };
 const reviewDomain = r => (r.tags && r.tags.includes('__camp')) ? 'camp' : 'bp';   // 마커 없으면 백패킹(기본)
+// 유효 사진 판별: data:image URL이면서 실제 이미지로 볼 만한 길이 (깨진/더미 photo 방어)
+const validPhoto = p => typeof p==='string' && /^data:image\//.test(p) && p.length > 200;
+// 백엔드 점검용 더미 후기 숨김
+const isJunkReview = r => ['컬럼테스트'].includes(String(r.name||'').trim());
 function renderReviews(){
   const raw = supaOn()
     ? (remoteReviews||[]).map(r=>({r,mine:false})).concat(REVIEWS.map(r=>({r,mine:false})))
     : loadMine().map(r=>({r,mine:true})).concat(REVIEWS.map(r=>({r,mine:false})));
-  const all = raw.filter(o=> reviewDomain(o.r)===domain);   // 현재 도메인만
+  const all = raw.filter(o=> !isJunkReview(o.r) && reviewDomain(o.r)===domain);   // 현재 도메인만
   const shown = all.slice(0, revLimit);
   $('#reviewList').innerHTML = shown.map(o=>reviewCard(o.r, o.mine)).join('')
     || `<div class="empty">아직 ${domain==='camp'?'캠핑':'백패킹'} 후기가 없어요. 첫 후기를 남겨보세요!</div>`;
@@ -627,7 +631,7 @@ function deleteReview(id){
 let galPhotos = [];
 function renderGallery(){
   const src = supaOn() ? (remoteReviews||[]).concat(REVIEWS) : loadMine().concat(REVIEWS);
-  galPhotos = src.filter(r=> typeof r.photo==='string' && /^data:image\//.test(r.photo) && reviewDomain(r)===domain);
+  galPhotos = src.filter(r=> validPhoto(r.photo) && !isJunkReview(r) && reviewDomain(r)===domain);
   const grid = $('#galGrid'); if(!grid) return;
   if(!galPhotos.length){
     grid.innerHTML = `<div class="gal-empty">아직 갤러리가 비어 있어요.<br>후기 작성 시 <b>사진을 첨부</b>하면 여기에 모여요.<br>
