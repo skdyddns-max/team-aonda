@@ -274,8 +274,8 @@ function listMoreButtons(total, limit, unit){
 }
 function resetLimit(){ tState.limit = PAGE; }
 
-/* ── 도메인(백패킹/캠핑) + 장비 카테고리 ── */
-let domain = 'bp';   // 'bp'(백패킹) | 'camp'(캠핑)
+/* ── 도메인(백패킹/오토캠핑) + 장비 카테고리 ── */
+let domain = 'bp';   // 'bp'(백패킹) | 'camp'(오토캠핑)
 const catsFor = d => d==='camp' ? CAMP_GEAR_CATS.slice() : ['텐트', ...GEAR_CATS];
 // 도메인 우선 조회 — '랜턴'처럼 양쪽에 있는 카테고리는 현재 도메인 것을 사용
 const gearItemsFor = cat => domain==='camp'
@@ -492,7 +492,7 @@ function setupTentControls(){
       refreshTents();
     });
   });
-  // 도메인 토글 (백패킹 / 캠핑)
+  // 도메인 토글 (백패킹 / 오토캠핑)
   $$('#domainSeg button').forEach(b=> b.addEventListener('click', ()=>selectDomain(b.dataset.dm)) );
   // 카테고리 탭 (도메인별 동적 생성 + 클릭 연결)
   renderCatTabs();
@@ -560,7 +560,7 @@ function regionGroup(region){
 }
 const DIFF_LV = { '하':1, '중':2, '상':3 };
 let spotFilter='all', spotQuery='', spotRegion='', spotDiff='', spotLimit=SPOT_PAGE;
-// 도메인별 데이터: 백패킹=박지(SPOTS), 캠핑=오토캠핑장(CAMPGROUNDS)
+// 도메인별 데이터: 백패킹=박지(SPOTS), 오토캠핑=오토캠핑장(CAMPGROUNDS)
 const activeSpotData = () => (domain==='camp' && typeof CAMPGROUNDS!=='undefined') ? CAMPGROUNDS : SPOTS;
 function filteredSpots(){
   const q = spotQuery.trim().toLowerCase();
@@ -626,7 +626,7 @@ function spotCardHTML(sp){
     </div>
   </div>`;
 }
-// ── 오토캠핑장 카드 (캠핑 도메인) ──
+// ── 오토캠핑장 카드 (오토캠핑 도메인) ──
 function campTheme(cg){
   if(/제주/.test(cg.region)) return 'island';
   if(cg.type==='노지') return 'meadow';
@@ -667,7 +667,7 @@ function renderSpots(){
   const card = camp ? campgroundCardHTML : spotCardHTML;
   $('#spotList').innerHTML = shown.length
     ? shown.map(card).join('')
-    : `<div class="empty">조건에 맞는 ${camp?'캠핑장':'박지'}이 없어요. 검색어나 필터를 바꿔보세요 🙂</div>`;
+    : `<div class="empty">조건에 맞는 ${camp?'오토캠핑장':'박지'}이 없어요. 검색어나 필터를 바꿔보세요 🙂</div>`;
   $('#spotCount').textContent = items.length;
   const more = $('#spotMore'), coll = $('#spotCollapse');
   if(items.length > spotLimit){ more.style.display=''; more.textContent = `더 보기 ▾ (남은 ${items.length - spotLimit}곳)`; }
@@ -713,8 +713,8 @@ function applyDomainToSpots(){
     ? '오토·글램핑·자연휴양림 캠핑장. 시설·요금은 참고용이며 예약·정확한 정보는 카드 링크에서 확인하세요.'
     : '국내 백패킹 성지·명소. 검색·필터로 찾아보세요. (입산·야영 통제는 방문 전 꼭 확인!)';
   $('#spotTotal').textContent = activeSpotData().length;
-  $('#fDiff').style.display = camp?'none':'';   // 캠핑장은 난이도 필터 없음
-  const tab = document.querySelector('[data-tab="spots"]'); if(tab) tab.textContent = camp?'캠핑장':'박지';
+  $('#fDiff').style.display = camp?'none':'';   // 오토캠핑장은 난이도 필터 없음
+  const tab = document.querySelector('[data-tab="spots"]'); if(tab) tab.textContent = camp?'오토캠핑장':'박지';
   // 필터 초기화 후 재구성
   spotFilter='all'; spotRegion=''; spotDiff=''; spotQuery=''; spotLimit=SPOT_PAGE;
   const ss=$('#spotSearch'); if(ss) ss.value='';
@@ -815,7 +815,7 @@ async function fetchRemoteReviews(){
 }
 const REV_PAGE = 5;
 let revLimit = REV_PAGE;
-// 후기 도메인 마커 (태그 기반 — 새 컬럼 없이 백패킹/캠핑 분리)
+// 후기 도메인 마커 (태그 기반 — 새 컬럼 없이 백패킹/오토캠핑 분리)
 const DOMAIN_TAG = { bp:'__bp', camp:'__camp' };
 const reviewDomain = r => (r.tags && r.tags.includes('__camp')) ? 'camp' : 'bp';   // 마커 없으면 백패킹(기본)
 // 유효 사진 판별: data:image URL이면서 실제 이미지로 볼 만한 길이 (깨진/더미 photo 방어)
@@ -829,7 +829,7 @@ function renderReviews(){
   const all = raw.filter(o=> !isJunkReview(o.r) && reviewDomain(o.r)===domain);   // 현재 도메인만
   const shown = all.slice(0, revLimit);
   $('#reviewList').innerHTML = shown.map(o=>reviewCard(o.r, o.mine)).join('')
-    || `<div class="empty">아직 ${domain==='camp'?'캠핑':'백패킹'} 후기가 없어요. 첫 후기를 남겨보세요!</div>`;
+    || `<div class="empty">아직 ${domain==='camp'?'오토캠핑':'백패킹'} 후기가 없어요. 첫 후기를 남겨보세요!</div>`;
   const more=$('#reviewMore'), coll=$('#reviewCollapse');
   if(more){ if(all.length>revLimit){ more.style.display=''; more.textContent=`후기 더 보기 (남은 ${all.length-revLimit}개)`; } else more.style.display='none'; }
   if(coll) coll.style.display = revLimit>REV_PAGE ? '' : 'none';
@@ -1008,7 +1008,7 @@ async function submitReview(ev){
   if(!fStars){ toast('만족도(별점)를 선택해 주세요 ⭐'); return; }
   if(text.length < 10){ toast('후기를 조금만 더 구체적으로 적어주세요 (10자 이상)'); $('#f-text').focus(); return; }
 
-  const tags = [...fTags, DOMAIN_TAG[domain]];   // 현재 도메인(백패킹/캠핑) 마커 포함
+  const tags = [...fTags, DOMAIN_TAG[domain]];   // 현재 도메인(백패킹/오토캠핑) 마커 포함
 
   // 백엔드 설정 시: 전체 공유 (Supabase에 저장)
   if(supaOn()){
