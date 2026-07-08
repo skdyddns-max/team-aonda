@@ -1,9 +1,9 @@
 /* 팀아온다 서비스워커 — 오프라인에서도 장비·박지·체크리스트 열람 가능
    ⚠️ 배포 시 index.html의 ?v=N 을 올릴 때 아래 CACHE 버전도 같이 올릴 것 */
-const CACHE = 'aonda-v21';
+const CACHE = 'aonda-v22';
 const CORE = [
   '.', 'index.html',
-  'data.js?v=21', 'app.js?v=21',
+  'data.js?v=22', 'app.js?v=22',
   'manifest.json',
   'assets/hero.jpg',
   'assets/icon-192.png', 'assets/icon-512.png',

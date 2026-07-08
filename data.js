@@ -411,6 +411,8 @@ const SPOTS = [
     desc: "백패커의 성지. 개머리언덕 능선 노지. 배편+도보 접근이라 자차 없이 OK.", vibe:["솔캠","친목"], keyword:["노지","일몰","억새"] },
   { name: "대이작도", type: "섬", region: "인천 옹진", car: false, difficulty: "하", season: "봄·여름·가을",
     desc: "풀등 모래섬으로 유명. 접근 쉽고 초보 섬백패킹 입문지.", vibe:["친목"], keyword:["해변","입문","가족"] },
+  { name: "가덕도 부언바위", type: "섬", region: "부산 강서", car: true, difficulty: "하", season: "봄·가을·겨울",
+    desc: "'미니 굴업도'로 불리는 해안 바위 박지. 주차장에서 도보 15분인데 속세와 떨어진 느낌. 박지가 좁아 주말엔 일찍 출발 권장. 차로 진입 가능한 섬, 섬앤산 인증 가능.", vibe:["솔캠","친목"], keyword:["미니굴업도","섬앤산","크루검증"] },
   { name: "승봉도", type: "섬", region: "인천 옹진", car: false, difficulty: "하", season: "봄·가을",
     desc: "이일레해변 야영. 조용하고 한적한 솔캠 최적지.", vibe:["솔캠"], keyword:["해변","한적","노지"] },
   { name: "선자령", type: "오지", region: "강원 평창", car: true, difficulty: "중", season: "가을·겨울",
@@ -556,6 +558,9 @@ const DEALS = [
 // date(날짜), people(함께한 크루 이름 배열 또는 숫자), note(한 줄 메모),
 // photo(사진 경로 assets/... 또는 https 주소), insta(인스타 게시물 주소 — 있으면 팝업에 버튼)
 const TRIPS = [
+  // 실기록 (후기 백엔드에서 확인) — 좌표는 가덕도 기준 대략치, 필요시 수정
+  { name:"가덕도 부언바위", lat:35.005, lng:128.830, date:"2026.06", people:["잰"],
+    note:"'미니 굴업도' — 박지 좁아 일찍 출발 권장, 주차장에서 도보 15분", photo:"", insta:"" },
   { name:"굴업도", lat:37.190, lng:125.998, date:"2026.05", people:["준호","세아","도현"],
     note:"개머리언덕 능선 1박 — 정기 백패킹", photo:"", insta:"" },
   { name:"대이작도", lat:37.255, lng:126.293, date:"2026.06", people:["세아","민지"],
