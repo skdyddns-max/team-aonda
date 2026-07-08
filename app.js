@@ -24,6 +24,7 @@ function showView(v, push=true){
     initTripMap();
     if(tripMap) setTimeout(()=>tripMap.invalidateSize(), 80);
   }
+  updatePackVis();     // 내 장비함 바: 장비 탭에서만 표시
 }
 function setupViews(){
   $$('#navTabs a').forEach(a=> a.addEventListener('click', ()=>showView(a.dataset.tab)) );
@@ -232,8 +233,62 @@ function naverSearch(t){ return naverURL(krBrand(t.brand) + ' ' + t.name); }
 function searchThumb(){
   return `<div class="tthumb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.5"/><path d="M5 16.4l4-3 3 2 3-2.2 4 3.2"/></svg><span>실물↗</span></div>`;
 }
+
+/* ── 내 장비함 (베이스웨이트 계산기) — 카드에서 담으면 총무게·가격 합산 ── */
+const PACK_REG = {};                         // pk → {cat,brand,name,weightG,priceWon}
+let pack = [];
+try{ pack = JSON.parse(localStorage.getItem('aonda_pack')||'[]'); }catch(e){ pack = []; }
+const packHas = pk => pack.some(p=>p.pk===pk);
+function packBtn(cat, brand, name, weightG, priceWon){
+  const pk = encodeURIComponent(brand+'|'+name);
+  PACK_REG[pk] = { pk, cat, brand, name, weightG: weightG||0, priceWon: priceWon||0 };
+  const inp = packHas(pk);
+  return `<span class="addpack${inp?' in':''}" role="button" data-pk="${pk}" onclick="packToggle(event,this.dataset.pk)">${inp?'담김 ✓':'담기 +'}</span>`;
+}
+function packToggle(e, pk){
+  e.preventDefault(); e.stopPropagation();
+  if(packHas(pk)) pack = pack.filter(p=>p.pk!==pk);
+  else if(PACK_REG[pk]) pack.push(PACK_REG[pk]);
+  localStorage.setItem('aonda_pack', JSON.stringify(pack));
+  renderPackUI();
+}
+function removePack(pk){ pack = pack.filter(p=>p.pk!==pk); localStorage.setItem('aonda_pack', JSON.stringify(pack)); renderPackUI(); }
+function clearPack(){ if(pack.length && !confirm('장비함을 비울까요?')) return; pack=[]; localStorage.setItem('aonda_pack','[]'); renderPackUI(); }
+function togglePackPanel(){
+  const p = $('#packPanel'); if(!p) return;
+  const open = p.style.display!=='none';
+  p.style.display = open ? 'none' : '';
+  const h = $('#packHint'); if(h) h.textContent = open ? '열기 ▴' : '닫기 ▾';
+}
+const fmtKg = g => g>=1000 ? (g/1000).toFixed(2)+'kg' : g+'g';
+// 베이스웨이트 등급 (담은 장비 합계 기준 대략)
+const packGrade = w => w<=0 ? '—' : w<=2500 ? 'SUL급' : w<=4500 ? 'UL급' : w<=7000 ? '라이트급' : '전통 백패킹';
+function renderPackUI(){
+  const bar=$('#packBar'); if(!bar) return;
+  const totalW = pack.reduce((s,p)=>s+(p.weightG||0),0);
+  const totalP = pack.reduce((s,p)=>s+(p.priceWon||0),0);
+  $('#packSummary').textContent = `내 장비함 ${pack.length} · ${fmtKg(totalW)}`;
+  $('#packList').innerHTML = pack.length
+    ? pack.map(p=>`<div class="pp-row">
+        <div class="nm">${esc(p.name)}<small>${esc(p.brand)} · ${esc(p.cat)}</small></div>
+        <span class="wt">${p.weightG?fmtKg(p.weightG):'무게 —'}</span>
+        <button class="rm" data-pk="${p.pk}" onclick="removePack(this.dataset.pk)" aria-label="빼기">×</button>
+      </div>`).join('')
+    : `<div class="empty" style="padding:14px 0">장비 카드의 <b>담기 +</b> 를 눌러보세요.</div>`;
+  $('#packTotal').innerHTML = `
+    <span>총무게<b>${fmtKg(totalW)}</b></span>
+    <span>총가격<b>약 ${Math.round(totalP/10000)}만</b></span>
+    <span class="grade">등급<b>${packGrade(totalW)}</b></span>`;
+  $$('.addpack').forEach(b=>{ const i=packHas(b.dataset.pk); b.classList.toggle('in',i); b.textContent=i?'담김 ✓':'담기 +'; });
+  updatePackVis();
+}
+function updatePackVis(){
+  const bar=$('#packBar'); if(!bar) return;
+  bar.style.display = (currentView==='gear' && pack.length) ? 'flex' : 'none';
+  if(currentView!=='gear'){ const p=$('#packPanel'); if(p) p.style.display='none'; const h=$('#packHint'); if(h) h.textContent='열기 ▴'; }
+}
 function tentCardHTML(t){
-  return `<a class="tcard withthumb" href="${naverSearch(t)}" target="_blank" rel="noopener">${searchThumb()}<div class="tcontent">
+  return `<a class="tcard withthumb" href="${naverSearch(t)}" target="_blank" rel="noopener">${searchThumb()}${packBtn('텐트',t.brand,t.name,Math.round(t.weight*1000),t.price)}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(t.brand)}
         ${t.verified?'<span class="vbadge" title="웹 조사로 확인된 실측 스펙">✓ 실측</span>'
@@ -304,7 +359,7 @@ function bagSeason(g){
 const _BAG_SEASON_CLS = { '동계':'s4', '삼계절':'s3', '여름·간절기':'s0' };
 function gearCardHTML(g){
   const bs = bagSeason(g);
-  return `<a class="tcard withthumb" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">${searchThumb()}<div class="tcontent">
+  return `<a class="tcard withthumb" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">${searchThumb()}${packBtn(curCat,g.brand,g.name,g.weight||0,(g.price||0)*10000)}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(g.brand)}</div><div class="tname">${esc(g.name)}</div></div>
       <span style="display:flex;gap:4px;align-items:center">
@@ -1091,3 +1146,5 @@ renderReviews(); renderGallery(); renderCheck(); renderStars();
 setupReviewForm(); setupContact();
 setupViews();                        // 앱형 탭 뷰 전환 (홈 뷰로 시작)
 if(supaOn()) fetchRemoteReviews();   // 백엔드 설정 시 전체 후기 로드
+renderPackUI();                      // 내 장비함 (localStorage 복원)
+if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }  // PWA 오프라인

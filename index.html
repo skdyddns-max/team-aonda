@@ -20,6 +20,13 @@
 <!-- 지도(후기 탭) 리소스 DNS 선조회 — 실제 로드는 탭 진입 시 -->
 <link rel="dns-prefetch" href="//unpkg.com">
 <link rel="dns-prefetch" href="//tile.openstreetmap.org">
+<!-- PWA: 홈화면 설치 + 오프라인 -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="아온다">
 <style>
 :root{
   /* 브랜드 골든 옐로 (네온 → 세련된 골드) */
@@ -160,6 +167,25 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .tcard .tthumb svg{width:25px;height:25px}
 .tcard .tthumb span{font-size:9.5px;font-weight:800;letter-spacing:.2px}
 .tcard:hover .tthumb{border-color:var(--brand);background:linear-gradient(150deg,#faedbf,#eed896)}
+/* 내 장비함 (베이스웨이트 계산기) */
+.addpack{position:absolute;bottom:12px;right:12px;z-index:2;font-size:11px;font-weight:800;padding:5px 10px;border-radius:14px;border:1.5px solid var(--line);background:#fff;color:var(--forest);cursor:pointer;user-select:none;transition:.12s}
+.addpack.in{background:var(--forest);color:#fff;border-color:var(--forest)}
+.addpack:active{transform:scale(.94)}
+.tcard.withthumb .tags{margin-right:66px}
+#packBar{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;display:flex;justify-content:space-between;align-items:center;background:var(--forest);color:#fff;font-weight:850;font-size:14px;padding:13px 18px;border-radius:16px;box-shadow:0 8px 30px rgba(43,54,36,.4);cursor:pointer}
+#packBar .pb-hint{font-size:12px;color:var(--brand);font-weight:800}
+#packPanel{position:fixed;left:12px;right:12px;bottom:64px;z-index:61;max-height:62vh;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 50px rgba(43,54,36,.35);padding:16px 16px 12px}
+.pp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:15px}
+.pp-btn{font-size:12px;font-weight:800;font-family:inherit;padding:6px 11px;border-radius:11px;border:1.5px solid var(--line);background:#fff;color:var(--forest);cursor:pointer;margin-left:6px}
+.pp-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1ecdc;font-size:13px}
+.pp-row .nm{font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp-row .nm small{display:block;font-weight:700;color:var(--muted);font-size:11px}
+.pp-row .wt{color:var(--muted);font-weight:700;white-space:nowrap}
+.pp-row .rm{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:none;background:#f3ede0;color:var(--terra-d);font-weight:900;cursor:pointer;line-height:1}
+.pp-total{display:flex;gap:16px;padding:12px 2px 2px;font-size:13px;font-weight:700;color:var(--muted)}
+.pp-total b{display:block;font-size:17px;color:var(--ink)}
+.pp-total .grade b{color:var(--brand-d)}
+.pp-note{font-size:11px;color:var(--muted);margin-top:8px}
 .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
 .tag{font-size:10.5px;font-weight:700;color:var(--moss);background:#eef2e8;padding:2px 8px;border-radius:10px}
 .tag.attr{background:#e4ecf5;color:#33507a}
@@ -803,7 +829,21 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 <div class="toast" id="toast"></div>
 
 <!-- 발자국 지도(Leaflet)는 후기 탭 첫 진입 시에만 동적 로드 (초기 로딩 ~180KB 절약) -->
-<script src="data.js?v=20"></script>
-<script src="app.js?v=20"></script>
+<!-- 내 장비함 (베이스웨이트 계산기) — 장비 탭에서 담으면 하단 바 표시 -->
+<div id="packBar" style="display:none" onclick="togglePackPanel()">
+  <span id="packSummary">내 장비함</span><span class="pb-hint" id="packHint">열기 ▴</span>
+</div>
+<div id="packPanel" style="display:none">
+  <div class="pp-head">
+    <b>내 장비함</b>
+    <span class="pp-acts"><button class="pp-btn" onclick="clearPack()">비우기</button><button class="pp-btn" onclick="togglePackPanel()">닫기 ▾</button></span>
+  </div>
+  <div id="packList"></div>
+  <div class="pp-total" id="packTotal"></div>
+  <p class="pp-note">무게는 추정치 기반 대략 합계입니다. 담은 장비 = 베이스웨이트(소모품 제외) 기준으로 등급을 매겨요.</p>
+</div>
+
+<script src="data.js?v=21"></script>
+<script src="app.js?v=21"></script>
 </body>
 </html>

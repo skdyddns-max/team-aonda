@@ -1,0 +1,15 @@
+{
+  "name": "팀아온다 Team A.O.D",
+  "short_name": "아온다",
+  "description": "백패킹·오토캠핑 크루 팀아온다 — 장비·박지·행사·후기",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#FBF8EE",
+  "theme_color": "#2f3d2a",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
