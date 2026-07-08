@@ -330,9 +330,15 @@ function tentMatch(t, opt){
 function naverURL(q){ return 'https://search.naver.com/search.naver?query=' + encodeURIComponent(q); }
 function krBrand(brand){ return (typeof BRAND_KR!=='undefined' && BRAND_KR[brand]) ? BRAND_KR[brand].split(' ')[0] : brand; }
 function naverSearch(t){ return naverURL(krBrand(t.brand) + ' ' + t.name); }
-// 검색 연동 썸네일: 실물 사진을 카드에 박는 대신, 탭하면 네이버 검색으로 실제 제품 사진이 뜸
-function searchThumb(){
-  return `<div class="tthumb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.5"/><path d="M5 16.4l4-3 3 2 3-2.2 4 3.2"/></svg><span>실물↗</span></div>`;
+// 네이버 이미지 검색 (썸네일 탭 → 실물 사진 바로)
+function naverImgURL(q){ return 'https://search.naver.com/search.naver?where=image&query=' + encodeURIComponent(q); }
+function openImg(e, q){
+  e.preventDefault(); e.stopPropagation();
+  window.open(naverImgURL(decodeURIComponent(q)), '_blank', 'noopener');
+}
+// 검색 연동 썸네일: 탭하면 네이버 '이미지' 탭으로 바로 — 카드 본문은 통합검색 유지
+function searchThumb(query){
+  return `<div class="tthumb" role="button" data-q="${encodeURIComponent(query||'')}" onclick="openImg(event,this.dataset.q)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.5"/><path d="M5 16.4l4-3 3 2 3-2.2 4 3.2"/></svg><span>실물↗</span></div>`;
 }
 
 /* ── 내 장비함 (베이스웨이트 계산기) — 카드에서 담으면 총무게·가격 합산 ── */
@@ -389,7 +395,7 @@ function updatePackVis(){
   if(currentView!=='gear'){ const p=$('#packPanel'); if(p) p.style.display='none'; const h=$('#packHint'); if(h) h.textContent='열기 ▴'; }
 }
 function tentCardHTML(t){
-  return `<a class="tcard withthumb" href="${naverSearch(t)}" target="_blank" rel="noopener">${searchThumb()}${packBtn('텐트',t.brand,t.name,Math.round(t.weight*1000),t.price)}<div class="tcontent">
+  return `<a class="tcard withthumb" href="${naverSearch(t)}" target="_blank" rel="noopener">${searchThumb(krBrand(t.brand)+' '+t.name)}${packBtn('텐트',t.brand,t.name,Math.round(t.weight*1000),t.price)}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(t.brand)}
         ${t.verified?'<span class="vbadge" title="웹 조사로 확인된 실측 스펙">✓ 실측</span>'
@@ -463,7 +469,7 @@ function bagSeason(g){
 const _BAG_SEASON_CLS = { '동계':'s4', '삼계절':'s3', '여름·간절기':'s0' };
 function gearCardHTML(g){
   const bs = bagSeason(g);
-  return `<a class="tcard withthumb" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">${searchThumb()}${packBtn(curCat,g.brand,g.name,g.weight||0,(g.price||0)*10000)}<div class="tcontent">
+  return `<a class="tcard withthumb" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">${searchThumb(krBrand(g.brand)+' '+g.name)}${packBtn(curCat,g.brand,g.name,g.weight||0,(g.price||0)*10000)}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(g.brand)}</div><div class="tname">${esc(g.name)}</div></div>
       <span style="display:flex;gap:4px;align-items:center">
