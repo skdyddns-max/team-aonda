@@ -173,6 +173,107 @@ function renderResult(tents, spots, a){
   setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
 }
 
+/* ---------- 매칭 엔진 (오토캠핑) — 대형텐트 + 서브장비 + 캠핑장 ---------- */
+function runMatchCamp(){
+  const a = answers;
+  if(!a.party || !a.budgetC){ alert('인원과 예산은 꼭 선택해 주세요 🙏'); return; }
+  const [bMin,bMax] = ({low:[0,30], mid:[30,70], high:[70,9999]})[a.budgetC];
+  // 대형텐트 점수화 (가격 = 만원 단위)
+  const T = tags => x => tags.some(t=>x.tags.includes(t));
+  const tents = CAMP_GEAR_ITEMS["대형텐트"].map(t=>{
+    let s=0; const reasons=[];
+    if(t.price>=bMin && t.price<=bMax){ s+=30; reasons.push('예산 적합'); }
+    else if(t.price<bMin) s+=10;
+    if(a.party==='solo'  && T(['돔형','티피','입문','간편설치'])(t)){ s+=20; reasons.push('소인원 설치 간편'); }
+    if(a.party==='family'&& T(['2룸','터널형','거실형','패밀리'])(t)){ s+=20; reasons.push('가족용 거실 공간'); }
+    if(a.party==='group' && T(['거실형','벨텐트','터널형','쉘터'])(t)){ s+=18; reasons.push('단체 수용'); }
+    if(a.style==='감성' && T(['감성','벨텐트','면텐트','티피'])(t)){ s+=25; reasons.push('감성 무드'); }
+    if(a.style==='기능' && T(['2룸','터널형','암실옵션','거실형'])(t)){ s+=20; reasons.push('실용 구조'); }
+    if(a.style==='입문'){ if(t.value){ s+=25; reasons.push('가성비'); } if(T(['입문'])(t)) s+=15; }
+    if(a.when==='겨울' && T(['핫텐트','동계','동계강함','쉘터'])(t)){ s+=15; reasons.push('동계 대응'); }
+    return {t,s,reasons};
+  }).sort((x,y)=>y.s-x.s).slice(0,2);
+  // 함께 챙기면 좋은 장비 (계절·전기 기반 1~2개)
+  const pickBy = (cat,re) => (CAMP_GEAR_ITEMS[cat]||[]).find(g=>re.test(g.tags.join(' ')+g.name));
+  const extras = [];
+  if(a.when==='겨울'){
+    const st = pickBy('난방·전원',/등유난로/); if(st) extras.push({g:st, why:'동계 필수 — 일산화탄소 경보기와 함께'});
+    if(a.elec==='yes'){ const eb=pickBy('난방·전원',/전기요|전기담요/); if(eb) extras.push({g:eb, why:'전기사이트면 바닥 보온 해결'}); }
+  } else {
+    const ic = pickBy('아이스박스',/가성비|대용량/); if(ic) extras.push({g:ic, why:'식재료 보냉'});
+  }
+  if(a.style==='감성' && extras.length<2){ const lt=pickBy('랜턴',/감성/); if(lt) extras.push({g:lt, why:'밤 분위기 담당'}); }
+  // 캠핑장 점수화
+  const grounds = CAMPGROUNDS.map(cg=>{
+    let s=0; const reasons=[];
+    if(a.elec==='yes'){ if(cg.elec){ s+=30; reasons.push('전기 사이트'); } else s-=30; }
+    if(a.when==='겨울' && /사계절/.test(cg.season)){ s+=20; reasons.push('사계절 운영'); }
+    if(a.when==='여름' && /여름|사계절/.test(cg.season)){ s+=12; }
+    if(a.style==='감성' && (cg.type==='글램핑'||cg.type==='휴양림')){ s+=15; reasons.push('감성·숲'); }
+    if(a.style==='기능' && cg.type==='오토'){ s+=10; }
+    if(a.party==='family' && (cg.keyword||[]).includes('가족')){ s+=15; reasons.push('가족 캠핑 인기'); }
+    if(a.party==='solo' && a.style==='감성' && cg.type==='글램핑'){ s+=10; }
+    return {cg,s,reasons};
+  }).sort((x,y)=>y.s-x.s).slice(0,2);
+  // 렌더
+  const profile = [
+    ({solo:'솔로·커플',family:'가족',group:'단체'})[a.party], a.style, a.when,
+    a.elec && (a.elec==='yes'?'전기':'무전원'),
+    ({low:'가성비 예산',mid:'중급 예산',high:'프리미엄 예산'})[a.budgetC]
+  ].filter(Boolean).join(' · ');
+  let html = `<div class="res-head">당신의 프로필 — ${profile}</div>`;
+  html += `<div style="font-size:13px;font-weight:800;color:var(--forest);margin:4px 0 8px">추천 텐트</div>`;
+  tents.forEach(x=>{
+    const t=x.t;
+    html += `<div class="pick">
+      <div class="top"><span class="nm">${esc(t.name)}</span><span class="badge">~${t.price}만</span></div>
+      <div class="meta">${esc(t.brand)} · ${t.tags.slice(0,3).join(' · ')}</div>
+      <div class="why">${x.reasons.slice(0,3).join(', ') || '전반적으로 무난한 선택'}</div>
+    </div>`;
+  });
+  if(extras.length){
+    html += `<div style="font-size:13px;font-weight:800;color:var(--forest);margin:16px 0 8px">함께 챙기면 좋은 장비</div>`;
+    extras.forEach(x=>{
+      html += `<div class="pick">
+        <div class="top"><span class="nm">${esc(x.g.name)}</span><span class="badge" style="background:var(--brand);color:#2c2408">~${x.g.price}만</span></div>
+        <div class="meta">${esc(x.g.brand)}</div><div class="why">${esc(x.why)}</div>
+      </div>`;
+    });
+  }
+  html += `<div style="font-size:13px;font-weight:800;color:var(--forest);margin:16px 0 8px">추천 캠핑장</div>`;
+  if(grounds[0] && grounds[0].s>0){
+    grounds.forEach(x=>{
+      const cg=x.cg;
+      html += `<div class="pick">
+        <div class="top"><span class="nm">${esc(cg.name)}</span><span class="badge" style="background:var(--forest)">${esc(cg.type)}</span></div>
+        <div class="meta">${esc(cg.region)} · ${esc(cg.season)}${cg.price?' · '+esc(cg.price):''}</div>
+        <div class="why">${x.reasons.slice(0,3).join(', ') || '무난한 선택'}</div>
+      </div>`;
+    });
+  } else {
+    html += `<div class="empty">조건에 맞는 캠핑장이 없어요. 전기 조건을 바꿔보세요 🙂</div>`;
+  }
+  html += `<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+    <button class="btn btn-ghost" style="flex:1;min-width:130px;color:var(--forest);border-color:var(--sage)" onclick="showView('gear')">전체 장비 보기</button>
+    <button class="btn btn-ghost" style="flex:1;min-width:130px;color:var(--forest);border-color:var(--sage)" onclick="showView('spots')">전체 캠핑장 보기</button>
+  </div>`;
+  const res = $('#resultCamp');
+  res.innerHTML = html; res.classList.add('show');
+  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+// 도메인에 따라 매칭 도구 전환 (백패킹 ↔ 오토캠핑)
+function applyDomainToTool(){
+  const camp = domain==='camp';
+  const bp=$('#toolBp'), cp=$('#toolCamp');
+  if(bp) bp.style.display = camp?'none':'';
+  if(cp) cp.style.display = camp?'':'none';
+  const tt=$('#toolTitle'), ts=$('#toolSub');
+  if(tt) tt.textContent = camp ? '나에게 맞는 캠핑 장비 · 캠핑장 찾기' : '나에게 맞는 장비 · 박지 찾기';
+  if(ts) ts.innerHTML = camp
+    ? '아래 항목을 선택하면 <b>대형텐트 + 계절 장비 + 캠핑장</b>을 한 번에 추천해 드려요.'
+    : '아래 항목을 선택하면 <b>텐트 + 예산별 장비(침낭·매트·배낭 등) + 박지</b>를 한 번에 추천해 드려요.';
+}
+
 /* ---------- 2. 텐트 데이터베이스 (검색·필터·정렬·페이지네이션) ---------- */
 const PAGE = 24;
 const tState = { q:'', kws:new Set(), brand:'', cap:'', sort:'weight', limit:PAGE };
@@ -348,6 +449,9 @@ function selectDomain(d){
   selectCat(catsFor(domain)[0]);   // 첫 카테고리로
   renderReviews(); renderGallery();
   applyDomainToSpots();            // 박지 ↔ 오토캠핑장 스위칭
+  applyDomainToTool();             // 매칭 도구 스위칭
+  checkPreset = domain==='camp' ? '오토캠핑' : '백패킹 기본';   // 체크리스트 기본 프리셋
+  renderCheckTabs(); renderCheck();
 }
 let curCat = '텐트', gearQuery = '', gearLimit = PAGE;
 const _fmtW = w => w>=1000 ? (Math.round(w/10)/100)+'kg' : w+'g';
@@ -790,11 +894,28 @@ function setupSpots(){
   applyDomainToSpots();   // 초기(백패킹) 헤더·칩·목록 구성
 }
 
-/* ---------- 5. 체크리스트 ---------- */
+/* ---------- 5. 체크리스트 (상황별 프리셋 + 체크상태 저장) ---------- */
+let checkPreset = "백패킹 기본";
+const _ckKey = () => 'aonda_check_' + checkPreset;
+function renderCheckTabs(){
+  const tabs = $('#checkTabs'); if(!tabs) return;
+  tabs.innerHTML = Object.keys(CHECKLISTS).map(k=>
+    `<div class="fchip${k===checkPreset?' on':''}" data-ck="${k}">${k}</div>`).join('');
+  $$('#checkTabs .fchip').forEach(f=>f.addEventListener('click',()=>{
+    checkPreset = f.dataset.ck; renderCheckTabs(); renderCheck();
+  }));
+}
 function renderCheck(){
-  $('#checkList').innerHTML = CHECKLIST.map((c,i)=>`
-    <div class="ci" data-i="${i}"><span class="box"></span><span class="lbl">${c}</span></div>`).join('');
-  $$('#checkList .ci').forEach(ci=>ci.addEventListener('click',()=>ci.classList.toggle('done')));
+  const items = CHECKLISTS[checkPreset] || [];
+  let done = new Set();
+  try{ done = new Set(JSON.parse(localStorage.getItem(_ckKey())||'[]')); }catch(e){}
+  $('#checkList').innerHTML = items.map((c,i)=>`
+    <div class="ci${done.has(i)?' done':''}" data-i="${i}"><span class="box"></span><span class="lbl">${c}</span></div>`).join('');
+  $$('#checkList .ci').forEach(ci=>ci.addEventListener('click',()=>{
+    ci.classList.toggle('done');
+    const d=[...$$('#checkList .ci')].filter(x=>x.classList.contains('done')).map(x=>+x.dataset.i);
+    localStorage.setItem(_ckKey(), JSON.stringify(d));
+  }));
 }
 
 /* ---------- 홈 바로가기 카드 ---------- */
@@ -1142,7 +1263,7 @@ function renderStars(){
 /* ---------- init ---------- */
 renderMenu(); renderCrew(); setupTentControls(); renderTents(); renderDeals(); setupSpots(); renderSpots();
 setupEvents(); renderEvents();
-renderReviews(); renderGallery(); renderCheck(); renderStars();
+renderReviews(); renderGallery(); renderCheckTabs(); renderCheck(); renderStars();
 setupReviewForm(); setupContact();
 setupViews();                        // 앱형 탭 뷰 전환 (홈 뷰로 시작)
 if(supaOn()) fetchRemoteReviews();   // 백엔드 설정 시 전체 후기 로드

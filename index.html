@@ -525,10 +525,55 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 <!-- MATCHING TOOL -->
 <section id="tool" class="section-alt" data-view="home"><div class="wrap">
   <div class="eyebrow">Gear Finder</div>
-  <h2>나에게 맞는 장비 · 박지 찾기</h2>
-  <p class="sub">아래 항목을 선택하면 <b>텐트 + 예산별 장비(침낭·매트·배낭 등) + 박지</b>를 한 번에 추천해 드려요.</p>
+  <h2 id="toolTitle">나에게 맞는 장비 · 박지 찾기</h2>
+  <p class="sub" id="toolSub">아래 항목을 선택하면 <b>텐트 + 예산별 장비(침낭·매트·배낭 등) + 박지</b>를 한 번에 추천해 드려요.</p>
 
-  <div class="tool">
+  <!-- 오토캠핑 도메인 전용 매칭 (기본 숨김) -->
+  <div class="tool" id="toolCamp" style="display:none">
+    <div class="q">
+      <div class="q-label"><span class="n">1</span> 함께 가는 인원</div>
+      <div class="opts" data-q="party">
+        <div class="opt" data-v="solo">솔로·커플</div>
+        <div class="opt" data-v="family">3~4인 가족</div>
+        <div class="opt" data-v="group">5인+ 단체</div>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-label"><span class="n">2</span> 캠핑 스타일</div>
+      <div class="opts" data-q="style">
+        <div class="opt" data-v="감성">감성<small>면텐트·무드</small></div>
+        <div class="opt" data-v="기능">기능<small>2룸·실용</small></div>
+        <div class="opt" data-v="입문">입문<small>가성비</small></div>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-label"><span class="n">3</span> 사이트 전기</div>
+      <div class="opts" data-q="elec">
+        <div class="opt" data-v="yes">전기 필요</div>
+        <div class="opt" data-v="no">무전원 OK</div>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-label"><span class="n">4</span> 주로 가는 계절</div>
+      <div class="opts" data-q="when">
+        <div class="opt" data-v="여름">여름</div>
+        <div class="opt" data-v="봄가을">봄·가을</div>
+        <div class="opt" data-v="겨울">겨울</div>
+      </div>
+    </div>
+    <div class="q">
+      <div class="q-label"><span class="n">5</span> 텐트 예산</div>
+      <div class="opts" data-q="budgetC">
+        <div class="opt" data-v="low">~30만<small>가성비</small></div>
+        <div class="opt" data-v="mid">30~70만<small>중급</small></div>
+        <div class="opt" data-v="high">70만+<small>프리미엄</small></div>
+      </div>
+    </div>
+    <button class="btn btn-primary run-btn" onclick="runMatchCamp()">추천 결과 보기</button>
+    <div class="result" id="resultCamp"></div>
+  </div>
+
+  <div class="tool" id="toolBp">
     <div class="q">
       <div class="q-label"><span class="n">1</span> 아웃도어 성향</div>
       <div class="opts" data-q="vibe">
@@ -791,8 +836,9 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 <!-- CHECKLIST -->
 <section id="check" data-view="home"><div class="wrap">
   <div class="eyebrow">Packing List</div>
-  <h2>백패킹 기본 체크리스트</h2>
-  <p class="sub">떠나기 전 탭해서 하나씩 확인. 쓰레기는 반드시 되가져오기!</p>
+  <h2>패킹 체크리스트</h2>
+  <p class="sub">상황별 리스트를 골라 떠나기 전 하나씩 확인. 체크 상태는 기기에 저장돼요. 쓰레기는 반드시 되가져오기!</p>
+  <div class="filter-bar" id="checkTabs"></div>
   <div class="check-grid" id="checkList"></div>
 </div></section>
 
@@ -843,7 +889,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <p class="pp-note">무게는 추정치 기반 대략 합계입니다. 담은 장비 = 베이스웨이트(소모품 제외) 기준으로 등급을 매겨요.</p>
 </div>
 
-<script src="data.js?v=22"></script>
-<script src="app.js?v=22"></script>
+<script src="data.js?v=23"></script>
+<script src="app.js?v=23"></script>
 </body>
 </html>
