@@ -1066,6 +1066,81 @@ function openLightbox(i){
 }
 function closeLightbox(){ $('#lightbox').style.display='none'; $('#lb-img').src=''; }
 
+/* ---------- 다음 모임 + 참석투표 (Supabase rsvp 테이블, 없으면 안내 폴백) ---------- */
+let rsvpOK = null;   // null=미확인, true/false=테이블 존재 여부
+const activeMeetups = () => (typeof MEETUPS!=='undefined' ? MEETUPS.filter(m=>m.status!=='마감') : []);
+function ddayLabel(iso){
+  if(!iso) return '';
+  const d = Math.round((new Date(iso+'T00:00:00+09:00') - new Date(new Date().toDateString()))/86400000);
+  return d===0 ? 'D-DAY' : (d>0 ? 'D-'+d : '지남');
+}
+async function fetchRsvp(mid){
+  const res = await fetch(`${SUPABASE.url}/rest/v1/rsvp?meetup_id=eq.${encodeURIComponent(mid)}&select=name,status,created_at&order=created_at.desc`, {headers:supaHeaders()});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const rows = await res.json();
+  const seen = new Set(), latest = [];
+  rows.forEach(r=>{ const k=r.name.trim(); if(!seen.has(k)){ seen.add(k); latest.push(r); } });  // 이름당 최신 투표만
+  return latest;
+}
+function meetupCardHTML(m, votes){
+  const dd = ddayLabel(m.dateISO);
+  const yes = votes ? votes.filter(v=>v.status==='참석') : [];
+  const no  = votes ? votes.filter(v=>v.status==='불참') : [];
+  const nick = localStorage.getItem('aonda_nick') || '';
+  return `<div class="mt-card" data-mid="${esc(m.id)}">
+    <div class="mt-top">
+      ${dd?`<span class="mt-dday${dd==='D-DAY'?' today':''}">${dd}</span>`:''}
+      <span class="mt-title">${esc(m.title)}</span>
+      <span class="mt-state">${esc(m.status||'모집중')}</span>
+    </div>
+    <div class="mt-meta">${esc(m.date||'')}${m.where?' · '+esc(m.where):''}</div>
+    ${m.note?`<div class="mt-note">${esc(m.note)}</div>`:''}
+    ${votes ? `
+      <div class="mt-counts"><span>참석 ${yes.length}</span><span class="no">불참 ${no.length}</span></div>
+      ${yes.length?`<div class="mt-names">${yes.map(v=>esc(v.name)).join(' · ')}</div>`:''}
+      <div class="mt-vote">
+        <input class="mt-nick" placeholder="닉네임" value="${esc(nick)}" maxlength="12">
+        <button class="yes" onclick="rsvpVote(this,'참석')">참석</button>
+        <button class="no" onclick="rsvpVote(this,'불참')">불참</button>
+      </div>
+      <div class="mt-hint">다시 누르면 최신 선택으로 바뀌어요.</div>`
+    : `<div class="mt-hint" style="margin-top:12px">참석 여부는 <a href="${CONTACT.kakao}" target="_blank" rel="noopener" style="font-weight:800;color:var(--brand-d)">오픈채팅</a>으로 알려주세요!</div>`}
+  </div>`;
+}
+async function renderMeetups(){
+  const sec = $('#meetup'), list = $('#meetupList');
+  if(!sec || !list) return;
+  const ms = activeMeetups();
+  if(!ms.length){ sec.style.display='none'; return; }
+  sec.style.display='';
+  if(rsvpOK===null && supaOn()){
+    try{ await fetchRsvp('__ping__'); rsvpOK=true; }catch(e){ rsvpOK=false; }   // 테이블 존재 확인
+  }
+  const cards = await Promise.all(ms.map(async m=>{
+    let votes = null;
+    if(rsvpOK){ try{ votes = await fetchRsvp(m.id); }catch(e){ votes = null; } }
+    return meetupCardHTML(m, votes);
+  }));
+  list.innerHTML = cards.join('');
+}
+async function rsvpVote(btn, status){
+  const card = btn.closest('.mt-card');
+  const name = card.querySelector('.mt-nick').value.trim();
+  if(!name){ alert('닉네임을 먼저 적어주세요 🙂'); return; }
+  localStorage.setItem('aonda_nick', name);
+  btn.disabled = true;
+  try{
+    const res = await fetch(`${SUPABASE.url}/rest/v1/rsvp`, {
+      method:'POST',
+      headers:{...supaHeaders(), Prefer:'return=minimal'},
+      body: JSON.stringify({meetup_id:card.dataset.mid, name, status}),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    toast(`${name}님 ${status} 완료!`);
+    renderMeetups();
+  }catch(e){ alert('전송에 실패했어요. 잠시 후 다시 시도해 주세요.'); btn.disabled=false; }
+}
+
 /* ---------- 아온다 발자국 (크루 방문 기록 지도) ---------- */
 let tripMap = null;
 function tripPeople(tr){
@@ -1287,4 +1362,5 @@ setupReviewForm(); setupContact();
 setupViews();                        // 앱형 탭 뷰 전환 (홈 뷰로 시작)
 if(supaOn()) fetchRemoteReviews();   // 백엔드 설정 시 전체 후기 로드
 renderPackUI();                      // 내 장비함 (localStorage 복원)
+renderMeetups();                     // 다음 모임 + 참석투표 (일정 없으면 숨김)
 if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }  // PWA 오프라인

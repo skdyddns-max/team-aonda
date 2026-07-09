@@ -578,6 +578,13 @@ const TRIPS = [
     note:"칼바람 설산 능선 — 동계 첫 도전", photo:"", insta:"" },
 ];
 
+// ── 크루 모임 일정 (홈 탭 '다음 모임' 카드 + 참석투표) ──
+// 모임을 열려면 아래 예시처럼 객체를 추가하세요. dateISO는 D-day 계산용.
+// 끝난 모임은 status:"마감"으로 바꾸거나 줄을 지우면 됩니다. 비어 있으면 섹션 자체가 숨겨져요.
+// { id:"m2607", title:"7월 정기 백패킹", where:"선자령", date:"7/19(토)~20(일)",
+//   dateISO:"2026-07-19", note:"별 보러 갑니다. 초보 환영!", status:"모집중" },
+const MEETUPS = [];
+
 const CONTACT = {
   kakao: "https://open.kakao.com/o/g9pC3BIh",
   instagram: "https://www.instagram.com/team_a.o.d",   // 팀아온다 인스타
