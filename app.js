@@ -699,7 +699,8 @@ function eventCardHTML(ev){
   const href = ev.url || naverURL(ev.q);
   return `<a class="evt" href="${href}" target="_blank" rel="noopener">
     <div class="eh"><span class="enm">${esc(ev.name)}</span>
-      <span class="etype ${tr?'tr':'bp'}">${esc(ev.type)}</span></div>
+      <span class="etype ${tr?'tr':'bp'}">${esc(ev.type)}</span>
+      <span class="evshare" role="button" onclick="shareEvent(event,'${encodeURIComponent(ev.name)}')">공유</span></div>
     <div class="emeta">${esc(ev.when)} · ${esc(ev.region)}</div>
     <div class="edesc">${esc(ev.desc)}</div>
   </a>`;
@@ -1105,6 +1106,7 @@ function meetupCardHTML(m, votes){
       </div>
       <div class="mt-hint">다시 누르면 최신 선택으로 바뀌어요.</div>`
     : `<div class="mt-hint" style="margin-top:12px">참석 여부는 <a href="${CONTACT.kakao}" target="_blank" rel="noopener" style="font-weight:800;color:var(--brand-d)">오픈채팅</a>으로 알려주세요!</div>`}
+    <button class="mt-share" onclick="shareMeetup(this.closest('.mt-card').dataset.mid)">일정 공유하기 (카톡·문자)</button>
   </div>`;
 }
 async function renderMeetups(){
@@ -1122,6 +1124,37 @@ async function renderMeetups(){
     return meetupCardHTML(m, votes);
   }));
   list.innerHTML = cards.join('');
+}
+/* ── 일정 공유 (모바일 공유 시트 → 카톡 선택, 미지원 시 클립보드 복사) ── */
+const SITE_URL = 'https://skdyddns-max.github.io/team-aonda/';
+async function shareText(text){
+  if(navigator.share){
+    try{ await navigator.share({ text }); return; }catch(e){ if(e.name==='AbortError') return; }
+  }
+  try{ await navigator.clipboard.writeText(text); toast('일정이 복사됐어요 — 카톡에 붙여넣기!'); }
+  catch(e){ prompt('아래 내용을 복사해서 공유하세요', text); }
+}
+function shareMeetup(mid){
+  const m = (typeof MEETUPS!=='undefined' ? MEETUPS : []).find(x=>x.id===mid); if(!m) return;
+  const dd = ddayLabel(m.dateISO);
+  shareText([
+    `[팀아온다] 다음 모임${dd?` (${dd})`:''}`,
+    `· ${m.title}`,
+    `· ${m.date}${m.where?` · ${m.where}`:''}`,
+    m.note?`· ${m.note}`:'',
+    `참석 투표 → ${SITE_URL}#home`,
+  ].filter(Boolean).join('\n'));
+}
+function shareEvent(e, name){
+  e.preventDefault(); e.stopPropagation();
+  const ev = EVENTS.find(x=>x.name===decodeURIComponent(name)); if(!ev) return;
+  shareText([
+    `[팀아온다] 행사 공유`,
+    `· ${ev.name} (${ev.type})`,
+    `· ${ev.when} · ${ev.region}`,
+    ev.desc?`· ${ev.desc}`:'',
+    `자세히 → ${ev.url || naverURL(ev.q)}`,
+  ].filter(Boolean).join('\n'));
 }
 async function rsvpVote(btn, status){
   const card = btn.closest('.mt-card');

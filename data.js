@@ -583,7 +583,10 @@ const TRIPS = [
 // 끝난 모임은 status:"마감"으로 바꾸거나 줄을 지우면 됩니다. 비어 있으면 섹션 자체가 숨겨져요.
 // { id:"m2607", title:"7월 정기 백패킹", where:"선자령", date:"7/19(토)~20(일)",
 //   dateISO:"2026-07-19", note:"별 보러 갑니다. 초보 환영!", status:"모집중" },
-const MEETUPS = [];
+const MEETUPS = [
+  { id:"m2610", title:"10월 정기 백패킹", where:"선자령", date:"10/17(토)~18(일)",
+    dateISO:"2026-10-17", note:"가을 억새 시즌 선자령 능선 1박. 초보 환영!", status:"모집중" },
+];
 
 const CONTACT = {
   kakao: "https://open.kakao.com/o/g9pC3BIh",
