@@ -329,7 +329,20 @@ function tentMatch(t, opt){
 // 네이버 검색 URL (한글 브랜드명 우선 → 사진·가격·후기 바로 확인)
 function naverURL(q){ return 'https://search.naver.com/search.naver?query=' + encodeURIComponent(q); }
 function krBrand(brand){ return (typeof BRAND_KR!=='undefined' && BRAND_KR[brand]) ? BRAND_KR[brand].split(' ')[0] : brand; }
-function naverSearch(t){ return naverURL(krBrand(t.brand) + ' ' + t.name); }
+// 검색어에 카테고리 단어를 붙여 모호한 모델명 보정 (예: '피라미드' → '피라미드 1P 텐트')
+const CAT_QWORD = {
+  '텐트':'텐트','침낭':'침낭','매트':'캠핑 매트','배낭':'배낭','스토브':'캠핑 스토브','랜턴':'랜턴',
+  '취사·식수':'캠핑','소품·안전':'캠핑','의류':'',
+  '대형텐트':'텐트','타프':'타프','테이블·체어':'캠핑','야전침대·침구':'캠핑','침대·침구':'캠핑',
+  '화로대':'화로대','버너·키친':'캠핑','난방·전원':'캠핑','아이스박스':'아이스박스',
+  '수납·운반':'캠핑','설영·정리':'캠핑','물통·위생':'캠핑',
+};
+function gearQ(brand, name, cat){
+  const w = CAT_QWORD[cat] !== undefined ? CAT_QWORD[cat] : '캠핑';
+  const base = krBrand(brand) + ' ' + name;
+  return (w && !base.includes(w)) ? base + ' ' + w : base;   // 이름에 이미 있으면 중복 방지
+}
+function naverSearch(t){ return naverURL(gearQ(t.brand, t.name, '텐트')); }
 // 네이버 이미지 검색 (썸네일 탭 → 실물 사진 바로)
 function naverImgURL(q){ return 'https://search.naver.com/search.naver?where=image&query=' + encodeURIComponent(q); }
 function openImg(e, q){
@@ -395,7 +408,7 @@ function updatePackVis(){
   if(currentView!=='gear'){ const p=$('#packPanel'); if(p) p.style.display='none'; const h=$('#packHint'); if(h) h.textContent='열기 ▴'; }
 }
 function tentCardHTML(t){
-  return `<a class="tcard withthumb" href="${naverSearch(t)}" target="_blank" rel="noopener">${searchThumb(krBrand(t.brand)+' '+t.name)}${packBtn('텐트',t.brand,t.name,Math.round(t.weight*1000),t.price)}<div class="tcontent">
+  return `<a class="tcard withthumb" href="${naverSearch(t)}" target="_blank" rel="noopener">${searchThumb(gearQ(t.brand,t.name,'텐트'))}${packBtn('텐트',t.brand,t.name,Math.round(t.weight*1000),t.price)}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(t.brand)}
         ${t.verified?'<span class="vbadge" title="웹 조사로 확인된 실측 스펙">✓ 실측</span>'
@@ -469,7 +482,7 @@ function bagSeason(g){
 const _BAG_SEASON_CLS = { '동계':'s4', '삼계절':'s3', '여름·간절기':'s0' };
 function gearCardHTML(g){
   const bs = bagSeason(g);
-  return `<a class="tcard withthumb" href="${naverURL(krBrand(g.brand)+' '+g.name)}" target="_blank" rel="noopener">${searchThumb(krBrand(g.brand)+' '+g.name)}${packBtn(curCat,g.brand,g.name,g.weight||0,(g.price||0)*10000)}<div class="tcontent">
+  return `<a class="tcard withthumb" href="${naverURL(gearQ(g.brand,g.name,curCat))}" target="_blank" rel="noopener">${searchThumb(gearQ(g.brand,g.name,curCat))}${packBtn(curCat,g.brand,g.name,g.weight||0,(g.price||0)*10000)}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(g.brand)}</div><div class="tname">${esc(g.name)}</div></div>
       <span style="display:flex;gap:4px;align-items:center">
