@@ -359,9 +359,9 @@ const PACK_REG = {};                         // pk → {cat,brand,name,weightG,p
 let pack = [];
 try{ pack = JSON.parse(localStorage.getItem('aonda_pack')||'[]'); }catch(e){ pack = []; }
 const packHas = pk => pack.some(p=>p.pk===pk);
-function packBtn(cat, brand, name, weightG, priceWon){
+function packBtn(cat, brand, name, weightG, priceWon, spec){
   const pk = encodeURIComponent(brand+'|'+name);
-  PACK_REG[pk] = { pk, cat, brand, name, weightG: weightG||0, priceWon: priceWon||0 };
+  PACK_REG[pk] = { pk, cat, brand, name, weightG: weightG||0, priceWon: priceWon||0, spec: spec||{} };
   const inp = packHas(pk);
   return `<span class="addpack${inp?' in':''}" role="button" data-pk="${pk}" onclick="packToggle(event,this.dataset.pk)">${inp?'담김 ✓':'담기 +'}</span>`;
 }
@@ -383,24 +383,102 @@ function togglePackPanel(){
 const fmtKg = g => g>=1000 ? (g/1000).toFixed(2)+'kg' : g+'g';
 // 베이스웨이트 등급 (담은 장비 합계 기준 대략)
 const packGrade = w => w<=0 ? '—' : w<=2500 ? 'SUL급' : w<=4500 ? 'UL급' : w<=7000 ? '라이트급' : '전통 백패킹';
+let packView = 'sum';   // 'sum'(합계) | 'cmp'(비교표)
+function setPackView(v){
+  packView = v;
+  $$('#packSeg button').forEach(b=>b.classList.toggle('on', b.dataset.pv===v));
+  renderPackUI();
+}
+// 비교표: 담은 장비의 스펙을 행=항목, 열=제품으로
+function renderCompare(){
+  const box = $('#packCompare');
+  if(pack.length<2){ box.innerHTML = `<div class="empty" style="padding:14px 0">2개 이상 담으면 스펙을 나란히 비교해요.</div>`; return; }
+  const rows = ['가격','무게'];
+  const specKeys = [];
+  pack.forEach(p=>Object.keys(p.spec||{}).forEach(k=>{ if((p.spec[k]||p.spec[k]===0) && p.spec[k]!=='' && !specKeys.includes(k)) specKeys.push(k); }));
+  const allRows = rows.concat(specKeys);
+  const cell = (p,row)=>{
+    if(row==='가격') return p.priceWon?`~${Math.round(p.priceWon/10000)}만`:'—';
+    if(row==='무게') return p.weightG?fmtKg(p.weightG):'—';
+    const v=(p.spec||{})[row]; return (v||v===0)&&v!=='' ? v : '—';
+  };
+  box.innerHTML = `<div class="cmp-wrap"><table class="cmp">
+    <thead><tr><th></th>${pack.map(p=>`<th>${esc(p.name)}<small>${esc(p.brand)}</small></th>`).join('')}</tr></thead>
+    <tbody>${allRows.map(r=>`<tr><td class="k">${esc(r)}</td>${pack.map(p=>`<td>${esc(String(cell(p,r)))}</td>`).join('')}</tr>`).join('')}</tbody>
+  </table></div>`;
+}
 function renderPackUI(){
   const bar=$('#packBar'); if(!bar) return;
   const totalW = pack.reduce((s,p)=>s+(p.weightG||0),0);
   const totalP = pack.reduce((s,p)=>s+(p.priceWon||0),0);
   $('#packSummary').textContent = `내 장비함 ${pack.length} · ${fmtKg(totalW)}`;
-  $('#packList').innerHTML = pack.length
-    ? pack.map(p=>`<div class="pp-row">
-        <div class="nm">${esc(p.name)}<small>${esc(p.brand)} · ${esc(p.cat)}</small></div>
-        <span class="wt">${p.weightG?fmtKg(p.weightG):'무게 —'}</span>
-        <button class="rm" data-pk="${p.pk}" onclick="removePack(this.dataset.pk)" aria-label="빼기">×</button>
-      </div>`).join('')
-    : `<div class="empty" style="padding:14px 0">장비 카드의 <b>담기 +</b> 를 눌러보세요.</div>`;
-  $('#packTotal').innerHTML = `
-    <span>총무게<b>${fmtKg(totalW)}</b></span>
-    <span>총가격<b>약 ${Math.round(totalP/10000)}만</b></span>
-    <span class="grade">등급<b>${packGrade(totalW)}</b></span>`;
+  const cmp = packView==='cmp';
+  $('#packList').style.display = cmp?'none':'';
+  $('#packTotal').style.display = cmp?'none':'';
+  $('#packCompare').style.display = cmp?'':'none';
+  if(cmp){ renderCompare(); }
+  else {
+    $('#packList').innerHTML = pack.length
+      ? pack.map(p=>`<div class="pp-row">
+          <div class="nm">${esc(p.name)}<small>${esc(p.brand)} · ${esc(p.cat)}</small></div>
+          <span class="wt">${p.weightG?fmtKg(p.weightG):'무게 —'}</span>
+          <button class="rm" data-pk="${p.pk}" onclick="removePack(this.dataset.pk)" aria-label="빼기">×</button>
+        </div>`).join('')
+      : `<div class="empty" style="padding:14px 0">장비 카드의 <b>담기 +</b> 를 눌러보세요.</div>`;
+    $('#packTotal').innerHTML = `
+      <span>총무게<b>${fmtKg(totalW)}</b></span>
+      <span>총가격<b>약 ${Math.round(totalP/10000)}만</b></span>
+      <span class="grade">등급<b>${packGrade(totalW)}</b></span>`;
+  }
+  renderPackSets();
   $$('.addpack').forEach(b=>{ const i=packHas(b.dataset.pk); b.classList.toggle('in',i); b.textContent=i?'담김 ✓':'담기 +'; });
   updatePackVis();
+}
+/* ── 장비함 저장 세트 (여름/동계 등 여러 구성 저장) ── */
+function loadSets(){ try{ return JSON.parse(localStorage.getItem('aonda_pack_sets')||'{}'); }catch(e){ return {}; } }
+function saveSets(s){ localStorage.setItem('aonda_pack_sets', JSON.stringify(s)); }
+function savePackSet(){
+  if(!pack.length){ alert('먼저 장비를 담아주세요 🙂'); return; }
+  const name = (prompt('세트 이름 (예: 동계 세트, 여름 UL)')||'').trim();
+  if(!name) return;
+  const sets = loadSets(); sets[name] = pack.map(p=>({...p})); saveSets(sets);
+  toast(`'${name}' 저장 완료`); renderPackSets();
+}
+function loadPackSet(name){
+  const sets = loadSets(); if(!sets[name]) return;
+  pack = sets[name].map(p=>({...p}));
+  pack.forEach(p=>{ PACK_REG[p.pk]=p; });   // 카드 버튼 동기화용 재등록
+  localStorage.setItem('aonda_pack', JSON.stringify(pack));
+  toast(`'${name}' 불러옴`); renderPackUI();
+}
+function deletePackSet(name){
+  const sets = loadSets(); delete sets[name]; saveSets(sets); renderPackSets();
+}
+function renderPackSets(){
+  const box = $('#packSets'); if(!box) return;
+  const sets = loadSets(); const names = Object.keys(sets);
+  box.innerHTML = names.length
+    ? `<div class="pp-sets-h">저장된 세트</div>` + names.map(n=>{
+        const d = encodeURIComponent(n);
+        return `<div class="pp-set">
+          <button class="ps-load" data-n="${d}" onclick="loadPackSet(decodeURIComponent(this.dataset.n))">${esc(n)} <small>${sets[n].length}개</small></button>
+          <button class="ps-del" data-n="${d}" onclick="deletePackSet(decodeURIComponent(this.dataset.n))" aria-label="삭제">×</button>
+        </div>`;
+      }).join('')
+    : '';
+}
+/* ── 패킹리스트 공유 (카톡 등) ── */
+function sharePack(){
+  if(!pack.length){ alert('먼저 장비를 담아주세요 🙂'); return; }
+  const totalW = pack.reduce((s,p)=>s+(p.weightG||0),0);
+  const totalP = pack.reduce((s,p)=>s+(p.priceWon||0),0);
+  const lines = [
+    `[팀아온다] 내 패킹리스트 (${pack.length}종)`,
+    ...pack.map(p=>`· ${p.name} (${p.brand})${p.weightG?` ${fmtKg(p.weightG)}`:''}`),
+    `— 총 ${fmtKg(totalW)} · 약 ${Math.round(totalP/10000)}만원 · ${packGrade(totalW)}`,
+    `장비 담아보기 → ${SITE_URL}#gear`,
+  ];
+  shareText(lines.join('\n'));
 }
 function updatePackVis(){
   const bar=$('#packBar'); if(!bar) return;
@@ -408,7 +486,7 @@ function updatePackVis(){
   if(currentView!=='gear'){ const p=$('#packPanel'); if(p) p.style.display='none'; const h=$('#packHint'); if(h) h.textContent='열기 ▴'; }
 }
 function tentCardHTML(t){
-  return `<a class="tcard withthumb" href="${naverSearch(t)}" target="_blank" rel="noopener">${searchThumb(gearQ(t.brand,t.name,'텐트'))}${packBtn('텐트',t.brand,t.name,Math.round(t.weight*1000),t.price)}<div class="tcontent">
+  return `<a class="tcard withthumb" href="${naverSearch(t)}" target="_blank" rel="noopener">${searchThumb(gearQ(t.brand,t.name,'텐트'))}${packBtn('텐트',t.brand,t.name,Math.round(t.weight*1000),t.price,{인원:t.cap,계절:t.season===4?'사계절':'삼계절',구조:t.struct,월:t.wall})}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(t.brand)}
         ${t.verified?'<span class="vbadge" title="웹 조사로 확인된 실측 스펙">✓ 실측</span>'
@@ -482,7 +560,7 @@ function bagSeason(g){
 const _BAG_SEASON_CLS = { '동계':'s4', '삼계절':'s3', '여름·간절기':'s0' };
 function gearCardHTML(g){
   const bs = bagSeason(g);
-  return `<a class="tcard withthumb" href="${naverURL(gearQ(g.brand,g.name,curCat))}" target="_blank" rel="noopener">${searchThumb(gearQ(g.brand,g.name,curCat))}${packBtn(curCat,g.brand,g.name,g.weight||0,(g.price||0)*10000)}<div class="tcontent">
+  return `<a class="tcard withthumb" href="${naverURL(gearQ(g.brand,g.name,curCat))}" target="_blank" rel="noopener">${searchThumb(gearQ(g.brand,g.name,curCat))}${packBtn(curCat,g.brand,g.name,g.weight||0,(g.price||0)*10000,{리밋온도:g.temp!==undefined?(g.temp>0?'+':'')+g.temp+'℃':'',충전재:g.fill,타입:g.type,'R값':g.rval,용량:g.vol?g.vol+'L':'',밝기:g.lumen?g.lumen+'lm':''})}<div class="tcontent">
     <div class="row1">
       <div><div class="brand">${esc(g.brand)}</div><div class="tname">${esc(g.name)}</div></div>
       <span style="display:flex;gap:4px;align-items:center">
