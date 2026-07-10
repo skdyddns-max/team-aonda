@@ -187,6 +187,19 @@ h2{font-size:26px;line-height:1.25;margin:6px 0 4px;font-weight:850;letter-spaci
 .pp-total .grade b{color:var(--brand-d)}
 .pp-note{font-size:11px;color:var(--muted);margin-top:8px}
 .pp-seg{margin:2px 0 12px}
+/* 장비 랭킹 */
+#insMetric{margin-top:-6px}
+#insMetric .fchip.sub{font-size:12.5px;padding:6px 12px;background:#fff;border:1.5px solid var(--line)}
+#insMetric .fchip.sub.on{background:var(--sage);color:#fff;border-color:var(--sage)}
+.ins-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px 15px;margin-bottom:9px;box-shadow:var(--shadow);color:inherit;text-decoration:none}
+.ins-row:hover{border-color:var(--sage)}
+.ins-rank{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:13px;background:#eef2e8;color:var(--moss)}
+.ins-rank.r1{background:var(--brand);color:#2c2408}
+.ins-rank.r2{background:#d8dee6;color:#3a4654}
+.ins-rank.r3{background:#e8d3c0;color:#7a4f2c}
+.ins-nm{flex:1;min-width:0;font-weight:850;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ins-nm small{display:block;font-weight:700;color:var(--muted);font-size:11.5px}
+.ins-stat{flex:0 0 auto;font-weight:850;color:var(--terra-d);font-size:15px}
 .pp-actions{display:flex;gap:8px;margin-top:14px}
 .pp-btn.wide{flex:1;padding:11px;font-size:13px}
 .cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:4px}
@@ -881,6 +894,16 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 </div></section>
 
 <!-- CHECKLIST -->
+<!-- 장비 인사이트·랭킹 -->
+<section id="insight" data-view="home"><div class="wrap">
+  <div class="eyebrow">Gear Insights</div>
+  <h2>장비 랭킹</h2>
+  <p class="sub">카테고리와 기준을 고르면 상위 5개를 보여줘요. 담긴 데이터 기반 대략치예요.</p>
+  <div class="filter-bar" id="insCat"></div>
+  <div class="filter-bar" id="insMetric"></div>
+  <div id="insList"></div>
+</div></section>
+
 <section id="check" data-view="home"><div class="wrap">
   <div class="eyebrow">Packing List</div>
   <h2>패킹 체크리스트</h2>
@@ -946,7 +969,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <p class="pp-note">무게는 추정치 기반 대략 합계입니다. 담은 장비 = 베이스웨이트(소모품 제외) 기준으로 등급을 매겨요.</p>
 </div>
 
-<script src="data.js?v=29"></script>
-<script src="app.js?v=29"></script>
+<script src="data.js?v=30"></script>
+<script src="app.js?v=30"></script>
 </body>
 </html>

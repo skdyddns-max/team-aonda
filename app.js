@@ -992,6 +992,57 @@ function setupSpots(){
   applyDomainToSpots();   // 초기(백패킹) 헤더·칩·목록 구성
 }
 
+/* ---------- 장비 인사이트·랭킹 ---------- */
+// 카테고리별 아이템을 통일 형태로: {brand,name,weightG,priceMan,temp,rval,lumen,vol,value}
+function insightItems(cat){
+  if(cat==='텐트') return TENTS.map(t=>({brand:t.brand,name:t.name,weightG:Math.round(t.weight*1000),priceMan:Math.round(t.price/10000),value:t.value}));
+  return (GEAR_ITEMS[cat]||[]).map(g=>({brand:g.brand,name:g.name,weightG:g.weight||0,priceMan:g.price||0,temp:g.temp,rval:g.rval,lumen:g.lumen,vol:g.vol,value:g.value}));
+}
+// 카테고리별 사용 가능한 기준 [key, label, 정렬fn(오름=상위), 표시fn]
+const INSIGHT_METRICS = {
+  light:  ['light','가벼운 순', a=>a.weightG||9e9, x=>x.weightG?fmtKg(x.weightG):'—'],
+  cheap:  ['cheap','저렴한 순', a=>a.priceMan||9e9, x=>x.priceMan?`~${x.priceMan}만`:'—'],
+  value:  ['value','가성비 픽', a=>(a.value?0:1)*1e6 + (a.priceMan||9e9), x=>`~${x.priceMan}만${x.value?' · 가성비':''}`],
+  warm:   ['warm','따뜻한 순', a=>a.temp!==undefined?a.temp:9e9, x=>x.temp!==undefined?`${x.temp>0?'+':''}${x.temp}℃`:'—'],
+  rval:   ['rval','보온(R값) 순', a=>a.rval!==undefined?-a.rval:9e9, x=>x.rval!==undefined?`R${x.rval}`:'—'],
+  bright: ['bright','밝은 순', a=>a.lumen?-a.lumen:9e9, x=>x.lumen?`${x.lumen}lm`:'—'],
+  big:    ['big','대용량 순', a=>a.vol?-a.vol:9e9, x=>x.vol?`${x.vol}L`:'—'],
+};
+const INSIGHT_CATS = [
+  ['텐트', ['light','cheap','value']],
+  ['침낭', ['light','cheap','warm']],
+  ['매트', ['light','cheap','rval']],
+  ['배낭', ['light','cheap','big']],
+  ['스토브', ['light','cheap']],
+  ['랜턴', ['bright','light','cheap']],
+];
+let insCat = '텐트', insMetric = 'light';
+function renderInsCat(){
+  $('#insCat').innerHTML = INSIGHT_CATS.map(([c])=>`<div class="fchip${c===insCat?' on':''}" data-ic="${c}">${c}</div>`).join('');
+  $$('#insCat .fchip').forEach(f=>f.addEventListener('click',()=>{
+    insCat=f.dataset.ic;
+    const metrics=(INSIGHT_CATS.find(x=>x[0]===insCat)||[])[1]||['light'];
+    if(!metrics.includes(insMetric)) insMetric=metrics[0];
+    renderInsCat(); renderInsMetric(); renderInsList();
+  }));
+}
+function renderInsMetric(){
+  const metrics=(INSIGHT_CATS.find(x=>x[0]===insCat)||[])[1]||['light'];
+  $('#insMetric').innerHTML = metrics.map(m=>`<div class="fchip sub${m===insMetric?' on':''}" data-im="${m}">${INSIGHT_METRICS[m][1]}</div>`).join('');
+  $$('#insMetric .fchip').forEach(f=>f.addEventListener('click',()=>{ insMetric=f.dataset.im; renderInsMetric(); renderInsList(); }));
+}
+function renderInsList(){
+  const [,,sortFn,fmt] = INSIGHT_METRICS[insMetric];
+  const top = insightItems(insCat).slice().sort((a,b)=>sortFn(a)-sortFn(b)).slice(0,5);
+  $('#insList').innerHTML = top.map((x,i)=>`
+    <a class="ins-row" href="${naverURL(gearQ(x.brand,x.name,insCat))}" target="_blank" rel="noopener">
+      <span class="ins-rank r${i+1}">${i+1}</span>
+      <span class="ins-nm">${esc(x.name)}<small>${esc(x.brand)}</small></span>
+      <span class="ins-stat">${fmt(x)}</span>
+    </a>`).join('') || `<div class="empty">데이터가 없어요.</div>`;
+}
+function renderInsight(){ renderInsCat(); renderInsMetric(); renderInsList(); }
+
 /* ---------- 5. 체크리스트 (상황별 프리셋 + 체크상태 저장) ---------- */
 let checkPreset = "백패킹 기본";
 const _ckKey = () => 'aonda_check_' + checkPreset;
@@ -1468,7 +1519,7 @@ function renderStars(){
 /* ---------- init ---------- */
 renderMenu(); renderCrew(); setupTentControls(); renderTents(); renderDeals(); setupSpots(); renderSpots();
 setupEvents(); renderEvents();
-renderReviews(); renderGallery(); renderCheckTabs(); renderCheck(); renderStars();
+renderReviews(); renderGallery(); renderCheckTabs(); renderCheck(); renderStars(); renderInsight();
 setupReviewForm(); setupContact();
 setupViews();                        // 앱형 탭 뷰 전환 (홈 뷰로 시작)
 if(supaOn()) fetchRemoteReviews();   // 백엔드 설정 시 전체 후기 로드
