@@ -1200,7 +1200,7 @@ function renderReviews(){
   const raw = supaOn()
     ? (remoteReviews||[]).map(r=>({r,mine:false})).concat(REVIEWS.map(r=>({r,mine:false})))
     : loadMine().map(r=>({r,mine:true})).concat(REVIEWS.map(r=>({r,mine:false})));
-  const all = raw.filter(o=> !isJunkReview(o.r) && reviewDomain(o.r)===domain);   // 현재 도메인만
+  const all = raw.filter(o=> !isJunkReview(o.r) && !isRsvpRow(o.r) && reviewDomain(o.r)===domain);   // 참석투표 행 제외
   const shown = all.slice(0, revLimit);
   $('#reviewList').innerHTML = shown.map(o=>reviewCard(o.r, o.mine)).join('')
     || `<div class="empty">아직 ${domain==='camp'?'오토캠핑':'백패킹'} 후기가 없어요. 첫 후기를 남겨보세요!</div>`;
@@ -1221,7 +1221,7 @@ function deleteReview(id){
 let galPhotos = [];
 function renderGallery(){
   const src = supaOn() ? (remoteReviews||[]).concat(REVIEWS) : loadMine().concat(REVIEWS);
-  galPhotos = src.filter(r=> validPhoto(r.photo) && !isJunkReview(r) && reviewDomain(r)===domain);
+  galPhotos = src.filter(r=> validPhoto(r.photo) && !isJunkReview(r) && !isRsvpRow(r) && reviewDomain(r)===domain);
   const grid = $('#galGrid'); if(!grid) return;
   if(!galPhotos.length){
     grid.innerHTML = `<div class="gal-empty">아직 갤러리가 비어 있어요.<br>후기 작성 시 <b>사진을 첨부</b>하면 여기에 모여요.<br>
@@ -1253,12 +1253,14 @@ function ddayLabel(iso){
   const d = Math.round((new Date(iso+'T00:00:00+09:00') - new Date(new Date().toDateString()))/86400000);
   return d===0 ? 'D-DAY' : (d>0 ? 'D-'+d : '지남');
 }
+// 참석투표는 별도 테이블 없이 reviews 테이블에 __rsvp 마커로 저장 (gear=모임id, text=상태)
+const isRsvpRow = r => r.tags && r.tags.includes('__rsvp');
 async function fetchRsvp(mid){
-  const res = await fetch(`${SUPABASE.url}/rest/v1/rsvp?meetup_id=eq.${encodeURIComponent(mid)}&select=name,status,created_at&order=created_at.desc`, {headers:supaHeaders()});
+  const res = await fetch(`${SUPABASE.url}/rest/v1/reviews?tags=cs.%7B__rsvp%7D&select=name,text,gear,created_at&order=created_at.desc`, {headers:supaHeaders()});
   if(!res.ok) throw new Error('HTTP '+res.status);
-  const rows = await res.json();
+  const rows = (await res.json()).filter(r=> r.gear===mid && !String(r.name||'').startsWith('_'));   // '_' 시작=점검용 제외
   const seen = new Set(), latest = [];
-  rows.forEach(r=>{ const k=r.name.trim(); if(!seen.has(k)){ seen.add(k); latest.push(r); } });  // 이름당 최신 투표만
+  rows.forEach(r=>{ const k=(r.name||'').trim(); if(!seen.has(k)){ seen.add(k); latest.push({name:r.name, status:r.text, created_at:r.created_at}); } });  // 이름당 최신만
   return latest;
 }
 function meetupCardHTML(m, votes){
@@ -1293,9 +1295,7 @@ async function renderMeetups(){
   const ms = activeMeetups();
   if(!ms.length){ sec.style.display='none'; return; }
   sec.style.display='';
-  if(rsvpOK===null && supaOn()){
-    try{ await fetchRsvp('__ping__'); rsvpOK=true; }catch(e){ rsvpOK=false; }   // 테이블 존재 확인
-  }
+  if(rsvpOK===null){ rsvpOK = supaOn(); }   // reviews 테이블은 항상 존재 → 투표 UI 활성
   const cards = await Promise.all(ms.map(async m=>{
     let votes = null;
     if(rsvpOK){ try{ votes = await fetchRsvp(m.id); }catch(e){ votes = null; } }
@@ -1341,10 +1341,11 @@ async function rsvpVote(btn, status){
   localStorage.setItem('aonda_nick', name);
   btn.disabled = true;
   try{
-    const res = await fetch(`${SUPABASE.url}/rest/v1/rsvp`, {
+    const res = await fetch(`${SUPABASE.url}/rest/v1/reviews`, {
       method:'POST',
       headers:{...supaHeaders(), Prefer:'return=minimal'},
-      body: JSON.stringify({meetup_id:card.dataset.mid, name, status}),
+      // reviews 테이블 재사용: gear=모임id, text=상태, stars=1(제약 통과), __rsvp 마커
+      body: JSON.stringify({ name, text:status, gear:card.dataset.mid, stars:1, tags:['__rsvp'] }),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
     toast(`${name}님 ${status} 완료!`);
