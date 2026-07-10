@@ -24,6 +24,7 @@ function showView(v, push=true){
     initTripMap();
     if(tripMap) setTimeout(()=>tripMap.invalidateSize(), 80);
   }
+  if(v==='spots' && spotViewMode==='map' && spotMap) setTimeout(()=>{ spotMap.invalidateSize(); refreshSpotMarkers(); }, 80);
   updatePackVis();     // 내 장비함 바: 장비 탭에서만 표시
 }
 function setupViews(){
@@ -930,6 +931,54 @@ function renderSpots(){
   if(items.length > spotLimit){ more.style.display=''; more.textContent = `더 보기 ▾ (남은 ${items.length - spotLimit}곳)`; }
   else more.style.display='none';
   coll.style.display = spotLimit>SPOT_PAGE ? '' : 'none';
+  if(spotViewMode==='map' && spotMap) refreshSpotMarkers();
+}
+
+/* ── 박지·캠핑장 지도 뷰 ── */
+let spotViewMode = 'list', spotMap = null, spotLayer = null;
+function setSpotView(v){
+  spotViewMode = v;
+  $$('#spotSeg button').forEach(b=>b.classList.toggle('on', b.dataset.sv===v));
+  const map = v==='map';
+  $('#spotMap').style.display = map?'':'none';
+  $('#spotMapNote').style.display = map?'':'none';
+  $('#spotList').style.display = map?'none':'';
+  $('#spotMore').closest('.more-row').style.display = map?'none':'';
+  if(map){ loadLeaflet(buildSpotMap); }
+}
+function spotMapPopup(sp){
+  const camp = domain==='camp';
+  const nmap = 'https://map.naver.com/p/search/' + encodeURIComponent(spotCleanName(sp));
+  const info = camp ? campInfo(sp) : spotInsta(sp);
+  const infoLabel = camp ? '정보·예약' : (sp.insta ? '이 박지 인스타' : '아온다 인스타');
+  return `<div class="tpop">
+    <div class="tpn">${esc(sp.name)}</div>
+    <div class="tpm">${esc(sp.region)}${sp.type?' · '+esc(sp.type):''}</div>
+    <a class="tpa" href="${nmap}" target="_blank" rel="noopener">지도에서 위치 보기 ↗</a>
+    <a class="tpa" href="${info}" target="_blank" rel="noopener">${infoLabel} ↗</a>
+  </div>`;
+}
+function refreshSpotMarkers(){
+  if(!spotMap || typeof L==='undefined') return;
+  if(spotLayer) spotLayer.remove();
+  spotLayer = L.layerGroup().addTo(spotMap);
+  const camp = domain==='camp';
+  const color = camp ? '#b48a12' : '#2b3624';
+  const items = filteredSpots(), pts = [];
+  items.forEach(sp=>{
+    const g = geoForSpot(sp); pts.push(g);
+    L.circleMarker(g, {radius:7, color:'#fff', weight:2, fillColor:color, fillOpacity:.95})
+      .addTo(spotLayer).bindPopup(spotMapPopup(sp));
+  });
+  if(pts.length) spotMap.fitBounds(pts, {padding:[30,30], maxZoom:10});
+}
+function buildSpotMap(){
+  if(!spotMap){
+    spotMap = L.map('spotMap', {scrollWheelZoom:false});
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'&copy; OpenStreetMap', maxZoom:18}).addTo(spotMap);
+  }
+  refreshSpotMarkers();
+  setTimeout(()=>spotMap.invalidateSize(), 80);
 }
 function moreSpots(){ spotLimit += SPOT_PAGE; renderSpots(); }
 function collapseSpots(){ spotLimit = SPOT_PAGE; renderSpots(); scrollTo2('spots'); }

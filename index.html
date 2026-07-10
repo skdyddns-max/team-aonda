@@ -246,6 +246,10 @@ table.cmp tbody tr:nth-child(even) td{background:#fbfaf4}
 .trips-block{margin-bottom:28px}
 .trip-note{font-size:12.5px;color:var(--muted);margin:4px 0 12px}
 .trip-map{height:320px;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1;background:#eef2e8}
+.spot-seg{margin:0 0 12px}
+.spot-map{height:420px;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1;background:#eef2e8}
+.spot-map-note{font-size:12px;color:var(--muted);margin:8px 2px 0}
+.spot-map-note b{color:var(--forest)}
 .trip-map.trip-fallback{height:auto;padding:14px 15px}
 .trip-fallback .trow{padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
 .trip-fallback .trow:last-child{border-bottom:none}
@@ -768,7 +772,13 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
     <div class="fchip" data-f="캠핑장">캠핑장</div>
     <div class="fchip" data-f="nocar">자차없이</div>
   </div>
+  <div class="seg spot-seg" id="spotSeg">
+    <button class="on" data-sv="list" onclick="setSpotView('list')">목록</button>
+    <button data-sv="map" onclick="setSpotView('map')">지도</button>
+  </div>
   <div class="rescount"><b id="spotCount">0</b>곳</div>
+  <div id="spotMap" class="spot-map" style="display:none"></div>
+  <p class="spot-map-note" id="spotMapNote" style="display:none">핀은 <b>지역 대략 위치</b>예요. 정확한 위치·정보는 핀을 눌러 확인하세요.</p>
   <div id="spotList"></div>
   <div class="more-row">
     <button id="spotMore" class="btn btn-ghost more-btn" onclick="moreSpots()" style="display:none">더 보기 ▾</button>
@@ -969,7 +979,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <p class="pp-note">무게는 추정치 기반 대략 합계입니다. 담은 장비 = 베이스웨이트(소모품 제외) 기준으로 등급을 매겨요.</p>
 </div>
 
-<script src="data.js?v=30"></script>
-<script src="app.js?v=30"></script>
+<script src="data.js?v=31"></script>
+<script src="app.js?v=31"></script>
 </body>
 </html>
