@@ -1140,6 +1140,19 @@ function renderCrew(){
       <div class="ct">${c.title}</div>
       <div class="cd">${c.desc}</div>
     </div>`).join('');
+  const mg = $('#crewMembers');
+  if(mg && typeof CREW_MEMBERS!=='undefined'){
+    mg.innerHTML = CREW_MEMBERS.map(m=>`
+      <div class="member">
+        <div class="mav">${esc(m.name.slice(0,1))}</div>
+        <div class="mbody">
+          <div class="mtop"><span class="mnm">${esc(m.name)}</span>
+            ${m.role?`<span class="mrole">${esc(m.role)}</span>`:''}
+            ${m.tag?`<span class="mtag">${esc(m.tag)}</span>`:''}</div>
+          <div class="mdesc">${esc(m.desc)}</div>
+        </div>
+      </div>`).join('');
+  }
 }
 
 /* ---------- 7. 후기 (시드 + 내 기기 저장분) ---------- */

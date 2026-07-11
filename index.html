@@ -436,6 +436,16 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
 .crew-card .ic{font-size:26px;margin-bottom:6px}
 .crew-card .ct{font-weight:850;font-size:15px;margin-bottom:3px}
 .crew-card .cd{font-size:12.5px;color:var(--muted);line-height:1.55}
+.crew-mhead{font-size:15px;font-weight:850;margin:22px 2px 12px}
+.member-grid{display:flex;flex-direction:column;gap:10px}
+.member{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+.member .mav{flex:0 0 44px;width:44px;height:44px;border-radius:50%;background:var(--forest);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}
+.member .mbody{min-width:0}
+.member .mtop{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.member .mnm{font-weight:850;font-size:15px}
+.member .mrole{font-size:11px;font-weight:800;color:#2c2408;background:var(--brand);padding:2px 8px;border-radius:11px}
+.member .mtag{font-size:11px;font-weight:700;color:var(--sage)}
+.member .mdesc{font-size:13px;color:#4a463c;line-height:1.55;margin-top:4px}
 
 /* ---------- Reviews ---------- */
 .review{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:11px;box-shadow:var(--shadow)}
@@ -576,6 +586,8 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <h2>팀아온다는요</h2>
   <p class="sub">이름 그대로 <b>Team + 아니온듯 다녀갑니다</b>. 흔적 없이 자연을 즐기는 백패킹 크루예요.</p>
   <div class="crew-grid" id="crewGrid"></div>
+  <h3 class="crew-mhead">함께 걷는 사람들</h3>
+  <div class="member-grid" id="crewMembers"></div>
 </div></section>
 
 <!-- 다음 모임 + 참석투표 (MEETUPS 비어 있으면 자동 숨김) -->
@@ -979,7 +991,7 @@ footer .fnote{font-size:11px;opacity:.6;margin-top:16px;line-height:1.6}
   <p class="pp-note">무게는 추정치 기반 대략 합계입니다. 담은 장비 = 베이스웨이트(소모품 제외) 기준으로 등급을 매겨요.</p>
 </div>
 
-<script src="data.js?v=32"></script>
-<script src="app.js?v=32"></script>
+<script src="data.js?v=33"></script>
+<script src="app.js?v=33"></script>
 </body>
 </html>
